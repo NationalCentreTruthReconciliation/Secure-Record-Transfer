@@ -19,8 +19,12 @@
     <div class="flex-item">
         <label></label>
         <div class="button-array">
-            <button class="green-button less-padding add-form-row margin-right-10px">{% trans "+ More" %}</button>
-            <button disabled class="red-button less-padding remove-form-row">{% trans "- Remove" %}</button>
+            <button class="green-button less-padding add-form-row margin-right-10px">
+                <span>{% trans "More" %}</span><i class="fa fa-plus ml-2" aria-hidden="true"></i>
+            </button>
+            <button disabled class="red-button less-padding remove-form-row">
+                <span>{% trans "Remove" %}</span><i class="fa fa-minus ml-2" aria-hidden="true"></i>
+            </button>
         </div>
     </div>
     <br>

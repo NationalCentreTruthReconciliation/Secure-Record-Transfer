@@ -20,7 +20,7 @@
                     {% for field in form %}
                         <div class="mb-4">
                             <label for="{{ field.id_for_label }}"
-                                   class="block mb-2 font-medium text-gray-700">{{ field.label }}</label>
+                                   class="block mb-2 font-medium text-gray-700">{% trans field.label %}</label>
                             {% if field.html_name == 'username' %}
                                 <div class="relative">
                                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -61,7 +61,7 @@
                     <button id="id_login_button"
                             type="submit"
                             class="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-primary-dark transition">
-                        Login
+                        {% trans "Login" %}
                     </button>
                 </form>
             </div>

@@ -1,5 +1,6 @@
 {% extends "admin/base_site.html" %}
 {% load static %}
+{% load i18n %}
 {% load render_bundle from webpack_loader %}
 {% block extrahead %}
     {{ block.super }}
@@ -34,6 +35,6 @@
          src="{% static 'nctrlogo_flame_150x150px.webp' %}"
          alt="NCTR Logo" />
     <h1 style="line-height: 40px;" id="site-name">
-        <a href="{% url 'admin:index' %}">NCTR Transfer App Administration</a>
+        <a href="{% url 'admin:index' %}">{% trans "NCTR Secure Record Transfer App Administration" %}</a>
     </h1>
 {% endblock branding %}

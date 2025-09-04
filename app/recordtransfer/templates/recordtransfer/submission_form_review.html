@@ -49,7 +49,7 @@
                                                                 class="text-sm text-primary/60 underline font-medium bg-transparent border-none p-0 hover:text-primary transition cursor-pointer"
                                                                 style="appearance: none"
                                                                 onclick="this.nextElementSibling.classList.toggle('hidden'); this.classList.toggle('hidden');">
-                                                            +{{ value|length|add:'-5' }} more
+                                                            +{{ value|length|add:'-5' }} {% trans "more" %}
                                                         </button>
                                                         <div class="hidden" id="more-files-{{ forloop.parentloop.counter }}">
                                                         {% endif %}

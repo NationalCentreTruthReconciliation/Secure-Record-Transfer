@@ -61,11 +61,11 @@
         <div class="text-2xl text-primary mb-4 mt-8">{% trans "Your Current Sessions" %}</div>
         <p class="text-sm mb-6">
             {% blocktrans %}
-                Below are your current active and expired sessions. Sessions will automatically
-                expire after a period of inactivity. Expired sessions that are not part of a saved
-                submission are automatically cleaned up on a schedule. To create space, you may
-                delete or complete submissions that you have saved. See the <b>Actions</b> column
-                below to resume or delete a saved submission.
+            Below are your current active and expired sessions. Sessions will automatically
+            expire after a period of inactivity. Expired sessions that are not part of a saved
+            submission are automatically cleaned up on a schedule. To create space, you may
+            delete or complete submissions that you have saved. See the <b>Actions</b> column
+            below to resume or delete a saved submission.
             {% endblocktrans %}
         </p>
         <div hx-get="{% url 'recordtransfer:open_session_table' %}"

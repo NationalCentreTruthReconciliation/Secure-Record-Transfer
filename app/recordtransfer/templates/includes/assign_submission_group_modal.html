@@ -16,7 +16,7 @@
           id="assign-submission-group-form">
         {% csrf_token %}
         <fieldset class="fieldset">
-            <legend class="fieldset-legend">Submission groups</legend>
+            <legend class="fieldset-legend">{% trans "Submission groups" %}</legend>
             <select id="group_select" name="{{ GROUP_UUID }}" class="select">
                 <option value=""
                         data-description="{% trans "Select a group to see its description" %}"
@@ -26,9 +26,10 @@
                     <option value="{{ group.uuid }}"
                             data-description="{% if group.description %}{{ group.description }}{% else %}{% trans "No description available" %}{% endif %}"
                             {% if current_group and group.uuid == current_group.uuid %}selected{% endif %}>
-                        {{ group.name }}
                         {% if current_group and group.uuid == current_group.uuid %}
-                            {% trans "(current)" %}
+                            {% blocktrans with group_name=group.name %}{{ group_name }} (current){% endblocktrans %}
+                        {% else %}
+                            {{ group.name }}
                         {% endif %}
                     </option>
                 {% endfor %}
