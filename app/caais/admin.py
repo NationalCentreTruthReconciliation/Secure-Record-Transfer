@@ -10,7 +10,6 @@ from django.contrib.admin.options import InlineModelAdmin
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse
 from django.template.response import TemplateResponse
-from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext_lazy
 
 from caais import settings as caais_settings
