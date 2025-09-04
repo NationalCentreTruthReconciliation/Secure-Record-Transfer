@@ -377,15 +377,19 @@ class SubmissionAdmin(admin.ModelAdmin):
         if submission and submission.upload_session:
             create_downloadable_bag.delay(submission, User.objects.get(pk=request.user.pk))
 
+            job_page_url = reverse("admin:recordtransfer_job_changelist")
+
             self.message_user(
                 request,
                 mark_safe(
                     _(
-                        (
-                            'A downloadable bag is being generated. Visit the <a href="{url}">jobs page</a> for '
-                            "the status of the bag generation, or check the Submission page for a download link"
-                        )
-                    ).format(url=reverse("admin:recordtransfer_job_changelist"))
+                        "A downloadable bag is being generated. Visit the %(link_start)sjobs page%(link_end)s for "
+                        "the status of the bag generation, or check the Submission page for a download link"
+                    )
+                    % {
+                        "link_start": mark_safe(f'<a href="{job_page_url}">'),
+                        "link_end": mark_safe("</a>"),
+                    }
                 ),
             )
 
@@ -395,10 +399,8 @@ class SubmissionAdmin(admin.ModelAdmin):
             self.message_user(
                 request,
                 _(
-                    (
-                        "There are no files associated with this submission, it is not possible to "
-                        "create a Bag"
-                    )
+                    "There are no files associated with this submission, it is not possible to "
+                    "create a Bag"
                 ),
                 messages.WARNING,
             )
@@ -406,7 +408,9 @@ class SubmissionAdmin(admin.ModelAdmin):
             return HttpResponseRedirect(submission.get_admin_change_url())
 
         # Error response
-        msg = _(f"Submission with ID '{object_id}' doesn't exist. Perhaps it was deleted?")
+        msg = _("Submission with ID '%(id)s' doesn't exist. Perhaps it was deleted?") % {
+            "id": object_id
+        }
         self.message_user(request, msg, messages.ERROR)
         admin_url = reverse("admin:index", current_app=self.admin_site.name)
         return HttpResponseRedirect(admin_url)
@@ -608,7 +612,7 @@ class CustomUserAdmin(UserAdmin):
         """
         if change and obj.is_superuser and not request.user.is_superuser:
             messages.set_level(request, messages.ERROR)
-            msg = "Non-superusers cannot modify superuser accounts."
+            msg = _("Non-superusers cannot modify superuser accounts.")
             self.message_user(request, msg, messages.ERROR)
         else:
             super().save_model(request, obj, form, change)

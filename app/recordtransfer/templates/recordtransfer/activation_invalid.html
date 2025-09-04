@@ -21,10 +21,7 @@
             <div class="mb-2 text-4xl text-primary">{% trans "Account Could not be Activated" %}</div>
             <!-- Main message -->
             <div class="my-6 text-gray-600 text-center">
-                {% blocktrans %}
-                  This may be because your account has already been activated, or that the activation link has
-        expired.
-            {% endblocktrans %}
+                {% trans "This may be because your account has already been activated, or that the activation link has expired." %}
             </div>
             <div class="text-center mt-6 pt-4 border-t border-gray-200">
                 <a href="{% url 'recordtransfer:index' %}"

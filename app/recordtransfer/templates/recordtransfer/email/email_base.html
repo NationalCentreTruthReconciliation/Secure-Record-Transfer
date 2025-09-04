@@ -4,7 +4,7 @@
 <html lang="{{ LANGUAGE_CODE }}">
     <head>
         <meta name="description"
-              content="Email communication from the National Centre for Truth and Reconciliation.">
+              content="{% trans "Email communication from the National Centre for Truth and Reconciliation." %}">
         <title></title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style type="text/css">
@@ -133,14 +133,14 @@
                 <td align="center">
                     <img class="logo"
                          src="https://ehprnh2mwo3.exactdn.com/wp-content/uploads/2023/08/NCTR-BILINGUAL-sh.png"
-                         alt="{% blocktrans %}Company Logo{% endblocktrans %}">
+                         alt="{% blocktrans %}NCTR Logo{% endblocktrans %}">
                 </td>
             </tr>
             <tr>
                 <td align="center">
                     <img class="header-img"
                          src="https://ehprnh2mwo3.exactdn.com/wp-content/uploads/2021/02/hero4-scaled.jpg"
-                         alt="{% blocktrans %}Company Image{% endblocktrans %}">
+                         alt="{% blocktrans %}Header Image{% endblocktrans %}">
                 </td>
             </tr>
             <tr>
@@ -168,7 +168,7 @@
                            class="footer-social">
                         <tr>
                             <td align="center" class="footer">
-                                <p>NATIONAL CENTRE FOR TRUTH AND RECONCILIATION, 177 DYSART RD, WINNIPEG, MB R3T 2M8</p>
+                                <p>{% trans "NATIONAL CENTRE FOR TRUTH AND RECONCILIATION, 177 DYSART RD, WINNIPEG, MB R3T 2M8" %}</p>
                                 <p>
                                     {% blocktrans %}Don't like these emails?{% endblocktrans %}
                                     <a href="{{ base_url }}{% url 'recordtransfer:user_profile' %}"

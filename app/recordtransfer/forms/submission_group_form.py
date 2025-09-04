@@ -16,19 +16,19 @@ class SubmissionGroupForm(forms.ModelForm):
         widget=forms.TextInput(
             attrs={"placeholder": "Enter group name", "id": HtmlIds.ID_SUBMISSION_GROUP_NAME}
         ),
-        label="Group Name",
+        label=_("Group Name"),
         required=True,
         label_suffix="",
     )
     description = forms.CharField(
         widget=forms.Textarea(
             attrs={
-                "placeholder": "Enter group description",
+                "placeholder": _("Enter group description"),
                 "id": HtmlIds.ID_SUBMISSION_GROUP_DESCRIPTION,
                 "rows": 5,
             }
         ),
-        label="Group Description",
+        label=_("Group Description"),
         required=False,
         label_suffix="",
     )

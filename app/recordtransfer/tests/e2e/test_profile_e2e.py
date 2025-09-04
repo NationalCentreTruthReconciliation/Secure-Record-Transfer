@@ -372,9 +372,12 @@ class SubmissionTablesTest(SeleniumLiveServerTestCase):
         driver.switch_to.window(new_window)
 
         # Increase timeout and add more specific waiting
-        submission_report_heading = WebDriverWait(driver, 5).until(
+        submission_report_heading = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located(
-                (By.XPATH, "//*[starts-with(text(), 'Submission Report for')]")
+                (
+                    By.XPATH,
+                    "//div[@class='main-title' and contains(text(), 'Submission Report for')]",
+                )
             )
         )
 

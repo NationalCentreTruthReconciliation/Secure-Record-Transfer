@@ -20,6 +20,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
 from django.utils.translation import gettext
+from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_http_methods
 from django.views.generic import DetailView, UpdateView
 from django_htmx.http import trigger_client_event
@@ -76,7 +77,7 @@ def submission_csv_export(request: HttpRequest, uuid: str) -> HttpResponse:
 
     # Check if submission exists and user has permission
     if not submission_queryset.exists():
-        raise Http404("Submission not found")
+        raise Http404(_("Submission not found"))
 
     # Get submission for filename prefix
     submission = submission_queryset.first()
@@ -106,7 +107,7 @@ def submission_group_bulk_csv_export(request: HttpRequest, uuid: str) -> HttpRes
 
     # Check if submission group exists and user has permission
     if not submission_group_queryset.exists():
-        raise Http404("Submission group not found")
+        raise Http404(_("Submission group not found"))
 
     # Get submission group for filename prefix
     submission_group = submission_group_queryset.first()
@@ -215,7 +216,7 @@ class SubmissionGroupDetailView(UpdateView):
 def get_user_submission_groups(request: HttpRequest) -> JsonResponse:
     """Return a JSON response containing all submission groups created by the specified user."""
     if not request.headers.get(HeaderNames.FRONTEND_REQUEST):
-        raise BadRequest("Direct access is not allowed.")
+        raise BadRequest(_("Direct access is not allowed."))
 
     user: User = cast(User, request.user)
     submission_groups = SubmissionGroup.objects.filter(created_by=user)

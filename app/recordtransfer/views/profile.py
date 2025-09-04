@@ -81,7 +81,7 @@ class BaseUserProfileUpdateView(UpdateView):
     def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
         """Ensure requests are made with HTMX."""
         if not request.htmx:
-            raise Http404("Page not found")
+            raise Http404(_("Page not found"))
         return super().dispatch(request, *args, **kwargs)
 
     def get_object(self, queryset: Optional[QuerySet] = None) -> User:
@@ -350,7 +350,7 @@ class SubmissionGroupModalCreateView(CreateView):
     def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
         """Ensure requests are made with HTMX."""
         if not request.htmx:
-            raise Http404("Page not found")
+            raise Http404(_("Page not found"))
         return super().dispatch(request, *args, **kwargs)
 
     def get_form_kwargs(self) -> dict[str, Any]:

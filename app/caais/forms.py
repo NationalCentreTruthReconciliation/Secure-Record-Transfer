@@ -140,7 +140,7 @@ class MetadataForm(CaaisModelForm):
     accession_identifier = forms.CharField(
         max_length=128,
         required=True,
-        help_text="Record an identifier to uniquely identify this accession",
+        help_text=_("Record an identifier to uniquely identify this accession"),
         widget=forms.widgets.TextInput(
             attrs={
                 "class": "vTextField",

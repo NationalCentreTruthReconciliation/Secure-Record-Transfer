@@ -8,6 +8,7 @@ from django.http import (
     HttpResponse,
 )
 from django.shortcuts import get_object_or_404
+from django.utils.translation import gettext_lazy as _
 from nginx.serve import serve_media_file
 
 from recordtransfer.models import Job
@@ -26,12 +27,12 @@ def job_file(request: HttpRequest, job_uuid: str) -> HttpResponse:
         HttpResponse: Redirects to the file's media path if the job has an associated file.
     """
     if not request.user.is_staff:
-        raise Http404("The requested resource could not be found")
+        raise Http404(_("The requested resource could not be found"))
 
     job = get_object_or_404(Job, uuid=job_uuid)
 
     if not job.has_file():
-        raise Http404("File not found for this job")
+        raise Http404(_("File not found for this job"))
 
     file_url = job.get_file_media_url()
     return serve_media_file(file_url)

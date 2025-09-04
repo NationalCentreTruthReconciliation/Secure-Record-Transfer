@@ -27,7 +27,9 @@ class SignUpForm(UserCreationForm):
         cleaned_data = super().clean()
         new_email = cleaned_data.get("email")
         if new_email and User.objects.filter(email__iexact=new_email).exists():
-            self.add_error("email", f"The email {new_email} is already in use")
+            self.add_error(
+                "email", _("The email %(email)s is already in use") % {"email": new_email}
+            )
         return cleaned_data
 
     email = forms.EmailField(

@@ -243,7 +243,7 @@ def _handle_uploaded_file_delete(session: Optional[UploadSession], file_name: st
 
 def _handle_uploaded_file_get(session: Optional[UploadSession], file_name: str) -> HttpResponse:
     if not session:
-        raise Http404("The uploaded file could not be found")
+        raise Http404(gettext("The uploaded file could not be found"))
 
     try:
         uploaded_file = session.get_file_by_name(file_name)

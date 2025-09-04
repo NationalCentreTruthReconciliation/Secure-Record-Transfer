@@ -300,7 +300,7 @@ def send_password_reset_email(
     _send_mail(
         recipient=to_email,
         from_email=_get_do_not_reply_email_address(),
-        subject=_("Password Reset on NCTR Record Transfer Portal"),
+        subject=_("Password Reset on NCTR Secure Record Transfer App"),
         template_name="registration/password_reset_email.html",
         context=context,
     )

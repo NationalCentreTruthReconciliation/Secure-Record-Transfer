@@ -5,6 +5,7 @@
     {{ block.super }}
 {% endblock javascript %}
 {% block formfields %}
+    {% url 'recordtransfer:help' as help_url %}
     {% for field in wizard.form %}
         {% if field.label != 'hidden' %}
             <div class="{% if field.name != 'enter_manual_source_info' %}initially-hidden hidden{% endif %}">
@@ -14,15 +15,13 @@
             {# Render hidden field #}
             {{ field }}
         {% endif %}
-        {% url 'recordtransfer:help' as help_url %}
         {% if field.name == "other_source_type" %}
             <div class="initially-hidden hidden">
                 <div class="alert">
                     <i class="fas fa-question-circle pointer-events-none text-gray-400"></i>
                     <div class="text-xs">
-                        {% blocktrans %}
-                        <a class="non-nav-link link link-primary font-semibold" target="_blank" href="{{ help_url }}#source-types">Click here</a>
-                        for an explanation of the different types of source types.
+                        {% blocktrans with link_start='<a class="non-nav-link link link-primary font-semibold" target="_blank" href="'|add:help_url|add:'#source-types">'|safe link_end='</a>'|safe %}
+                        {{ link_start }}Click here{{ link_end }} for an explanation of the different types of source types.
                         {% endblocktrans %}
                     </div>
                 </div>
@@ -32,9 +31,8 @@
                 <div class="alert">
                     <i class="fas fa-question-circle pointer-events-none text-gray-400"></i>
                     <div class="text-xs">
-                        {% blocktrans %}
-                        <a class="non-nav-link link link-primary font-semibold" target="_blank" href="{{ help_url }}#source-roles">Click here</a>
-                        for an explanation of the different types of source roles.
+                        {% blocktrans with link_start='<a class="non-nav-link link link-primary font-semibold" target="_blank" href="'|add:help_url|add:'#source-roles">'|safe link_end='</a>'|safe %}
+                        {{ link_start }}Click here{{ link_end }} for an explanation of the different types of source roles.
                         {% endblocktrans %}
                     </div>
                 </div>

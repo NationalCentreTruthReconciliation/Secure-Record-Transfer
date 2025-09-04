@@ -30,7 +30,9 @@ from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.decorators import method_decorator
+from django.utils.safestring import mark_safe
 from django.utils.translation import gettext
+from django.utils.translation import gettext_lazy as _
 from django.views.decorators.cache import cache_control
 from django.views.generic import TemplateView
 from django_htmx.http import HttpResponseClientRedirect, trigger_client_event
@@ -205,11 +207,19 @@ class SubmissionFormWizard(SessionWizardView):
             template="recordtransfer/submission_form_formset.html",
             title=gettext("Record Rights and Restrictions (Optional)"),
             form=formset_factory(forms.RightsForm, formset=forms.RightsFormSet, extra=1),
-            info_message=gettext(
-                "Depending on the records you are submitting, there may be specific rights that govern "
-                "the access of your records. <br> <br>"
-                " Need help understanding rights types? "
-                '<a class="non-nav-link link-primary font-semibold underline" target="_blank" href="/help#rights-types">View our guide</a> for detailed explanations.'
+            info_message=mark_safe(
+                gettext(
+                    "Depending on the records you are submitting, there may be specific rights that govern "
+                    "the access of your records. <br> <br>"
+                    "Need help understanding rights types? %(link_start)sView our guide%(link_end)s for "
+                    "detailed explanations."
+                )
+                % {
+                    "link_start": mark_safe(
+                        '<a class="non-nav-link link-primary font-semibold underline" target="_blank" href="/help#rights-types">'
+                    ),
+                    "link_end": mark_safe("</a>"),
+                }
             ),
         ),
         SubmissionStep.OTHER_IDENTIFIERS: SubmissionStepMeta(
@@ -284,7 +294,7 @@ class SubmissionFormWizard(SessionWizardView):
             return SubmissionStep(current)  # Converts string to enum
         except ValueError as exc:
             LOGGER.error("Invalid step name: %s", current)
-            raise Http404("Invalid step name") from exc
+            raise Http404(_("Invalid step name")) from exc
 
     @method_decorator(cache_control(no_cache=True, no_store=True, must_revalidate=True))
     def dispatch(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
@@ -392,12 +402,19 @@ class SubmissionFormWizard(SessionWizardView):
             # Otherwise, save their form for them before redirecting
             save_form = True
             redirect_to = reverse("recordtransfer:open_sessions")
-            base_message = gettext(
-                "Your submission was saved, but you have reached your session limit. Go to "
-                '<a href="%(link)s">your profile</a> to see your saved submissions.'
-            ) % {
-                "link": reverse("recordtransfer:user_profile"),
-            }
+            profile_url = reverse("recordtransfer:user_profile")
+            base_message = mark_safe(
+                gettext(
+                    "Your submission was saved, but you have reached your session limit. Go to "
+                    "%(link_start)syour profile%(link_end)s to see your saved submissions."
+                )
+                % {
+                    "link_start": mark_safe(
+                        f'<a class="link-primary font-semibold underline" href="{profile_url}">'
+                    ),
+                    "link_end": mark_safe("</a>"),
+                }
+            )
 
         # Or, save form if explicit save request is received
         elif request.POST.get("save_form_step", None):

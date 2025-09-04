@@ -157,9 +157,13 @@ class SiteSettingModelForm(RecordTransferModelForm):
                         description.replace("\n", "<br><br>")
                     )
                 else:
-                    self.fields["value"].help_text = "No description available for this setting."
+                    self.fields["value"].help_text = gettext(
+                        "No description available for this setting."
+                    )
             except KeyError:
-                self.fields["value"].help_text = "No description available for this setting."
+                self.fields["value"].help_text = gettext(
+                    "No description available for this setting."
+                )
 
     def clean_value(self) -> Any:
         """Validate the value field based on the selected value_type."""
@@ -168,19 +172,20 @@ class SiteSettingModelForm(RecordTransferModelForm):
 
         if value_type == SiteSettingType.STR:
             if not isinstance(value, str):
-                raise ValidationError("Value must be a text value.")
+                raise ValidationError(gettext("Value must be a text value."))
             if not value.strip():
-                raise ValidationError("Value must be a non-empty text value.")
+                raise ValidationError(gettext("Value must be a non-empty text value."))
 
         elif value_type == SiteSettingType.INT:
             if not isinstance(value, str):
-                raise ValidationError("Value must be a number.")
+                raise ValidationError(gettext("Value must be a number."))
 
             try:
                 int(value)
             except (ValueError, TypeError) as exc:
                 raise ValidationError(
-                    f"Value must be a valid whole number. '{value}' is not a valid number."
+                    gettext("Value must be a valid whole number. '%(num)s' is not a valid number.")
+                    % {"num": value}
                 ) from exc
 
         return value
@@ -192,7 +197,9 @@ class SiteSettingModelForm(RecordTransferModelForm):
         try:
             key = SiteSettingKey[self.instance.key]
         except KeyError as exc:
-            raise ValidationError(f"Invalid setting key: {self.instance.key}") from exc
+            raise ValidationError(
+                gettext("Invalid setting key: %(key)s") % {"key": self.instance.key}
+            ) from exc
 
         value = cleaned_data.get("value")
 
@@ -201,11 +208,13 @@ class SiteSettingModelForm(RecordTransferModelForm):
                 paginate_by = int(cleaned_data.get("value", 0))
                 if paginate_by <= 0:
                     raise ValidationError(
-                        f"{SiteSettingKey.PAGINATE_BY.key_name} must be a positive whole number."
+                        gettext("%(setting)s must be a positive whole number.")
+                        % {"setting": SiteSettingKey.PAGINATE_BY.key_name}
                     )
             except (ValueError, TypeError) as exc:
                 raise ValidationError(
-                    f"{SiteSettingKey.PAGINATE_BY.key_name} must be a positive whole number."
+                    gettext("%(setting)s must be a positive whole number.")
+                    % {"setting": SiteSettingKey.PAGINATE_BY.key_name}
                 ) from exc
         elif key == SiteSettingKey.ARCHIVIST_EMAIL:
             value = cleaned_data.get("value", "")
@@ -213,7 +222,8 @@ class SiteSettingModelForm(RecordTransferModelForm):
                 validate_email(value)
             except ValidationError as exc:
                 raise ValidationError(
-                    f"{SiteSettingKey.ARCHIVIST_EMAIL.key_name} must be a valid email address."
+                    gettext("%(setting)s must be a valid email address.")
+                    % {"setting": SiteSettingKey.ARCHIVIST_EMAIL.key_name}
                 ) from exc
 
         return cleaned_data

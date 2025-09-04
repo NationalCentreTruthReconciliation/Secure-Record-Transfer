@@ -1,7 +1,7 @@
 {% load i18n %}
 <div class="banner-container flex items-center justify-between gap-6 w-full">
     <div class="hidden sm:flex items-center">
-        <span class="banner-text">The National Residential School Crisis Line&nbsp;</span>
+        <span class="banner-text">{% trans "The National Residential School Crisis Line" %}&nbsp;</span>
         <a class="banner-link non-nav-link" href="tel:1-866-925-4419">1-866-925-4419</a>
     </div>
     <form action="{% url 'set_language' %}" method="post" class="ml-auto">
