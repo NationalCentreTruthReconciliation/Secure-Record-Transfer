@@ -31,6 +31,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext
+from django.utils.translation import gettext_lazy as _
 from django.views.decorators.cache import cache_control
 from django.views.generic import TemplateView
 from django_htmx.http import HttpResponseClientRedirect, trigger_client_event
@@ -284,7 +285,7 @@ class SubmissionFormWizard(SessionWizardView):
             return SubmissionStep(current)  # Converts string to enum
         except ValueError as exc:
             LOGGER.error("Invalid step name: %s", current)
-            raise Http404("Invalid step name") from exc
+            raise Http404(_("Invalid step name")) from exc
 
     @method_decorator(cache_control(no_cache=True, no_store=True, must_revalidate=True))
     def dispatch(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
