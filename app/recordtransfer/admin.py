@@ -20,6 +20,7 @@ from django.urls import path, reverse
 from django.utils.html import format_html
 from django.utils.safestring import SafeText, mark_safe
 from django.utils.translation import gettext_lazy as _
+from django.utils.translation import pgettext_lazy
 
 from recordtransfer.constants import HtmlIds, OtherValues
 from recordtransfer.emails import send_user_account_updated
@@ -222,27 +223,52 @@ class SubmissionGroupAdmin(ReadOnlyAdmin):
         metadata_queryset = Metadata.objects.filter(submission__in=related_submissions)
         return metadata_queryset.export_csv(version=version)
 
-    @admin.action(description=_("Export CAAIS 1.0 CSV for Submissions in Selected"))
+    @admin.action(
+        description=pgettext_lazy(
+            '"Selected" refers to one or more Submission Group objects.',
+            "Export CAAIS 1.0 CSV for Submissions in Selected",
+        )
+    )
     def export_caais_csv(self, request: HttpRequest, queryset: QuerySet) -> HttpResponse | None:
         """Export CAAIS 1.0 CSV for submissions in the selected queryset."""
         return self._export_submissions_csv(request, queryset, ExportVersion.CAAIS_1_0)
 
-    @admin.action(description=_("Export AtoM 2.6 Accession CSV for Submissions in Selected"))
+    @admin.action(
+        description=pgettext_lazy(
+            '"Selected" refers to one or more Submission Group objects.',
+            "Export AtoM 2.6 Accession CSV for Submissions in Selected",
+        )
+    )
     def export_atom_2_6_csv(self, request: HttpRequest, queryset: QuerySet) -> HttpResponse | None:
         """Export AtoM 2.6 Accession CSV for submissions in the selected queryset."""
         return self._export_submissions_csv(request, queryset, ExportVersion.ATOM_2_6)
 
-    @admin.action(description=_("Export AtoM 2.3 Accession CSV for Submissions in Selected"))
+    @admin.action(
+        description=pgettext_lazy(
+            '"Selected" refers to one or more Submission Group objects.',
+            "Export AtoM 2.3 Accession CSV for Submissions in Selected",
+        )
+    )
     def export_atom_2_3_csv(self, request: HttpRequest, queryset: QuerySet) -> HttpResponse | None:
         """Export AtoM 2.3 Accession CSV for submissions in the selected queryset."""
         return self._export_submissions_csv(request, queryset, ExportVersion.ATOM_2_3)
 
-    @admin.action(description=_("Export AtoM 2.2 Accession CSV for Submissions in Selected"))
+    @admin.action(
+        description=pgettext_lazy(
+            '"Selected" refers to one or more Submission Group objects.',
+            "Export AtoM 2.2 Accession CSV for Submissions in Selected",
+        )
+    )
     def export_atom_2_2_csv(self, request: HttpRequest, queryset: QuerySet) -> HttpResponse | None:
         """Export AtoM 2.2 Accession CSV for submissions in the selected queryset."""
         return self._export_submissions_csv(request, queryset, ExportVersion.ATOM_2_2)
 
-    @admin.action(description=_("Export AtoM 2.1 Accession CSV for Submissions in Selected"))
+    @admin.action(
+        description=pgettext_lazy(
+            '"Selected" refers to one or more Submission Group objects.',
+            "Export AtoM 2.1 Accession CSV for Submissions in Selected",
+        )
+    )
     def export_atom_2_1_csv(self, request: HttpRequest, queryset: QuerySet) -> HttpResponse | None:
         """Export AtoM 2.1 Accession CSV for submissions in the selected queryset."""
         return self._export_submissions_csv(request, queryset, ExportVersion.ATOM_2_1)
@@ -415,35 +441,60 @@ class SubmissionAdmin(admin.ModelAdmin):
         admin_url = reverse("admin:index", current_app=self.admin_site.name)
         return HttpResponseRedirect(admin_url)
 
-    @admin.action(description=_("Export CAAIS 1.0 CSV for Metadata in Selected"))
+    @admin.action(
+        description=pgettext_lazy(
+            '"Selected" refers to one or more Submission objects.',
+            "Export CAAIS 1.0 CSV for Metadata in Selected",
+        )
+    )
     def export_caais_csv(self, request: HttpRequest, queryset: QuerySet) -> HttpResponse:
         """Export CAAIS 1.0 CSV for submissions in the selected queryset."""
         return Metadata.objects.filter(submission__in=queryset).export_csv(
             version=ExportVersion.CAAIS_1_0
         )
 
-    @admin.action(description=_("Export AtoM 2.6 Accession CSV for Metadata in Selected"))
+    @admin.action(
+        description=pgettext_lazy(
+            '"Selected" refers to one or more Submission objects.',
+            "Export AtoM 2.6 Accession CSV for Metadata in Selected",
+        )
+    )
     def export_atom_2_6_csv(self, request: HttpRequest, queryset: QuerySet) -> HttpResponse:
         """Export AtoM 2.6 Accession CSV for submissions in the selected queryset."""
         return Metadata.objects.filter(submission__in=queryset).export_csv(
             version=ExportVersion.ATOM_2_6
         )
 
-    @admin.action(description=_("Export AtoM 2.3 Accession CSV for Metadata in Selected"))
+    @admin.action(
+        description=pgettext_lazy(
+            '"Selected" refers to one or more Submission objects.',
+            "Export AtoM 2.3 Accession CSV for Metadata in Selected",
+        )
+    )
     def export_atom_2_3_csv(self, request: HttpRequest, queryset: QuerySet) -> HttpResponse:
         """Export AtoM 2.3 Accession CSV for submissions in the selected queryset."""
         return Metadata.objects.filter(submission__in=queryset).export_csv(
             version=ExportVersion.ATOM_2_3
         )
 
-    @admin.action(description=_("Export AtoM 2.2 Accession CSV for Metadata in Selected"))
+    @admin.action(
+        description=pgettext_lazy(
+            '"Selected" refers to one or more Submission objects.',
+            "Export AtoM 2.2 Accession CSV for Metadata in Selected",
+        )
+    )
     def export_atom_2_2_csv(self, request: HttpRequest, queryset: QuerySet) -> HttpResponse:
         """Export AtoM 2.2 Accession CSV for submissions in the selected queryset."""
         return Metadata.objects.filter(submission__in=queryset).export_csv(
             version=ExportVersion.ATOM_2_2
         )
 
-    @admin.action(description=_("Export AtoM 2.1 Accession CSV for Metadata in Selected"))
+    @admin.action(
+        description=pgettext_lazy(
+            '"Selected" refers to one or more Submission objects.',
+            "Export AtoM 2.1 Accession CSV for Metadata in Selected",
+        )
+    )
     def export_atom_2_1_csv(self, request: HttpRequest, queryset: QuerySet) -> HttpResponse:
         """Export AtoM 2.1 Accession CSV for submissions in the selected queryset."""
         return Metadata.objects.filter(submission__in=queryset).export_csv(
