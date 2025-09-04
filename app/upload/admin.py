@@ -47,7 +47,7 @@ class BaseUploadedFileAdminMixin:
     def formatted_upload_size(self, obj: BaseUploadedFile) -> str:
         """Format file size of an BaseUploadedFile instance for display."""
         if not obj.file_upload or not obj.exists:
-            return "N/A"
+            return _("N/A")
         return get_human_readable_size(int(obj.file_upload.size), 1000, 2)
 
     @display(description=_("File Link"))
@@ -254,7 +254,7 @@ class UploadSessionAdmin(admin.ModelAdmin):
         try:
             file_count = obj.file_count
         except ValueError:
-            file_count = "n/a"
+            file_count = _("N/A")
         return str(file_count)
 
     @display(description=_("Upload Size"))
@@ -264,7 +264,7 @@ class UploadSessionAdmin(admin.ModelAdmin):
         try:
             upload_size = get_human_readable_size(obj.upload_size, 1000, 2)
         except ValueError:
-            upload_size = "n/a"
+            upload_size = _("N/A")
         return upload_size
 
     @display(description=_("Last upload at"))
