@@ -24,10 +24,10 @@ from datetime import date, datetime
 
 from django.conf import settings
 from django.db import models
-from django.utils.translation import gettext
+from django.utils.translation import gettext_lazy as _
 from django_countries.fields import CountryField
 
-from caais.citation import cite_caais
+from caais.citation import cite_caais_lazy
 from caais.export import ExportVersion
 from caais.managers import (
     AppraisalManager,
@@ -91,12 +91,12 @@ class AcquisitionMethod(AbstractTerm):
     class Meta(AbstractTerm.Meta):
         """Meta options for the acquisition method."""
 
-        verbose_name_plural = gettext("Acquisition methods")
-        verbose_name = gettext("Acquisition method")
+        verbose_name_plural = _("Acquisition methods")
+        verbose_name = _("Acquisition method")
 
 
-AcquisitionMethod._meta.get_field("name").help_text = cite_caais(
-    gettext("Record the acquisition method in accordance with a controlled vocabulary"),
+AcquisitionMethod._meta.get_field("name").help_text = cite_caais_lazy(
+    _("Record the acquisition method in accordance with a controlled vocabulary"),
     section=(1, 5),
 )
 
@@ -117,12 +117,12 @@ class Status(AbstractTerm):
     class Meta(AbstractTerm.Meta):
         """Meta options for the status term."""
 
-        verbose_name_plural = gettext("Statuses")
-        verbose_name = gettext("Status")
+        verbose_name_plural = _("Statuses")
+        verbose_name = _("Status")
 
 
-Status._meta.get_field("name").help_text = cite_caais(
-    gettext(
+Status._meta.get_field("name").help_text = cite_caais_lazy(
+    _(
         "Record the current position of the material with respect to the "
         "repository's workflows and business processes using a controlled "
         "vocabulary"
@@ -235,8 +235,8 @@ class Metadata(models.Model):
     class Meta:
         """Meta options for the model."""
 
-        verbose_name_plural = gettext("CAAIS metadata")
-        verbose_name = gettext("CAAIS metadata")
+        verbose_name_plural = _("CAAIS metadata")
+        verbose_name = _("CAAIS metadata")
 
     objects = MetadataQuerySet.as_manager()
 
@@ -255,8 +255,8 @@ class Metadata(models.Model):
         max_length=512,
         blank=True,
         default="",
-        help_text=cite_caais(
-            gettext(
+        help_text=cite_caais_lazy(
+            _(
                 "Give the authorized form(s) of the name of the institution in "
                 "accordance with the repository's naming standard"
             ),
@@ -269,8 +269,8 @@ class Metadata(models.Model):
         max_length=512,
         blank=True,
         default="",
-        help_text=cite_caais(
-            gettext(
+        help_text=cite_caais_lazy(
+            _(
                 "Supply an accession title in accordance with the repository's "
                 "descriptive standard, typically consisting of the creator's name(s) "
                 "and the type of material"
@@ -288,10 +288,9 @@ class Metadata(models.Model):
         max_length=512,
         blank=True,
         default="",
-        help_text=cite_caais(
-            gettext(
-                "Provide a preliminary estimate of the date range or explicitly "
-                "indicate if not it has yet been determined"
+        help_text=cite_caais_lazy(
+            _(
+                "Provide a preliminary estimate of the date range or explicitly indicate if not it has yet been determined"
             ),
             section=(3, 1),
         ),
@@ -307,8 +306,8 @@ class Metadata(models.Model):
         max_length=256,
         blank=True,
         default="",
-        help_text=cite_caais(
-            gettext(
+        help_text=cite_caais_lazy(
+            _(
                 "Record information about the standards, rules or conventions that "
                 "were followed when creating or maintaining the accession record."
             ),
@@ -321,8 +320,8 @@ class Metadata(models.Model):
         max_length=256,
         blank=True,
         default="en",
-        help_text=cite_caais(
-            gettext("Record the language(s) and script(s) used to create the accession record."),
+        help_text=cite_caais_lazy(
+            _("Record the language(s) and script(s) used to create the accession record."),
             section=(7, 3),
         ),
     )
@@ -564,8 +563,8 @@ class Identifier(models.Model):
     class Meta:
         """Meta options for the Identifier model."""
 
-        verbose_name_plural = gettext("Identifiers")
-        verbose_name = gettext("Identifier")
+        verbose_name_plural = _("Identifiers")
+        verbose_name = _("Identifier")
 
     objects = IdentifierManager()
 
@@ -578,8 +577,8 @@ class Identifier(models.Model):
         null=False,
         blank=True,
         default="",
-        help_text=cite_caais(
-            gettext(
+        help_text=cite_caais_lazy(
+            _(
                 "Record the identifier type in accordance with a controlled vocabulary "
                 "maintained by the repository"
             ),
@@ -591,10 +590,8 @@ class Identifier(models.Model):
         max_length=128,
         null=False,
         blank=False,
-        help_text=cite_caais(
-            gettext(
-                "Record the other identifier value as received or generated by the repository"
-            ),
+        help_text=cite_caais_lazy(
+            _("Record the other identifier value as received or generated by the repository"),
             section=(1, 2, 2),
         ),
     )
@@ -603,8 +600,8 @@ class Identifier(models.Model):
         null=False,
         blank=True,
         default="",
-        help_text=cite_caais(
-            gettext(
+        help_text=cite_caais_lazy(
+            _(
                 "Record any additional information that clarifies the purpose, use or "
                 "generation of the identifier."
             ),
@@ -636,8 +633,8 @@ class ArchivalUnit(models.Model):
     class Meta:
         """Meta options for the ArchivalUnit model."""
 
-        verbose_name_plural = gettext("Archival units")
-        verbose_name = gettext("Archival unit")
+        verbose_name_plural = _("Archival units")
+        verbose_name = _("Archival unit")
 
     objects = ArchivalUnitManager()
 
@@ -648,8 +645,8 @@ class ArchivalUnit(models.Model):
     archival_unit = models.TextField(
         null=False,
         blank=False,
-        help_text=cite_caais(
-            gettext(
+        help_text=cite_caais_lazy(
+            _(
                 "Record the reference code and/or title of the archival unit to which "
                 "the accession belongs"
             ),
@@ -681,8 +678,8 @@ class DispositionAuthority(models.Model):
     class Meta:
         """Meta options for the DispositionAuthority model."""
 
-        verbose_name_plural = gettext("Disposition authorities")
-        verbose_name = gettext("Disposition authority")
+        verbose_name_plural = _("Disposition authorities")
+        verbose_name = _("Disposition authority")
 
     objects = DispositionAuthorityManager()
 
@@ -693,8 +690,8 @@ class DispositionAuthority(models.Model):
     disposition_authority = models.TextField(
         null=False,
         blank=False,
-        help_text=cite_caais(
-            gettext(
+        help_text=cite_caais_lazy(
+            _(
                 "Record information about any legal instruments that apply to the "
                 "accessioned material. Legal instruments include statutes, records "
                 "schedules or disposition authorities, and donor agreements"
@@ -725,14 +722,12 @@ class SourceType(AbstractTerm):
     class Meta(AbstractTerm.Meta):
         """Meta options for the SourceType model."""
 
-        verbose_name_plural = gettext("Source types")
-        verbose_name = gettext("Source type")
+        verbose_name_plural = _("Source types")
+        verbose_name = _("Source type")
 
 
-SourceType._meta.get_field("name").help_text = cite_caais(
-    gettext(
-        "Record the source in accordance with a controlled vocabulary maintained by the repository"
-    ),
+SourceType._meta.get_field("name").help_text = cite_caais_lazy(
+    _("Record the source in accordance with a controlled vocabulary maintained by the repository"),
     section=(2, 1, 1),
 )
 
@@ -752,12 +747,12 @@ class SourceRole(AbstractTerm):
     class Meta(AbstractTerm.Meta):
         """Meta options for the SourceRole model."""
 
-        verbose_name_plural = gettext("Source roles")
-        verbose_name = gettext("Source role")
+        verbose_name_plural = _("Source roles")
+        verbose_name = _("Source role")
 
 
-SourceRole._meta.get_field("name").help_text = cite_caais(
-    gettext(
+SourceRole._meta.get_field("name").help_text = cite_caais_lazy(
+    _(
         "Record the source role (when known) in accordance with a controlled "
         "vocabulary maintained by the repository"
     ),
@@ -781,12 +776,12 @@ class SourceConfidentiality(AbstractTerm):
     class Meta(AbstractTerm.Meta):
         """Meta options for the SourceConfidentiality model."""
 
-        verbose_name_plural = gettext("Source confidentialities")
-        verbose_name = gettext("Source confidentiality")
+        verbose_name_plural = _("Source confidentialities")
+        verbose_name = _("Source confidentiality")
 
 
-SourceConfidentiality._meta.get_field("name").help_text = cite_caais(
-    gettext(
+SourceConfidentiality._meta.get_field("name").help_text = cite_caais_lazy(
+    _(
         "Record source statements or source information that is for internal use "
         "only by the repository. Repositories should develop a controlled "
         "vocabulary with terms that can be translated into clear rules for "
@@ -861,8 +856,8 @@ class SourceOfMaterial(models.Model):
     class Meta:
         """Meta options for the SourceOfMaterial model."""
 
-        verbose_name_plural = gettext("Sources of material")
-        verbose_name = gettext("Source of material")
+        verbose_name_plural = _("Sources of material")
+        verbose_name = _("Source of material")
 
     objects = SourceOfMaterialManager()
 
@@ -879,10 +874,8 @@ class SourceOfMaterial(models.Model):
         null=False,
         blank=True,
         default="",
-        help_text=cite_caais(
-            gettext(
-                "Record the source name in accordance with the repository's descriptive standard"
-            ),
+        help_text=cite_caais_lazy(
+            _("Record the source name in accordance with the repository's descriptive standard"),
             section=(2, 1, 2),
         ),
     )
@@ -906,8 +899,8 @@ class SourceOfMaterial(models.Model):
     source_note = models.TextField(
         blank=True,
         default="",
-        help_text=cite_caais(
-            gettext(
+        help_text=cite_caais_lazy(
+            _(
                 "Record any other information about the source of the accessioned "
                 "materials. If the source performed the role for only a specific "
                 "period of time (e.g. was a custodian for several years), record the "
@@ -949,8 +942,8 @@ class PreliminaryCustodialHistory(models.Model):
     class Meta:
         """Meta options for the PreliminaryCustodialHistory model."""
 
-        verbose_name_plural = gettext("Preliminary custodial histories")
-        verbose_name = gettext("Preliminary custodial history")
+        verbose_name_plural = _("Preliminary custodial histories")
+        verbose_name = _("Preliminary custodial history")
 
     objects = PreliminaryCustodialHistoryManager()
 
@@ -964,8 +957,8 @@ class PreliminaryCustodialHistory(models.Model):
     preliminary_custodial_history = models.TextField(
         null=False,
         blank=False,
-        help_text=cite_caais(
-            gettext(
+        help_text=cite_caais_lazy(
+            _(
                 "Provide relevant custodial history information in accordance with "
                 "the repository's descriptive standard. Record the successive "
                 "transfers of ownership, responsibility and/or custody of the "
@@ -997,12 +990,12 @@ class ExtentType(AbstractTerm):
     class Meta(AbstractTerm.Meta):
         """Meta options for the ExtentType model."""
 
-        verbose_name_plural = gettext("Extent types")
-        verbose_name = gettext("Extent type")
+        verbose_name_plural = _("Extent types")
+        verbose_name = _("Extent type")
 
 
-ExtentType._meta.get_field("name").help_text = cite_caais(
-    gettext(
+ExtentType._meta.get_field("name").help_text = cite_caais_lazy(
+    _(
         "Record the extent statement type in accordance with a controlled "
         "vocabulary maintained by the repository"
     ),
@@ -1026,12 +1019,12 @@ class ContentType(AbstractTerm):
     class Meta(AbstractTerm.Meta):
         """Meta options for the ContentType model."""
 
-        verbose_name_plural = gettext("Content types")
-        verbose_name = gettext("Content type")
+        verbose_name_plural = _("Content types")
+        verbose_name = _("Content type")
 
 
-ContentType._meta.get_field("name").help_text = cite_caais(
-    gettext(
+ContentType._meta.get_field("name").help_text = cite_caais_lazy(
+    _(
         "Record the type of material contained in the units measured, i.e., the "
         "genre of the material"
     ),
@@ -1055,12 +1048,12 @@ class CarrierType(AbstractTerm):
     class Meta(AbstractTerm.Meta):
         """Meta options for the CarrierType model."""
 
-        verbose_name_plural = gettext("Carrier types")
-        verbose_name = gettext("Carrier type")
+        verbose_name_plural = _("Carrier types")
+        verbose_name = _("Carrier type")
 
 
-CarrierType._meta.get_field("name").help_text = cite_caais(
-    gettext(
+CarrierType._meta.get_field("name").help_text = cite_caais_lazy(
+    _(
         "Record the physical format of an object that supports or carries archival "
         "materials using a controlled vocabulary maintained by the repository"
     ),
@@ -1096,8 +1089,8 @@ class ExtentStatement(models.Model):
     class Meta:
         """Meta options for the ExtentStatement model."""
 
-        verbose_name = gettext("Extent statement")
-        verbose_name_plural = gettext("Extent statements")
+        verbose_name = _("Extent statement")
+        verbose_name_plural = _("Extent statements")
 
     objects = ExtentStatementManager()
 
@@ -1113,8 +1106,8 @@ class ExtentStatement(models.Model):
         null=False,
         blank=True,
         default="",
-        help_text=cite_caais(
-            gettext(
+        help_text=cite_caais_lazy(
+            _(
                 "Record the number and unit of measure expressing the quantity of the "
                 "extent (e.g., 5 files, totalling 2.5MB)"
             ),
@@ -1134,8 +1127,8 @@ class ExtentStatement(models.Model):
         null=False,
         blank=True,
         default="",
-        help_text=cite_caais(
-            gettext(
+        help_text=cite_caais_lazy(
+            _(
                 "Record additional information related to the number and type of "
                 "units received, retained, or removed not otherwise recorded"
             ),
@@ -1169,8 +1162,8 @@ class PreliminaryScopeAndContent(models.Model):
     class Meta:
         """Meta options for the PreliminaryScopeAndContent model."""
 
-        verbose_name_plural = gettext("Preliminary scope and content")
-        verbose_name = gettext("Preliminary scope and content")
+        verbose_name_plural = _("Preliminary scope and content")
+        verbose_name = _("Preliminary scope and content")
 
     objects = PreliminaryScopeAndContentManager()
 
@@ -1184,8 +1177,8 @@ class PreliminaryScopeAndContent(models.Model):
     preliminary_scope_and_content = models.TextField(
         null=False,
         blank=False,
-        help_text=cite_caais(
-            gettext(
+        help_text=cite_caais_lazy(
+            _(
                 "Record a preliminary description that may include: functions and "
                 "activities that resulted in the material's generation, dates, the "
                 "geographic area to which the material pertains, subject matter, "
@@ -1219,8 +1212,8 @@ class LanguageOfMaterial(models.Model):
     class Meta:
         """Meta options for the LanguageOfMaterial model."""
 
-        verbose_name_plural = gettext("Language of materials")
-        verbose_name = gettext("Language of material")
+        verbose_name_plural = _("Language of materials")
+        verbose_name = _("Language of material")
 
     objects = LanguageOfMaterialManager()
 
@@ -1231,8 +1224,8 @@ class LanguageOfMaterial(models.Model):
     language_of_material = models.TextField(
         null=False,
         blank=False,
-        help_text=cite_caais(
-            gettext(
+        help_text=cite_caais_lazy(
+            _(
                 "Record, at a minimum, the language that is predominantly found in "
                 "the accessioned material"
             ),
@@ -1275,8 +1268,8 @@ class StorageLocation(models.Model):
     storage_location = models.TextField(
         null=False,
         blank=False,
-        help_text=cite_caais(
-            gettext(
+        help_text=cite_caais_lazy(
+            _(
                 "Record the physical and/or digital location(s) within the "
                 "repository in which the accessioned material is stored"
             ),
@@ -1310,8 +1303,8 @@ class RightsType(AbstractTerm):
         verbose_name = "Type of rights"
 
 
-RightsType._meta.get_field("name").help_text = cite_caais(
-    gettext(
+RightsType._meta.get_field("name").help_text = cite_caais_lazy(
+    _(
         "Record the rights statement type in accordance with a controlled "
         "vocabulary maintained by the repository"
     ),
@@ -1361,8 +1354,8 @@ class Rights(models.Model):
     rights_value = models.TextField(
         blank=True,
         default="",
-        help_text=cite_caais(
-            gettext(
+        help_text=cite_caais_lazy(
+            _(
                 "Record the nature and duration of the permission granted or "
                 "restriction imposed. Specify where the condition applies only to part "
                 "of the accession"
@@ -1374,8 +1367,8 @@ class Rights(models.Model):
     rights_note = models.TextField(
         blank=True,
         default="",
-        help_text=cite_caais(
-            gettext("Record any other information relevant to describing the rights statement"),
+        help_text=cite_caais_lazy(
+            _("Record any other information relevant to describing the rights statement"),
             section=(4, 2, 3),
         ),
     )
@@ -1407,8 +1400,8 @@ class PreservationRequirementsType(AbstractTerm):
         verbose_name = "Preservation requirements type"
 
 
-PreservationRequirementsType._meta.get_field("name").help_text = cite_caais(
-    gettext(
+PreservationRequirementsType._meta.get_field("name").help_text = cite_caais_lazy(
+    _(
         "Record the type of preservation requirement in accordance with a "
         "controlled vocabulary maintained by the repository."
     ),
@@ -1462,8 +1455,8 @@ class PreservationRequirements(models.Model):
     preservation_requirements_value = models.TextField(
         blank=True,
         default="",
-        help_text=cite_caais(
-            gettext(
+        help_text=cite_caais_lazy(
+            _(
                 "Record information about the assessment of the material with "
                 "respect to its physical condition, dependencies, processing or "
                 "access"
@@ -1475,8 +1468,8 @@ class PreservationRequirements(models.Model):
     preservation_requirements_note = models.TextField(
         blank=True,
         default="",
-        help_text=cite_caais(
-            gettext(
+        help_text=cite_caais_lazy(
+            _(
                 "Record any other information relevant to the long-term "
                 "preservation of the material"
             ),
@@ -1510,8 +1503,8 @@ class AppraisalType(AbstractTerm):
         verbose_name = "Appraisal type"
 
 
-AppraisalType._meta.get_field("name").help_text = cite_caais(
-    gettext(
+AppraisalType._meta.get_field("name").help_text = cite_caais_lazy(
+    _(
         "Record the appraisal type in accordance with a controlled vocabulary "
         "maintained by the repository"
     ),
@@ -1560,8 +1553,8 @@ class Appraisal(models.Model):
         null=False,
         blank=True,
         default="",
-        help_text=cite_caais(
-            gettext(
+        help_text=cite_caais_lazy(
+            _(
                 "Where the accession process includes appraisal activities, record "
                 "the appraisal statement value."
             ),
@@ -1573,10 +1566,8 @@ class Appraisal(models.Model):
         null=False,
         blank=True,
         default="",
-        help_text=cite_caais(
-            gettext(
-                "Record any other information relevant to describing the appraisal activities."
-            ),
+        help_text=cite_caais_lazy(
+            _("Record any other information relevant to describing the appraisal activities."),
             section=(4, 4, 3),
         ),
     )
@@ -1607,8 +1598,8 @@ class AssociatedDocumentationType(AbstractTerm):
         verbose_name = "Associated documentation type"
 
 
-AssociatedDocumentationType._meta.get_field("name").help_text = cite_caais(
-    gettext(
+AssociatedDocumentationType._meta.get_field("name").help_text = cite_caais_lazy(
+    _(
         "Where the accession process generates associated documents, record the "
         "associated documentation type in accordance with a controlled vocabulary "
         "maintained by the repository."
@@ -1663,8 +1654,8 @@ class AssociatedDocumentation(models.Model):
         null=False,
         blank=True,
         default="",
-        help_text=cite_caais(
-            gettext("Record the title of the associated documentation"), section=(4, 5, 2)
+        help_text=cite_caais_lazy(
+            _("Record the title of the associated documentation"), section=(4, 5, 2)
         ),
     )
 
@@ -1672,8 +1663,8 @@ class AssociatedDocumentation(models.Model):
         null=False,
         blank=True,
         default="",
-        help_text=cite_caais(
-            gettext(
+        help_text=cite_caais_lazy(
+            _(
                 "Record any other information relevant to describing documentation "
                 "associated to the accessioned material"
             ),
@@ -1708,8 +1699,8 @@ class EventType(AbstractTerm):
         verbose_name_plural = "Event types"
 
 
-EventType._meta.get_field("name").help_text = cite_caais(
-    gettext(
+EventType._meta.get_field("name").help_text = cite_caais_lazy(
+    _(
         "Record the event type in accordance with a controlled vocabulary "
         "maintained by the repository"
     ),
@@ -1764,10 +1755,8 @@ class Event(models.Model):
         null=False,
         blank=True,
         default="",
-        help_text=cite_caais(
-            gettext(
-                "Record the name of the staff member or application responsible for the event"
-            ),
+        help_text=cite_caais_lazy(
+            _("Record the name of the staff member or application responsible for the event"),
             section=(5, 1, 3),
         ),
     )
@@ -1776,8 +1765,8 @@ class Event(models.Model):
         null=False,
         blank=True,
         default="",
-        help_text=cite_caais(
-            gettext("Record any other information relevant to describing the event."),
+        help_text=cite_caais_lazy(
+            _("Record any other information relevant to describing the event."),
             section=(5, 1, 4),
         ),
     )
@@ -1818,8 +1807,8 @@ class GeneralNote(models.Model):
     general_note = models.TextField(
         null=False,
         blank=False,
-        help_text=cite_caais(
-            gettext(
+        help_text=cite_caais_lazy(
+            _(
                 "Record any other information relevant to the accession record or "
                 "accessioning process"
             ),
@@ -1854,8 +1843,8 @@ class CreationOrRevisionType(AbstractTerm):
         verbose_name_plural = "Date of creation or revision types"
 
 
-CreationOrRevisionType._meta.get_field("name").help_text = cite_caais(
-    gettext(
+CreationOrRevisionType._meta.get_field("name").help_text = cite_caais_lazy(
+    _(
         "Record the action type in accordance with a controlled vocabulary "
         "maintained by the repository."
     ),
@@ -1919,8 +1908,8 @@ class DateOfCreationOrRevision(models.Model):
         null=False,
         blank=True,
         default="",
-        help_text=cite_caais(
-            gettext(
+        help_text=cite_caais_lazy(
+            _(
                 "Record the name of the staff member who performed the action "
                 "(creation or revision) on the accession record"
             ),
@@ -1932,8 +1921,8 @@ class DateOfCreationOrRevision(models.Model):
         null=False,
         blank=True,
         default="",
-        help_text=cite_caais(
-            gettext("Record any information summarizing actions applied to the accession record."),
+        help_text=cite_caais_lazy(
+            _("Record any information summarizing actions applied to the accession record."),
             section=(7, 2, 4),
         ),
     )
