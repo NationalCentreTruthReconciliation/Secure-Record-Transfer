@@ -182,7 +182,7 @@ msgstr ""
 
 #: caais/models.py:238 caais/models.py:239
 msgid "CAAIS metadata"
-msgstr "Métadonnées CAAIS"
+msgstr "Métadonnées NCIAA"
 
 #: caais/models.py:260
 msgid ""
