@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-04 11:47-0500\n"
+"POT-Creation-Date: 2025-09-11 10:36-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,35 +20,50 @@ msgstr ""
 
 #: app/settings/base.py:144
 msgid "English"
-msgstr ""
+msgstr "Anglais"
 
 #: app/settings/base.py:145
 msgid "French"
-msgstr ""
+msgstr "Français"
 
 #: app/settings/base.py:146
 msgid "Hindi"
-msgstr ""
+msgstr "Hindi"
 
-#: caais/admin.py:333
+#: caais/admin.py:336
+#, fuzzy
+#| msgid "Export CAAIS 1.0 CSV for Selected"
+msgctxt "\"Selected\" refers to one or more Metadata objects."
 msgid "Export CAAIS 1.0 CSV for Selected"
-msgstr ""
+msgstr "Exporter CSV CAAIS 1.0 pour Sélectionnés"
 
-#: caais/admin.py:338
+#: caais/admin.py:346
+#, fuzzy
+#| msgid "Export AtoM 2.6 Accession CSV for Selected"
+msgctxt "\"Selected\" refers to one or more Metadata objects."
 msgid "Export AtoM 2.6 Accession CSV for Selected"
-msgstr ""
+msgstr "Exporter AtoM 2.6 Accession CSV pour Sélectionnés"
 
-#: caais/admin.py:345
+#: caais/admin.py:358
+#, fuzzy
+#| msgid "Export AtoM 2.3 Accession CSV for Selected"
+msgctxt "\"Selected\" refers to one or more Metadata objects."
 msgid "Export AtoM 2.3 Accession CSV for Selected"
-msgstr ""
+msgstr "Exporter AtoM 2.3 Accession CSV pour Sélectionnés"
 
-#: caais/admin.py:352
+#: caais/admin.py:370
+#, fuzzy
+#| msgid "Export AtoM 2.2 Accession CSV for Selected"
+msgctxt "\"Selected\" refers to one or more Metadata objects."
 msgid "Export AtoM 2.2 Accession CSV for Selected"
-msgstr ""
+msgstr "Exporter AtoM 2.2 Accession CSV pour Sélectionnés"
 
-#: caais/admin.py:359
+#: caais/admin.py:382
+#, fuzzy
+#| msgid "Export AtoM 2.1 Accession CSV for Selected"
+msgctxt "\"Selected\" refers to one or more Metadata objects."
 msgid "Export AtoM 2.1 Accession CSV for Selected"
-msgstr ""
+msgstr "Exporter AtoM 2.1 Accession CSV pour Sélectionnés"
 
 #: caais/forms.py:101
 #, python-format
@@ -56,45 +71,50 @@ msgid ""
 "%(help_text)s. Use the date format YYYY-MM-DD for a single date or YYYY-MM-"
 "DD - YYYY-MM-DD for a date range"
 msgstr ""
+"%(help_text)s. Utilisez le format de date AAAA-MM-JJ pour une seule date ou "
+"AAAA-MM-JJ - AAAA-MM-JJ pour une plage de dates"
 
 #: caais/forms.py:143
 msgid "Record an identifier to uniquely identify this accession"
 msgstr ""
+"Enregistrez un identifiant pour identifier cette accession de manière unique"
 
 #: caais/forms.py:172 caais/forms.py:209
 #: recordtransfer/forms/submission_forms.py:365
 #: recordtransfer/forms/submission_forms.py:402
 msgid "Invalid date format"
-msgstr ""
+msgstr "Format de date invalide"
 
 #: caais/forms.py:191 recordtransfer/forms/submission_forms.py:384
 msgid "Date cannot be in the future"
-msgstr ""
+msgstr "La date ne peut pas être dans le futur"
 
 #: caais/forms.py:193 recordtransfer/forms/submission_forms.py:386
 msgid "End date cannot be in the future"
-msgstr ""
+msgstr "La date de fin ne peut pas être dans le futur"
 
 #: caais/forms.py:199 recordtransfer/forms/submission_forms.py:392
 msgid "Date cannot be before 1800"
-msgstr ""
+msgstr "La date ne peut pas être avant 1800"
 
 #: caais/forms.py:201 recordtransfer/forms/submission_forms.py:394
 msgid "End date cannot be before 1800"
-msgstr ""
+msgstr "La date de fin ne peut pas être avant 1800"
 
 #: caais/forms.py:211 recordtransfer/forms/submission_forms.py:404
 msgid "Invalid date format for end date"
-msgstr ""
+msgstr "Format de date invalide pour la date de fin"
 
 #: caais/forms.py:221 recordtransfer/forms/submission_forms.py:414
 msgid "End date must be later than start date"
-msgstr ""
+msgstr "La date de fin doit être postérieure à la date de début"
 
 #: caais/forms.py:286
 #, python-format
 msgid "'%(id)s' is a reserved Identifier type - please use another type name"
 msgstr ""
+"'%(id)s' est un type d’identifiant réservé - veuillez utiliser un autre nom "
+"de type"
 
 #: caais/forms.py:366 recordtransfer/forms/mixins.py:17
 #: recordtransfer/forms/mixins.py:147
@@ -103,63 +123,68 @@ msgstr ""
 #: recordtransfer/forms/submission_forms.py:212
 #: recordtransfer/forms/submission_forms.py:442
 msgid "This field is required."
-msgstr ""
+msgstr "Ce champ est obligatoire."
 
 #: caais/forms.py:367 recordtransfer/forms/mixins.py:18
 msgid "Phone number must look like \"+1 (999) 999-9999\""
-msgstr ""
+msgstr "Le numéro de téléphone doit ressembler à \"+1 (999) 999-9999\""
 
 #: caais/forms.py:375 recordtransfer/forms/mixins.py:25
 msgid "Phone number"
-msgstr ""
+msgstr "Numéro de téléphone"
 
 #: caais/forms.py:379 recordtransfer/forms/submission_forms.py:125
 #: recordtransfer/forms/user_forms.py:36
 #: recordtransfer/templates/includes/account_info_form.html:13
 msgid "Email"
-msgstr ""
+msgstr "Courriel"
 
 #: caais/forms.py:388
 msgid "Select a Country"
-msgstr ""
+msgstr "Sélectionner un pays"
 
 #: caais/models.py:94
 msgid "Acquisition methods"
-msgstr ""
+msgstr "Méthodes d'acquisition"
 
 #: caais/models.py:95
 msgid "Acquisition method"
-msgstr ""
+msgstr "Méthode d'acquisition"
 
 #: caais/models.py:99
 msgid ""
 "Record the acquisition method in accordance with a controlled vocabulary"
 msgstr ""
+"Enregistrer la méthode d’acquisition conformément à un vocabulaire contrôlé"
 
 #: caais/models.py:120
 msgid "Statuses"
-msgstr ""
+msgstr "Statuts"
 
 #: caais/models.py:121
 #: recordtransfer/templates/includes/open_session_table.html:9
 msgid "Status"
-msgstr ""
+msgstr "Statut"
 
 #: caais/models.py:126
 msgid ""
 "Record the current position of the material with respect to the repository's "
 "workflows and business processes using a controlled vocabulary"
 msgstr ""
+"Enregistrez la position actuelle des documents dans les activités et les "
+"processus d’affaires de l’établissement."
 
 #: caais/models.py:238 caais/models.py:239
 msgid "CAAIS metadata"
-msgstr ""
+msgstr "Métadonnées CAAIS"
 
 #: caais/models.py:260
 msgid ""
 "Give the authorized form(s) of the name of the institution in accordance "
 "with the repository's naming standard"
 msgstr ""
+"Fournir la forme autorisée du nom de l’établissement conformément  aux norms "
+"de nommage de l’organisme"
 
 #: caais/models.py:274
 msgid ""
@@ -167,70 +192,86 @@ msgid ""
 "standard, typically consisting of the creator's name(s) and the type of "
 "material"
 msgstr ""
+"Établir un titre d’acquisition conformément aux normes de description de "
+"l’établissement celles-ci consistent généralement du nom du créateur et du "
+"type de documents."
 
 #: caais/models.py:293
 msgid ""
 "Provide a preliminary estimate of the date range or explicitly indicate if "
 "not it has yet been determined"
 msgstr ""
+"Fournir une estimation préliminaire de dates échelonnées ou préciser en "
+"toutes lettres si elles n’ont pas encore été déterminées."
 
 #: caais/models.py:312
 msgid ""
 "Record information about the standards, rules or conventions that were "
 "followed when creating or maintaining the accession record."
 msgstr ""
+"Consigner les informations sur les normes, règles ou conventionsutilisées "
+"lors de la création ou de la mise à jour de la notice d'acquisition "
 
 #: caais/models.py:325
 msgid ""
 "Record the language(s) and script(s) used to create the accession record."
 msgstr ""
+"Consigner la ou les langue(s) ou typographie(s) utilisée(s) lors de la "
+"création de la notice d'acquisition."
 
 #: caais/models.py:567
 msgid "Identifiers"
-msgstr ""
+msgstr "Identifiants"
 
 #: caais/models.py:568
 msgid "Identifier"
-msgstr ""
+msgstr "Identifiant"
 
 #: caais/models.py:583
 msgid ""
 "Record the identifier type in accordance with a controlled vocabulary "
 "maintained by the repository"
 msgstr ""
+"Enregistrer le type d’identifiant en accord avec un vocabulaire contrôlé "
+"utilisé par l’établissement"
 
 #: caais/models.py:596
 msgid ""
 "Record the other identifier value as received or generated by the repository"
 msgstr ""
+"Enregistrer l’autre identifiant comme reçu ou généré par l’établissement"
 
 #: caais/models.py:608
 msgid ""
 "Record any additional information that clarifies the purpose, use or "
 "generation of the identifier."
 msgstr ""
+"Consigner toute information additionnelle qui précise la raison d’être, "
+"l’utilisation ou la création de l’identifiant."
 
 #: caais/models.py:639
 msgid "Archival units"
-msgstr ""
+msgstr "Unités archivistiques"
 
 #: caais/models.py:640
 msgid "Archival unit"
-msgstr ""
+msgstr "Unité archivistique"
 
 #: caais/models.py:653
 msgid ""
 "Record the reference code and/or title of the archival unit to which the "
 "accession belongs"
 msgstr ""
+"Enregistrer le code de référence et/ou le titre de l’unité archivistique "
+"auquelappartient l’acquisition"
 
 #: caais/models.py:684
 msgid "Disposition authorities"
-msgstr ""
+msgstr "Autorisations de disposition"
 
 #: caais/models.py:685
 msgid "Disposition authority"
-msgstr ""
+msgstr "Autorisation de disposition"
 
 #: caais/models.py:698
 msgid ""
@@ -238,42 +279,50 @@ msgid ""
 "material. Legal instruments include statutes, records schedules or "
 "disposition authorities, and donor agreements"
 msgstr ""
+"Consigner l’information à propos de toute référence légale qui s’applique "
+"aux documents acquis. Les références légales incluent les statuts, "
+"calendriers de conservation ou instance décisionnelle, de même que les "
+"ententes avec les donateurs"
 
 #: caais/models.py:728
 msgid "Source types"
-msgstr ""
+msgstr "Types de sources"
 
 #: caais/models.py:729 recordtransfer/forms/submission_forms.py:260
 msgid "Source type"
-msgstr ""
+msgstr "Type de source"
 
 #: caais/models.py:734
 msgid ""
 "Record the source in accordance with a controlled vocabulary maintained by "
 "the repository"
 msgstr ""
+"Consigner le type de source conformément au vocabulaire contrôlé utilisé par "
+"l’établissement"
 
 #: caais/models.py:755
 msgid "Source roles"
-msgstr ""
+msgstr "Rôles de la source"
 
 #: caais/models.py:756 recordtransfer/forms/submission_forms.py:297
 msgid "Source role"
-msgstr ""
+msgstr "Rôle de la source"
 
 #: caais/models.py:761
 msgid ""
 "Record the source role (when known) in accordance with a controlled "
 "vocabulary maintained by the repository"
 msgstr ""
+"Consigner le rôle de la source (lorsqu’il est connu) conformément au "
+"vocabulaire contrôlé utilisé par l’établissement."
 
 #: caais/models.py:784
 msgid "Source confidentialities"
-msgstr ""
+msgstr "Confidentialités de la source"
 
 #: caais/models.py:785
 msgid "Source confidentiality"
-msgstr ""
+msgstr "Confidentialité de la source"
 
 #: caais/models.py:790
 msgid ""
@@ -281,6 +330,10 @@ msgid ""
 "by the repository. Repositories should develop a controlled vocabulary with "
 "terms that can be translated into clear rules for handling source information"
 msgstr ""
+"Identifier des déclarations de source ou de l’information sur la source à "
+"l’intention de l’établissement. Les établissements devraient développer un "
+"vocabulaire contrôlé contenant des termes qui peuvent être transposés en "
+"règles claires pour la manipulation de l’information sur la source."
 
 #: caais/models.py:864
 msgid "Sources of material"
@@ -524,36 +577,51 @@ msgstr ""
 msgid "No other details listed"
 msgstr ""
 
-#: recordtransfer/admin.py:217
+#: recordtransfer/admin.py:218
 msgid ""
 "The selected submission group(s) do not contain any submissions to export."
 msgstr ""
 
-#: recordtransfer/admin.py:225
+#: recordtransfer/admin.py:229
+#, fuzzy
+#| msgid "Export CAAIS 1.0 CSV for Selected"
+msgctxt "\"Selected\" refers to one or more Submission Group objects."
 msgid "Export CAAIS 1.0 CSV for Submissions in Selected"
-msgstr ""
+msgstr "Exporter CSV CAAIS 1.0 pour Sélectionnés"
 
-#: recordtransfer/admin.py:230
+#: recordtransfer/admin.py:239
+#, fuzzy
+#| msgid "Export AtoM 2.6 Accession CSV for Selected"
+msgctxt "\"Selected\" refers to one or more Submission Group objects."
 msgid "Export AtoM 2.6 Accession CSV for Submissions in Selected"
-msgstr ""
+msgstr "Exporter AtoM 2.6 Accession CSV pour Sélectionnés"
 
-#: recordtransfer/admin.py:235
+#: recordtransfer/admin.py:249
+#, fuzzy
+#| msgid "Export AtoM 2.3 Accession CSV for Selected"
+msgctxt "\"Selected\" refers to one or more Submission Group objects."
 msgid "Export AtoM 2.3 Accession CSV for Submissions in Selected"
-msgstr ""
+msgstr "Exporter AtoM 2.3 Accession CSV pour Sélectionnés"
 
-#: recordtransfer/admin.py:240
+#: recordtransfer/admin.py:259
+#, fuzzy
+#| msgid "Export AtoM 2.2 Accession CSV for Selected"
+msgctxt "\"Selected\" refers to one or more Submission Group objects."
 msgid "Export AtoM 2.2 Accession CSV for Submissions in Selected"
-msgstr ""
+msgstr "Exporter AtoM 2.2 Accession CSV pour Sélectionnés"
 
-#: recordtransfer/admin.py:245
+#: recordtransfer/admin.py:269
+#, fuzzy
+#| msgid "Export AtoM 2.1 Accession CSV for Selected"
+msgctxt "\"Selected\" refers to one or more Submission Group objects."
 msgid "Export AtoM 2.1 Accession CSV for Submissions in Selected"
-msgstr ""
+msgstr "Exporter AtoM 2.1 Accession CSV pour Sélectionnés"
 
-#: recordtransfer/admin.py:362
+#: recordtransfer/admin.py:388
 msgid "Click link to view uploaded files"
 msgstr ""
 
-#: recordtransfer/admin.py:386
+#: recordtransfer/admin.py:412
 #, python-format
 msgid ""
 "A downloadable bag is being generated. Visit the %(link_start)sjobs "
@@ -561,114 +629,129 @@ msgid ""
 "Submission page for a download link"
 msgstr ""
 
-#: recordtransfer/admin.py:402
+#: recordtransfer/admin.py:428
 msgid ""
 "There are no files associated with this submission, it is not possible to "
 "create a Bag"
 msgstr ""
 
-#: recordtransfer/admin.py:411
+#: recordtransfer/admin.py:437
 #, python-format
 msgid "Submission with ID '%(id)s' doesn't exist. Perhaps it was deleted?"
 msgstr ""
 
-#: recordtransfer/admin.py:418
+#: recordtransfer/admin.py:447
+#, fuzzy
+#| msgid "Export CAAIS 1.0 CSV for Selected"
+msgctxt "\"Selected\" refers to one or more Submission objects."
 msgid "Export CAAIS 1.0 CSV for Metadata in Selected"
-msgstr ""
+msgstr "Exporter CSV CAAIS 1.0 pour Sélectionnés"
 
-#: recordtransfer/admin.py:425
+#: recordtransfer/admin.py:459
+#, fuzzy
+#| msgid "Export AtoM 2.6 Accession CSV for Selected"
+msgctxt "\"Selected\" refers to one or more Submission objects."
 msgid "Export AtoM 2.6 Accession CSV for Metadata in Selected"
-msgstr ""
+msgstr "Exporter AtoM 2.6 Accession CSV pour Sélectionnés"
 
-#: recordtransfer/admin.py:432
+#: recordtransfer/admin.py:471
+#, fuzzy
+#| msgid "Export AtoM 2.3 Accession CSV for Selected"
+msgctxt "\"Selected\" refers to one or more Submission objects."
 msgid "Export AtoM 2.3 Accession CSV for Metadata in Selected"
-msgstr ""
+msgstr "Exporter AtoM 2.3 Accession CSV pour Sélectionnés"
 
-#: recordtransfer/admin.py:439
+#: recordtransfer/admin.py:483
+#, fuzzy
+#| msgid "Export AtoM 2.2 Accession CSV for Selected"
+msgctxt "\"Selected\" refers to one or more Submission objects."
 msgid "Export AtoM 2.2 Accession CSV for Metadata in Selected"
-msgstr ""
+msgstr "Exporter AtoM 2.2 Accession CSV pour Sélectionnés"
 
-#: recordtransfer/admin.py:446
+#: recordtransfer/admin.py:495
+#, fuzzy
+#| msgid "Export AtoM 2.1 Accession CSV for Selected"
+msgctxt "\"Selected\" refers to one or more Submission objects."
 msgid "Export AtoM 2.1 Accession CSV for Metadata in Selected"
-msgstr ""
+msgstr "Exporter AtoM 2.1 Accession CSV pour Sélectionnés"
 
-#: recordtransfer/admin.py:494 upload/admin.py:53
+#: recordtransfer/admin.py:545 upload/admin.py:53
 msgid "File Link"
 msgstr ""
 
-#: recordtransfer/admin.py:500
+#: recordtransfer/admin.py:551
 msgid "No file attached"
 msgstr ""
 
-#: recordtransfer/admin.py:527
+#: recordtransfer/admin.py:578
 #: recordtransfer/templates/includes/profile_forms.html:18
 #: recordtransfer/views/pre_submission.py:183
 msgid "Contact Information"
 msgstr ""
 
-#: recordtransfer/admin.py:542
+#: recordtransfer/admin.py:593
 msgid "Language Preferences"
 msgstr ""
 
-#: recordtransfer/admin.py:548
+#: recordtransfer/admin.py:599
 msgid "Email Updates"
 msgstr ""
 
-#: recordtransfer/admin.py:602 recordtransfer/views/account.py:324
+#: recordtransfer/admin.py:653 recordtransfer/views/account.py:324
 msgid "Password updated"
 msgstr ""
 
-#: recordtransfer/admin.py:603 recordtransfer/views/account.py:325
+#: recordtransfer/admin.py:654 recordtransfer/views/account.py:325
 #: recordtransfer/views/account.py:366
 msgid "password"
 msgstr ""
 
-#: recordtransfer/admin.py:604 recordtransfer/admin.py:634
+#: recordtransfer/admin.py:655 recordtransfer/admin.py:685
 #: recordtransfer/management/commands/send_test_email.py:178
 #: recordtransfer/views/account.py:326
 msgid "updated"
 msgstr ""
 
-#: recordtransfer/admin.py:615
+#: recordtransfer/admin.py:666
 msgid "Non-superusers cannot modify superuser accounts."
 msgstr ""
 
-#: recordtransfer/admin.py:626
+#: recordtransfer/admin.py:677
 msgid "Account Deactivated"
 msgstr ""
 
-#: recordtransfer/admin.py:627 recordtransfer/admin.py:633
+#: recordtransfer/admin.py:678 recordtransfer/admin.py:684
 #: recordtransfer/management/commands/send_test_email.py:177
 msgid "account"
 msgstr ""
 
-#: recordtransfer/admin.py:628
+#: recordtransfer/admin.py:679
 msgid "deactivated"
 msgstr ""
 
-#: recordtransfer/admin.py:632
+#: recordtransfer/admin.py:683
 #: recordtransfer/management/commands/send_test_email.py:176
 msgid "Account updated"
 msgstr ""
 
-#: recordtransfer/admin.py:645
+#: recordtransfer/admin.py:696
 msgid "Superuser privileges have been added to your account."
 msgstr ""
 
-#: recordtransfer/admin.py:647
+#: recordtransfer/admin.py:698
 msgid "Superuser privileges have been removed from your account."
 msgstr ""
 
-#: recordtransfer/admin.py:650
+#: recordtransfer/admin.py:701
 #: recordtransfer/management/commands/send_test_email.py:179
 msgid "Staff privileges have been added to your account."
 msgstr ""
 
-#: recordtransfer/admin.py:652
+#: recordtransfer/admin.py:703
 msgid "Staff privileges have been removed from your account."
 msgstr ""
 
-#: recordtransfer/admin.py:709
+#: recordtransfer/admin.py:760
 #, python-format
 msgid "Setting \"%(key)s\" has been reset to its default value of %(value)s."
 msgstr ""
@@ -2017,6 +2100,13 @@ msgstr ""
 msgid "Save and continue"
 msgstr ""
 
+#: recordtransfer/templates/includes/submission_form_field.html:30
+#: recordtransfer/templates/recordtransfer/header.html:44
+#: recordtransfer/templates/recordtransfer/help.html:4
+#: recordtransfer/templates/recordtransfer/signup_form.html:123
+msgid "Help"
+msgstr ""
+
 #: recordtransfer/templates/includes/submission_group_form_fields.html:20
 msgid "Optional"
 msgstr ""
@@ -2475,12 +2565,6 @@ msgstr ""
 
 #: recordtransfer/templates/recordtransfer/header.html:32
 msgid "Home"
-msgstr ""
-
-#: recordtransfer/templates/recordtransfer/header.html:44
-#: recordtransfer/templates/recordtransfer/help.html:4
-#: recordtransfer/templates/recordtransfer/signup_form.html:123
-msgid "Help"
 msgstr ""
 
 #: recordtransfer/templates/recordtransfer/header.html:51
