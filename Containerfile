@@ -9,7 +9,7 @@ ENV PATH="$PNPM_HOME:$PATH"
 
 WORKDIR ${PROJ_DIR}
 
-# 🔧 Install gettext for makemessages (includes msguniq) and libmagic for MIME type detection
+# 🔧 Install gettext for for internationalization and libmagic for MIME type detection
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     gettext \

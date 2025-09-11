@@ -23,6 +23,7 @@ All translatable strings are extracted into `.po` files and compiled into `.mo` 
   Translations go into `locale/<language_code>/LC_MESSAGES/djangojs.po`.
 
   Example:
+
   ```
   locale/
     hi/
@@ -39,29 +40,31 @@ To extract translatable strings after making changes:
 
 ```bash
 # For Python and templates
-python manage.py makemessages -l hi
+python manage.py make_messages -l hi
 
 # For JavaScript
-python manage.py makemessages -d djangojs -l hi
+python manage.py make_messages -d djangojs -l hi
 
 # Extract for all configured languages at once
-python manage.py makemessages -a
+python manage.py make_messages -a
 
 # Extract JavaScript strings for all languages
-python manage.py makemessages -d djangojs -a
+python manage.py make_messages -d djangojs -a
 ```
 
 Replace `hi` with the target language code (e.g., `fr`, `es`, etc.).
 
 **Useful flags:**
+
 - `-a, --all`: Extract strings for all configured languages
 - `-d, --domain`: Specify domain (default: `django`, use `djangojs` for JavaScript)
 - `-l, --locale`: Specify a particular language code
 - `--help`: See all available options and flags
 
 For a complete list of options, run:
+
 ```bash
-python manage.py makemessages --help
+python manage.py make_messages --help
 ```
 
 ---
@@ -93,6 +96,7 @@ We use `JavaScriptCatalog` to make translations available to frontend code.
 You don’t need to worry about the setup — just translate the `djangojs.po` file as you would with `django.po`.
 
 ### Behind the scenes:
+
 - `JavaScriptCatalog.as_view()` is set up in `urls.py`
 - `{% javascript_catalog %}` is included in templates to load translations
 - Strings in JS files are marked as translatable using `window.django.gettext()`
@@ -105,7 +109,7 @@ Here's the step-by-step process for translating:
 
 1. **Fork this repository** to your own GitHub account
 2. **Make a new branch** for your translations
-3. **Extract new strings**: `python manage.py makemessages -l hi`
+3. **Extract new strings**: `python manage.py make_messages -l hi`
 4. **Edit the `.po` file** with your translations (using Poedit or text editor)
 5. **Compile translations**: `python manage.py compilemessages`
 6. **Test your changes** by switching language in the app
@@ -118,16 +122,20 @@ Here's the step-by-step process for translating:
 After compiling your translations, you'll want to verify they work correctly:
 
 ### Switching Languages
+
 - Look for a language selector in the app interface located in the header of the website
 
 ### Verification Checklist
+
 - [ ] Text appears in your target language
 - [ ] Placeholders are filled with actual values
 - [ ] Text fits properly in the UI (not cut off)
 - [ ] Special characters display correctly
 
 ### Troubleshooting
+
 If translations don't appear:
+
 1. Check you ran `compilemessages` after editing `.po` files
 2. Restart the development server: `docker compose -f compose.dev.yml restart app`
 3. If restart doesn't work, rebuild the container: `docker compose -f compose.dev.yml up -d --build app`
@@ -154,6 +162,7 @@ msgstr "स्वागत है, %s!"
 ```
 
 ### Key Rules:
+
 - **Keep placeholder names exactly the same**: `%(filename)s` stays `%(filename)s`
 - **You can reorder them** for your language's grammar: `"%(count)d files by %(user)s"` → `"%(user)s द्वारा %(count)d फ़ाइलें"`
 - **Don't change the format specifiers**: `%s`, `%d`, `.2f` must stay exactly as written
