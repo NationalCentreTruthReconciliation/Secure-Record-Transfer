@@ -31,36 +31,26 @@ msgid "Hindi"
 msgstr "Hindi"
 
 #: caais/admin.py:336
-#, fuzzy
-#| msgid "Export CAAIS 1.0 CSV for Selected"
 msgctxt "\"Selected\" refers to one or more Metadata objects."
 msgid "Export CAAIS 1.0 CSV for Selected"
-msgstr "Exporter CSV CAAIS 1.0 pour Sélectionnés"
+msgstr "Exporter CSV NCIAA 1.0 pour Sélectionnés"
 
 #: caais/admin.py:346
-#, fuzzy
-#| msgid "Export AtoM 2.6 Accession CSV for Selected"
 msgctxt "\"Selected\" refers to one or more Metadata objects."
 msgid "Export AtoM 2.6 Accession CSV for Selected"
 msgstr "Exporter AtoM 2.6 Accession CSV pour Sélectionnés"
 
 #: caais/admin.py:358
-#, fuzzy
-#| msgid "Export AtoM 2.3 Accession CSV for Selected"
 msgctxt "\"Selected\" refers to one or more Metadata objects."
 msgid "Export AtoM 2.3 Accession CSV for Selected"
 msgstr "Exporter AtoM 2.3 Accession CSV pour Sélectionnés"
 
 #: caais/admin.py:370
-#, fuzzy
-#| msgid "Export AtoM 2.2 Accession CSV for Selected"
 msgctxt "\"Selected\" refers to one or more Metadata objects."
 msgid "Export AtoM 2.2 Accession CSV for Selected"
 msgstr "Exporter AtoM 2.2 Accession CSV pour Sélectionnés"
 
 #: caais/admin.py:382
-#, fuzzy
-#| msgid "Export AtoM 2.1 Accession CSV for Selected"
 msgctxt "\"Selected\" refers to one or more Metadata objects."
 msgid "Export AtoM 2.1 Accession CSV for Selected"
 msgstr "Exporter AtoM 2.1 Accession CSV pour Sélectionnés"
@@ -599,36 +589,26 @@ msgid ""
 msgstr ""
 
 #: recordtransfer/admin.py:229
-#, fuzzy
-#| msgid "Export CAAIS 1.0 CSV for Selected"
 msgctxt "\"Selected\" refers to one or more Submission Group objects."
 msgid "Export CAAIS 1.0 CSV for Submissions in Selected"
-msgstr "Exporter CSV CAAIS 1.0 pour Sélectionnés"
+msgstr "Exporter CSV NCIAA 1.0 pour Sélectionnés"
 
 #: recordtransfer/admin.py:239
-#, fuzzy
-#| msgid "Export AtoM 2.6 Accession CSV for Selected"
 msgctxt "\"Selected\" refers to one or more Submission Group objects."
 msgid "Export AtoM 2.6 Accession CSV for Submissions in Selected"
 msgstr "Exporter AtoM 2.6 Accession CSV pour Sélectionnés"
 
 #: recordtransfer/admin.py:249
-#, fuzzy
-#| msgid "Export AtoM 2.3 Accession CSV for Selected"
 msgctxt "\"Selected\" refers to one or more Submission Group objects."
 msgid "Export AtoM 2.3 Accession CSV for Submissions in Selected"
 msgstr "Exporter AtoM 2.3 Accession CSV pour Sélectionnés"
 
 #: recordtransfer/admin.py:259
-#, fuzzy
-#| msgid "Export AtoM 2.2 Accession CSV for Selected"
 msgctxt "\"Selected\" refers to one or more Submission Group objects."
 msgid "Export AtoM 2.2 Accession CSV for Submissions in Selected"
 msgstr "Exporter AtoM 2.2 Accession CSV pour Sélectionnés"
 
 #: recordtransfer/admin.py:269
-#, fuzzy
-#| msgid "Export AtoM 2.1 Accession CSV for Selected"
 msgctxt "\"Selected\" refers to one or more Submission Group objects."
 msgid "Export AtoM 2.1 Accession CSV for Submissions in Selected"
 msgstr "Exporter AtoM 2.1 Accession CSV pour Sélectionnés"
@@ -657,36 +637,26 @@ msgid "Submission with ID '%(id)s' doesn't exist. Perhaps it was deleted?"
 msgstr ""
 
 #: recordtransfer/admin.py:447
-#, fuzzy
-#| msgid "Export CAAIS 1.0 CSV for Selected"
 msgctxt "\"Selected\" refers to one or more Submission objects."
 msgid "Export CAAIS 1.0 CSV for Metadata in Selected"
-msgstr "Exporter CSV CAAIS 1.0 pour Sélectionnés"
+msgstr "Exporter CSV NCIAA 1.0 pour Sélectionnés"
 
 #: recordtransfer/admin.py:459
-#, fuzzy
-#| msgid "Export AtoM 2.6 Accession CSV for Selected"
 msgctxt "\"Selected\" refers to one or more Submission objects."
 msgid "Export AtoM 2.6 Accession CSV for Metadata in Selected"
 msgstr "Exporter AtoM 2.6 Accession CSV pour Sélectionnés"
 
 #: recordtransfer/admin.py:471
-#, fuzzy
-#| msgid "Export AtoM 2.3 Accession CSV for Selected"
 msgctxt "\"Selected\" refers to one or more Submission objects."
 msgid "Export AtoM 2.3 Accession CSV for Metadata in Selected"
 msgstr "Exporter AtoM 2.3 Accession CSV pour Sélectionnés"
 
 #: recordtransfer/admin.py:483
-#, fuzzy
-#| msgid "Export AtoM 2.2 Accession CSV for Selected"
 msgctxt "\"Selected\" refers to one or more Submission objects."
 msgid "Export AtoM 2.2 Accession CSV for Metadata in Selected"
 msgstr "Exporter AtoM 2.2 Accession CSV pour Sélectionnés"
 
 #: recordtransfer/admin.py:495
-#, fuzzy
-#| msgid "Export AtoM 2.1 Accession CSV for Selected"
 msgctxt "\"Selected\" refers to one or more Submission objects."
 msgid "Export AtoM 2.1 Accession CSV for Metadata in Selected"
 msgstr "Exporter AtoM 2.1 Accession CSV pour Sélectionnés"
