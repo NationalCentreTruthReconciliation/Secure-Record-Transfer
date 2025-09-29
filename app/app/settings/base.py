@@ -48,18 +48,17 @@ AUTHENTICATION_BACKENDS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "django.middleware.gzip.GZipMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
+    "django.middleware.gzip.GZipMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "axes.middleware.AxesMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_htmx.middleware.HtmxMiddleware",
-    "recordtransfer.middleware.SaveUserLanguageMiddleware",  # After LocaleMiddleware
-    # AxesMiddleware should be the last middleware in the MIDDLEWARE list.
-    "axes.middleware.AxesMiddleware",
+    "recordtransfer.middleware.SaveUserLanguageMiddleware",
 ]
 
 # Axes configuration

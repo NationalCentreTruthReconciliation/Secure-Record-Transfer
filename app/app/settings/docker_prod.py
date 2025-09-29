@@ -1,28 +1,19 @@
-from decouple import config
+from decouple import Csv, config
 
 from .base import *
 
 DEBUG = False
 SITE_ID = config("SITE_ID", default=1, cast=int)
 
-ALLOWED_HOSTS = config("ALLOWED_HOSTS", cast=str).split(",")
-CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", cast=str).split(",")
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", cast=Csv())
+CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", cast=Csv())
 
 SECRET_KEY = config("SECRET_KEY", cast=str)
 
 # Extra Middleware for caching
 
-_axes_middleware_index = 0
-
-try:
-    _axes_middleware_index = MIDDLEWARE.index("axes.middleware.AxesMiddleware")
-except ValueError:
-    # Set it to the end by default
-    _axes_middleware_index = len(MIDDLEWARE)
-
-# Insert FetchFromCache at the end (before the Axes middleware) and insert UpdateCache at the start
-MIDDLEWARE.insert(_axes_middleware_index, "django.middleware.cache.FetchFromCacheMiddleware")
 MIDDLEWARE.insert(0, "django.middleware.cache.UpdateCacheMiddleware")
+MIDDLEWARE.append("django.middleware.cache.FetchFromCacheMiddleware")
 
 
 # Recaptcha
