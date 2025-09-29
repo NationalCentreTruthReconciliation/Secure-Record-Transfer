@@ -745,7 +745,7 @@ class Submission(models.Model):
         # Clear any items in the location first
         self.remove_bag_contents(location)
 
-        copied, missing = self.upload_session.copy_session_uploads(str(location))
+        _copied, missing = self.upload_session.copy_session_uploads(str(location))
 
         if missing:
             LOGGER.error("One or more uploaded files is missing!")
