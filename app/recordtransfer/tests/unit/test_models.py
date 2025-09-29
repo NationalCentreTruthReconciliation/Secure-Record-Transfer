@@ -10,7 +10,7 @@ from django.conf import settings
 from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.forms import ValidationError
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 from upload.models import PermUploadedFile, TempUploadedFile, UploadSession
@@ -471,6 +471,15 @@ class TestInProgressSubmission(TestCase):
         self.assertEqual(str(self.in_progress), expected_str)
 
 
+# Enable caching for this test class
+@override_settings(
+    CACHES={
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "TestSiteSetting",
+        }
+    }
+)
 class TestSiteSetting(TestCase):
     """Tests for the SiteSetting model."""
 
