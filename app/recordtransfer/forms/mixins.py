@@ -50,7 +50,6 @@ class ContactInfoFormMixin(forms.Form):
         widget=forms.Select(
             attrs={
                 "id": HtmlIds.ID_CONTACT_INFO_PROVINCE_OR_STATE,
-                "class": "reduce-form-field-width",
             }
         ),
         choices=[
@@ -135,7 +134,6 @@ class ContactInfoFormMixin(forms.Form):
         widget=forms.TextInput(
             attrs={
                 "id": HtmlIds.ID_CONTACT_INFO_OTHER_PROVINCE_OR_STATE,
-                "class": "reduce-form-field-width",
             }
         ),
         label=_("Other province or state"),
@@ -159,11 +157,7 @@ class ContactInfoFormMixin(forms.Form):
     )
 
     country = CountryField(blank_label=_("Select your Country")).formfield(
-        widget=CustomCountrySelectWidget(
-            attrs={
-                "class": "reduce-form-field-width",
-            }
-        ),
+        widget=CustomCountrySelectWidget(),
         label=_("Country"),
     )
 
