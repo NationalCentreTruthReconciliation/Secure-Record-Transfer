@@ -18,10 +18,10 @@ try:
     _axes_middleware_index = MIDDLEWARE.index("axes.middleware.AxesMiddleware")
 except ValueError:
     # Set it to the end by default
-    _axes_middleware_index = len(MIDDLEWARE) - 1
+    _axes_middleware_index = len(MIDDLEWARE)
 
 # Insert FetchFromCache at the end (before the Axes middleware) and insert UpdateCache at the start
-MIDDLEWARE.insert(_axes_middleware_index - 1, "django.middleware.cache.FetchFromCacheMiddleware")
+MIDDLEWARE.insert(_axes_middleware_index, "django.middleware.cache.FetchFromCacheMiddleware")
 MIDDLEWARE.insert(0, "django.middleware.cache.UpdateCacheMiddleware")
 
 
