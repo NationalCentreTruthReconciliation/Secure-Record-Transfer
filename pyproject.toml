@@ -27,6 +27,7 @@ dependencies = [
     "django-debug-toolbar>=6.0.0",
     "python-magic>=0.4.27,<0.5",
     "django-admin-interface>=0.30.1,<0.31",
+    "redis[hiredis]>=6.4.0,<7.0.0",
 ]
 
 [project.optional-dependencies]
