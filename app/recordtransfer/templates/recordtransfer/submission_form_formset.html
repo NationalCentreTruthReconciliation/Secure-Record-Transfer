@@ -16,16 +16,12 @@
                        border-top: 1px solid #ccc">
         {% endif %}
     {% endfor %}
-    <div class="flex-item">
-        <label></label>
-        <div class="button-array">
-            <button class="green-button less-padding add-form-row margin-right-10px">
-                <span>{% trans "More" %}</span><i class="fa fa-plus ml-2" aria-hidden="true"></i>
-            </button>
-            <button disabled class="red-button less-padding remove-form-row">
-                <span>{% trans "Remove" %}</span><i class="fa fa-minus ml-2" aria-hidden="true"></i>
-            </button>
-        </div>
+    <div class="flex gap-4 mt-4">
+        <button class="btn btn-success btn-outline add-form-row">
+            <span>{% trans "More" %}</span><i class="fa fa-plus ml-2" aria-hidden="true"></i>
+        </button>
+        <button disabled class="btn btn-error btn-outline remove-form-row">
+            <span>{% trans "Remove" %}</span><i class="fa fa-minus ml-2" aria-hidden="true"></i>
+        </button>
     </div>
-    <br>
 {% endblock formfields %}
