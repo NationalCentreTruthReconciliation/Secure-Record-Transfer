@@ -1,16 +1,20 @@
-# pylint: disable=wildcard-import
-# pylint: disable=unused-wildcard-import
-from decouple import config
+from decouple import Csv, config
 
 from .base import *
 
 DEBUG = False
 SITE_ID = config("SITE_ID", default=1, cast=int)
 
-ALLOWED_HOSTS = config("ALLOWED_HOSTS", cast=str).split(",")
-CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", cast=str).split(",")
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", cast=Csv())
+CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", cast=Csv())
 
 SECRET_KEY = config("SECRET_KEY", cast=str)
+
+# Extra Middleware for caching
+
+MIDDLEWARE.insert(0, "django.middleware.cache.UpdateCacheMiddleware")
+MIDDLEWARE.append("django.middleware.cache.FetchFromCacheMiddleware")
+
 
 # Recaptcha
 RECAPTCHA_PUBLIC_KEY = config("RECAPTCHA_PUBLIC_KEY", cast=str, default="")
@@ -44,6 +48,22 @@ RQ_QUEUES = {
 }
 
 RQ_SHOW_ADMIN_LINK = True
+
+
+# Cache setup (shares Redis with the task queue)
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": f"redis://{config('REDIS_HOST', default='redis')}:{config('REDIS_PORT', cast=int, default=6379)}",
+    }
+}
+
+CACHE_MIDDLEWARE_ALIAS = "default"
+CACHE_MIDDLEWARE_SECONDS = config("CACHE_MIDDLEWARE_SECONDS", cast=int, default=86400)
+CACHE_MIDDLEWARE_KEY_PREFIX = config(
+    "CACHE_MIDDLEWARE_KEY_PREFIX", default="secure-record-transfer-01"
+)
 
 
 # Emailing
