@@ -410,6 +410,69 @@ REDIS_PASSWORD
         REDIS_PASSWORD=a-strong-password-here
 
 
+Cache Controls
+--------------
+
+Redis is used for both the async task queue and caching certain pages that can be cached. The cache
+``max-age`` and key prefix can be controlled via settings in the environment variables.
+
+CACHE_MIDDLEWARE_SECONDS
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+    *Sets the number of seconds pages are cached for.*
+
+    .. table::
+
+        ===============  =========
+        Default          Type
+        ===============  =========
+        86400            int
+        ===============  =========
+
+    This setting does not have any effect on the dev container, it is only used in the production
+    configuration.
+
+    Changing this variable changes `the CACHE_MIDDLEWARE_SECONDS Django setting <https://docs.djangoproject.com/en/5.2/ref/settings/#std-setting-CACHE_MIDDLEWARE_SECONDS>`_.
+
+    By default, pages are cached for a day.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        CACHE_MIDDLEWARE_SECONDS=3600
+
+
+CACHE_MIDDLEWARE_KEY_PREFIX
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    *Cache prefix for this instance of the application.*
+
+    .. table::
+
+        ===============  =========
+        Default          Type
+        ===============  =========
+        86400            int
+        ===============  =========
+
+    You can ignore this setting if you do not have multiple instances of the application each
+    sharing a cache.
+
+    Changing this variable changes `the CACHE_MIDDLEWARE_KEY_PREFIX Django setting <https://docs.djangoproject.com/en/5.2/ref/settings/#std-setting-CACHE_MIDDLEWARE_KEY_PREFIX>`_.
+
+    You should use a different prefix for each instance of the application so that there are no
+    cache collisions across different instances of the application.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        CACHE_MIDDLEWARE_KEY_PREFIX=secure-record-transfer-05
+
+
 File Upload Controls
 --------------------
 
