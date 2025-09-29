@@ -19,15 +19,15 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
-from django.views.decorators.cache import cache_page
-from django.views.i18n import JavaScriptCatalog
+from django.views.decorators.vary import vary_on_headers
 from recordtransfer.views.account import (
     AsyncPasswordChangeView,
     AsyncPasswordResetConfirmView,
     AsyncPasswordResetView,
     Login,
 )
-from utility import get_js_translation_version
+
+from .views import AppJavaScriptCatalog
 
 urlpatterns = [
     path("i18n/", include("django.conf.urls.i18n")),
@@ -57,11 +57,10 @@ urlpatterns = [
     ),
     # Django's built-in auth URLs (remaining views that aren't overridden)
     path("account/", include("django.contrib.auth.urls")),
+    # JavaScript catalog for translation
     path(
         "jsi18n/",
-        cache_page(86400, key_prefix="jsi18n-%s" % get_js_translation_version())(
-            JavaScriptCatalog.as_view()
-        ),
+        vary_on_headers("JavaScript-Catalog-Version")(AppJavaScriptCatalog.as_view()),
         name="javascript-catalog",
     ),
 ]
