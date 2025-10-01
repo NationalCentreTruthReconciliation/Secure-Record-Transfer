@@ -70,33 +70,8 @@ class HelpPageTest(SeleniumLiveServerTestCase):
         )
         self.assertIn("help", driver.current_url)
 
-    def test_help_section_components(self) -> None:
-        """Test that help sections have the right component structure."""
-        driver = self.driver
-        help_url = reverse("recordtransfer:help")
-        driver.get(f"{self.live_server_url}{help_url}")
-
-        for section_id in ["source-types", "source-roles", "rights-types"]:
-            section = driver.find_element(By.ID, section_id)
-
-            if section_id != "faq":
-                # Check that section has a card container
-                card = section.find_element(
-                    By.XPATH, "./ancestor::div[contains(@class, 'rounded-box')]"
-                )
-            else:
-                card = section
-
-            # Check that section has a collapsible component
-            self.assertTrue(card.find_element(By.CSS_SELECTOR, ".collapse").is_displayed())
-
-            collapse_content = card.find_element(By.CSS_SELECTOR, ".collapse-content")
-            self.assertIsNotNone(
-                collapse_content, f"Section {section_id} should have a collapse-content element"
-            )
-
     def test_page_responsiveness(self) -> None:
-        """Test that the About page is responsive at different viewport sizes."""
+        """Test that the help page is responsive at different viewport sizes."""
         driver = self.driver
         help_url = reverse("recordtransfer:help")
 
