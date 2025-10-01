@@ -4,8 +4,8 @@
     {% trans "Help" %}
 {% endblock title %}
 {% block content %}
-    <div id="help-page-heading" class="max-w-6xl mx-auto px-4 py-8">
-        <div class="mb-2 text-4xl text-primary" id="form-help">{% trans "Form Help" %}</div>
+    <div class="max-w-6xl mx-auto px-4 py-8">
+        <div id="help-page-heading" class="mb-2 text-4xl text-primary">{% trans "Form Help" %}</div>
         <div class="card">
             <div class="card-body">
                 <p class="text-lg leading-relaxed text-base-content">
@@ -13,105 +13,140 @@
                 </p>
             </div>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Source Types Card -->
-            <div class="bg-base-100 shadow-lg p-4 rounded-box transition-all duration-200 hover:shadow-2xl hover:scale-105">
-                <div class="mb-2 text-2xl text-primary tracking-wide border-b-2 border-primary/20 pb-2"
-                     id="source-types">{% trans "Source Types" %}</div>
-                <span class="inline-block text-primary text-md font-semibold rounded px-2 py-1 mb-2">{% trans "Step 3 of Submission Form" %}</span>
-                <p class="mb-4 prose">
-                    {% blocktrans %}
+        <div class="text-2xl text-primary mb-4 mt-8" id="faq">{% trans "Frequently Asked Questions" %}</div>
+        <!-- Submission Groups FAQ -->
+        <div class="collapse collapse-arrow bg-base-100 shadow-sm rounded-box mb-2">
+            <input type="checkbox" class="peer" />
+            <div class="collapse-title text-lg tracking-wide border-b-2 border-primary/20 pb-2">
+                {% trans "Why would I want to make a submission group?" %}
+            </div>
+            <div class="collapse-content prose max-w-none">
+                <div class="font-medium text-lg mt-4 mb-4">{% trans "Submission groups are useful when:" %}</div>
+                <ul class="list-disc pl-6 space-y-3">
+                    <li>
+                        <span class="font-semibold">{% trans "You have large collections" %}</span>
+                        — {% blocktrans %}If you have too many files for a single submission (exceeding {{ MAX_TOTAL_UPLOAD_COUNT }}
+                            files or {{ MAX_TOTAL_UPLOAD_SIZE_MB }} MB), you can split them into multiple submissions
+                            within the same group.
+                            {% endblocktrans %}
+                    </li>
+                    <li>
+                        <span class="font-semibold">{% trans "You want logical organization" %}</span>
+                        — {% blocktrans %}You can organize related records by theme, time period, or project, even if they're submitted at different times.{% endblocktrans %}
+                    </li>
+                    <li>
+                        <span class="font-semibold">{% trans "You need easier tracking" %}</span>
+                        — {% blocktrans %}Grouping helps you and archivists track related submissions through the processing workflow.{% endblocktrans %}
+                    </li>
+                    <li>
+                        <span class="font-semibold">{% trans "You want consistent metadata" %}</span>
+                        — {% blocktrans %}Groups ensure related submissions are cataloged with consistent metadata.{% endblocktrans %}
+                    </li>
+                </ul>
+                <div class="bg-base-200 p-4 rounded-lg mt-6">
+                    <p class="font-medium mb-2">{% trans "Pro Tip:" %}</p>
+                    <p>
+                        {% blocktrans %}
+                            When creating a new group, use a descriptive naming convention (e.g., "Smith Research Project 2025"
+                            or "Financial Records 2020-2025") to easily identify it for future submissions.
+                            {% endblocktrans %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="py-1">
+            <div class="text-2xl text-primary mb-4 mt-8" id="source-types">
+                {% trans "Source Types (Step 3 of Submission Form)" %}
+            </div>
+            <p class="mb-4 prose">
+                {% blocktrans %}
                     The <i>source type</i> describes what type of entity the source of the records is. If none of
                     the provided options properly describe the source entity, select <b>Other</b> in the
                     source types dropdown and enter your own type.
                     {% endblocktrans %}
-                </p>
-                <div class="collapse collapse-arrow mt-4">
+            </p>
+            {% if source_types %}
+                <div class="collapse collapse-arrow bg-base-100 shadow-sm rounded-box mb-2">
                     <input type="checkbox" class="peer" />
-                    <div class="collapse-title text-lg  font-semibold flex items-center">{% trans "Show details" %}</div>
-                    <div class="collapse-content p-0">
-                        {% if source_types %}
-                            <span class="block text-primary mb-3 mt-2 rounded-lg px-2 py-1 font-semibold">
-                                {% trans "The following is a description of each source type:" %}
-                            </span>
-                            <ul class="list-disc list-inside mb-2">
-                                {% for source_type in source_types %}
-                                    <li class="leading-relaxed">
-                                        <span class="font-semibold text-primary">{{ source_type.name }}</span>:
-                                        <span>{{ source_type.description }}</span>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
+                    <div class="collapse-title text-lg tracking-wide border-b-2 border-primary/20 pb-2">
+                        {% trans "Show source type details" %}
+                    </div>
+                    <div class="collapse-content">
+                        <div class="font-medium text-lg mt-4 mb-4">{% trans "The following is a description of each source type:" %}</div>
+                        <ul class="list-disc pl-6 space-y-3">
+                            {% for source_type in source_types %}
+                                <li class="leading-relaxed">
+                                    <span class="font-semibold">{{ source_type.name }}</span>:
+                                    <span>{{ source_type.description }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
                     </div>
                 </div>
+            {% endif %}
+        </div>
+        <div class="py-1">
+            <div class="text-2xl text-primary mb-4 mt-8" id="source-roles">
+                {% trans "Source Roles (Step 3 of Submission Form)" %}
             </div>
-            <!-- Source Roles Card -->
-            <div class="bg-base-100 shadow-lg p-4 rounded-box transition-all duration-200 hover:shadow-2xl hover:scale-105 ">
-                <div class="mb-2 text-2xl text-primary tracking-wide border-b-2 border-primary/20 pb-2"
-                     id="source-roles">{% trans "Source Roles" %}</div>
-                <span class="inline-block text-primary text-md font-semibold rounded px-2 py-1 mb-2">{% trans "Step 3 of Submission Form" %}</span>
-                <p class="mb-4 prose">
-                    {% blocktrans %}
+            <p class="mb-4 prose">
+                {% blocktrans %}
                     The <i>source role</i> describes how the entity relates to the records. If none of the
                     provided options properly describe the source's relationship to the records, select
                     <b>Other</b> in the source roles dropdown and enter your own type.
                     {% endblocktrans %}
-                </p>
-                <div class="collapse collapse-arrow mt-4">
+            </p>
+            {% if source_roles %}
+                <div class="collapse collapse-arrow bg-base-100 shadow-sm rounded-box mb-2">
                     <input type="checkbox" class="peer" />
-                    <div class="collapse-title text-lg  font-semibold flex items-center">{% trans "Show details" %}</div>
-                    <div class="collapse-content p-0">
-                        {% if source_roles %}
-                            <span class="block text-primary mb-3 mt-2 rounded-lg px-2 py-1 font-semibold">
-                                {% trans "The following is a description of each source role:" %}
-                            </span>
-                            <ul class="list-disc list-inside mb-2">
-                                {% for source_role in source_roles %}
-                                    <li class="leading-relaxed">
-                                        <span class="font-semibold text-primary">{{ source_role.name }}</span>:
-                                        <span>{{ source_role.description }}</span>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
+                    <div class="collapse-title text-lg tracking-wide border-b-2 border-primary/20 pb-2">
+                        {% trans "Show source role details" %}
+                    </div>
+                    <div class="collapse-content">
+                        <div class="font-medium text-lg mt-4 mb-4">{% trans "The following is a description of each source role:" %}</div>
+                        <ul class="list-disc pl-6 space-y-3">
+                            {% for source_role in source_roles %}
+                                <li class="leading-relaxed">
+                                    <span class="font-semibold">{{ source_role.name }}</span>:
+                                    <span>{{ source_role.description }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
                     </div>
                 </div>
+            {% endif %}
+        </div>
+        <div class="py-1 mb-8">
+            <div class="text-2xl text-primary mb-4 mt-8" id="rights-types">
+                {% trans "Rights Types (Step 5 of Submission Form)" %}
             </div>
-            <!-- Rights Types Card -->
-            <div class="bg-base-100 shadow-lg p-4 rounded-box transition-all duration-200 hover:shadow-2xl hover:scale-105">
-                <div class="mb-2 text-2xl text-primary tracking-wide border-b-2 border-primary/20 pb-2"
-                     id="rights-types">{% trans "Rights Types" %}</div>
-                <span class="inline-block text-primary text-md font-semibold rounded px-2 py-1 mb-2">{% trans "Step 5 of Submission Form" %}</span>
-                <p class="mb-4 prose">
-                    {% blocktrans %}
+            <p class="mb-4 prose">
+                {% blocktrans %}
                     Depending on the records you are submitting, there may be specific rights that govern
                     the access of your records. The following is a brief description about the types of
                     rights that are available to be used. If none suit your needs, select <b>Other</b> in
                     the rights dropdown.
                     {% endblocktrans %}
-                </p>
-                <div class="collapse collapse-arrow mt-4">
+            </p>
+            {% if rights_types %}
+                <div class="collapse collapse-arrow bg-base-100 shadow-sm rounded-box mb-2">
                     <input type="checkbox" class="peer" />
-                    <div class="collapse-title text-lg  font-semibold flex items-center">{% trans "Show details" %}</div>
-                    <div class="collapse-content p-0">
-                        {% if rights_types %}
-                            <span class="block text-primary mb-3 mt-2 rounded-lg px-2 py-1 font-semibold">
-                                {% trans "The following is a description of each rights type:" %}
-                            </span>
-                            <ul class="list-disc list-inside mb-2">
-                                {% for rights_type in rights_types %}
-                                    <li class="leading-relaxed">
-                                        <span class="font-semibold text-primary">{{ rights_type.name }}</span>:
-                                        <span>{{ rights_type.description }}</span>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
+                    <div class="collapse-title text-lg tracking-wide border-b-2 border-primary/20 pb-2">
+                        {% trans "Show rights type details" %}
+                    </div>
+                    <div class="collapse-content">
+                        <div class="font-medium text-lg mt-4 mb-4">{% trans "The following is a description of each rights type:" %}</div>
+                        <ul class="list-disc pl-6 space-y-3">
+                            {% for rights_type in rights_types %}
+                                <li class="leading-relaxed">
+                                    <span class="font-semibold">{{ rights_type.name }}</span>:
+                                    <span>{{ rights_type.description }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
                     </div>
                 </div>
-            </div>
+            {% endif %}
         </div>
-        {% include "includes/frequently_asked_questions.html" %}
     </div>
 {% endblock content %}
