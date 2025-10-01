@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-30 20:27-0500\n"
+"POT-Creation-Date: 2025-10-01 09:18-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1776,76 +1776,6 @@ msgid ""
 "be unassigned from all submissions and will no longer be available for use."
 msgstr ""
 
-#: recordtransfer/templates/includes/frequently_asked_questions.html:4
-msgid "Frequently Asked Questions"
-msgstr ""
-
-#: recordtransfer/templates/includes/frequently_asked_questions.html:9
-msgid "Why would I want to make a submission group?"
-msgstr ""
-
-#: recordtransfer/templates/includes/frequently_asked_questions.html:12
-msgid "Submission groups are useful when:"
-msgstr ""
-
-#: recordtransfer/templates/includes/frequently_asked_questions.html:15
-msgid "You have large collections"
-msgstr ""
-
-#: recordtransfer/templates/includes/frequently_asked_questions.html:16
-#, python-format
-msgid ""
-"If you have too many files for a single submission (exceeding "
-"%(MAX_TOTAL_UPLOAD_COUNT)s\n"
-"                        files or %(MAX_TOTAL_UPLOAD_SIZE_MB)s MB), you can "
-"split them into multiple submissions\n"
-"                        within the same group.\n"
-"                        "
-msgstr ""
-
-#: recordtransfer/templates/includes/frequently_asked_questions.html:22
-msgid "You want logical organization"
-msgstr ""
-
-#: recordtransfer/templates/includes/frequently_asked_questions.html:23
-msgid ""
-"You can organize related records by theme, time period, or project, even if "
-"they're submitted at different times."
-msgstr ""
-
-#: recordtransfer/templates/includes/frequently_asked_questions.html:26
-msgid "You need easier tracking"
-msgstr ""
-
-#: recordtransfer/templates/includes/frequently_asked_questions.html:27
-msgid ""
-"Grouping helps you and archivists track related submissions through the "
-"processing workflow."
-msgstr ""
-
-#: recordtransfer/templates/includes/frequently_asked_questions.html:30
-msgid "You want consistent metadata"
-msgstr ""
-
-#: recordtransfer/templates/includes/frequently_asked_questions.html:31
-msgid ""
-"Groups ensure related submissions are cataloged with consistent metadata."
-msgstr ""
-
-#: recordtransfer/templates/includes/frequently_asked_questions.html:35
-msgid "Pro Tip:"
-msgstr ""
-
-#: recordtransfer/templates/includes/frequently_asked_questions.html:37
-msgid ""
-"\n"
-"                        When creating a new group, use a descriptive naming "
-"convention (e.g., \"Smith Research Project 2025\"\n"
-"                        or \"Financial Records 2020-2025\") to easily "
-"identify it for future submissions.\n"
-"                        "
-msgstr ""
-
 #: recordtransfer/templates/includes/in_progress_submission_table.html:4
 #: recordtransfer/views/profile.py:224 recordtransfer/views/profile.py:244
 msgid "Last Updated"
@@ -2549,16 +2479,81 @@ msgid ""
 "you need assistance with."
 msgstr ""
 
-#: recordtransfer/templates/recordtransfer/help.html:20
-msgid "Source Types"
+#: recordtransfer/templates/recordtransfer/help.html:16
+msgid "Frequently Asked Questions"
 msgstr ""
 
 #: recordtransfer/templates/recordtransfer/help.html:21
-#: recordtransfer/templates/recordtransfer/help.html:53
-msgid "Step 3 of Submission Form"
+msgid "Why would I want to make a submission group?"
 msgstr ""
 
-#: recordtransfer/templates/recordtransfer/help.html:23
+#: recordtransfer/templates/recordtransfer/help.html:24
+msgid "Submission groups are useful when:"
+msgstr ""
+
+#: recordtransfer/templates/recordtransfer/help.html:27
+msgid "You have large collections"
+msgstr ""
+
+#: recordtransfer/templates/recordtransfer/help.html:28
+#, python-format
+msgid ""
+"If you have too many files for a single submission (exceeding "
+"%(MAX_TOTAL_UPLOAD_COUNT)s\n"
+"                            files or %(MAX_TOTAL_UPLOAD_SIZE_MB)s MB), you "
+"can split them into multiple submissions\n"
+"                            within the same group.\n"
+"                            "
+msgstr ""
+
+#: recordtransfer/templates/recordtransfer/help.html:34
+msgid "You want logical organization"
+msgstr ""
+
+#: recordtransfer/templates/recordtransfer/help.html:35
+msgid ""
+"You can organize related records by theme, time period, or project, even if "
+"they're submitted at different times."
+msgstr ""
+
+#: recordtransfer/templates/recordtransfer/help.html:38
+msgid "You need easier tracking"
+msgstr ""
+
+#: recordtransfer/templates/recordtransfer/help.html:39
+msgid ""
+"Grouping helps you and archivists track related submissions through the "
+"processing workflow."
+msgstr ""
+
+#: recordtransfer/templates/recordtransfer/help.html:42
+msgid "You want consistent metadata"
+msgstr ""
+
+#: recordtransfer/templates/recordtransfer/help.html:43
+msgid ""
+"Groups ensure related submissions are cataloged with consistent metadata."
+msgstr ""
+
+#: recordtransfer/templates/recordtransfer/help.html:47
+msgid "Pro Tip:"
+msgstr ""
+
+#: recordtransfer/templates/recordtransfer/help.html:49
+msgid ""
+"\n"
+"                            When creating a new group, use a descriptive "
+"naming convention (e.g., \"Smith Research Project 2025\"\n"
+"                            or \"Financial Records 2020-2025\") to easily "
+"identify it for future submissions.\n"
+"                            "
+msgstr ""
+
+#: recordtransfer/templates/recordtransfer/help.html:59
+msgid "Source Types (Step 3 of Submission Form)"
+msgstr ""
+
+#: recordtransfer/templates/recordtransfer/help.html:62
 msgid ""
 "\n"
 "                    The <i>source type</i> describes what type of entity the "
@@ -2569,21 +2564,21 @@ msgid ""
 "                    "
 msgstr ""
 
-#: recordtransfer/templates/recordtransfer/help.html:31
-#: recordtransfer/templates/recordtransfer/help.html:63
-#: recordtransfer/templates/recordtransfer/help.html:96
-msgid "Show details"
-msgstr ""
+#: recordtransfer/templates/recordtransfer/help.html:72
+#, fuzzy
+#| msgid "Source types"
+msgid "Show source type details"
+msgstr "स्रोत प्रकार"
 
-#: recordtransfer/templates/recordtransfer/help.html:35
+#: recordtransfer/templates/recordtransfer/help.html:75
 msgid "The following is a description of each source type:"
 msgstr ""
 
-#: recordtransfer/templates/recordtransfer/help.html:52
-msgid "Source Roles"
+#: recordtransfer/templates/recordtransfer/help.html:90
+msgid "Source Roles (Step 3 of Submission Form)"
 msgstr ""
 
-#: recordtransfer/templates/recordtransfer/help.html:55
+#: recordtransfer/templates/recordtransfer/help.html:93
 msgid ""
 "\n"
 "                    The <i>source role</i> describes how the entity relates "
@@ -2595,19 +2590,21 @@ msgid ""
 "                    "
 msgstr ""
 
-#: recordtransfer/templates/recordtransfer/help.html:67
+#: recordtransfer/templates/recordtransfer/help.html:103
+#, fuzzy
+#| msgid "Source roles"
+msgid "Show source role details"
+msgstr "स्रोत भूमिकाएँ"
+
+#: recordtransfer/templates/recordtransfer/help.html:106
 msgid "The following is a description of each source role:"
 msgstr ""
 
-#: recordtransfer/templates/recordtransfer/help.html:84
-msgid "Rights Types"
+#: recordtransfer/templates/recordtransfer/help.html:121
+msgid "Rights Types (Step 5 of Submission Form)"
 msgstr ""
 
-#: recordtransfer/templates/recordtransfer/help.html:85
-msgid "Step 5 of Submission Form"
-msgstr ""
-
-#: recordtransfer/templates/recordtransfer/help.html:87
+#: recordtransfer/templates/recordtransfer/help.html:124
 msgid ""
 "\n"
 "                    Depending on the records you are submitting, there may "
@@ -2620,7 +2617,11 @@ msgid ""
 "                    "
 msgstr ""
 
-#: recordtransfer/templates/recordtransfer/help.html:100
+#: recordtransfer/templates/recordtransfer/help.html:135
+msgid "Show rights type details"
+msgstr ""
+
+#: recordtransfer/templates/recordtransfer/help.html:138
 msgid "The following is a description of each rights type:"
 msgstr ""
 
