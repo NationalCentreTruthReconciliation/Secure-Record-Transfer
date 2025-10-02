@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-11 11:46-0500\n"
+"POT-Creation-Date: 2025-10-01 09:18-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,15 +18,15 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: app/settings/base.py:144
+#: app/settings/base.py:143
 msgid "English"
 msgstr ""
 
-#: app/settings/base.py:145
+#: app/settings/base.py:144
 msgid "French"
 msgstr ""
 
-#: app/settings/base.py:146
+#: app/settings/base.py:145
 msgid "Hindi"
 msgstr ""
 
@@ -117,7 +117,7 @@ msgid "'%(id)s' is a reserved Identifier type - please use another type name"
 msgstr ""
 
 #: caais/forms.py:366 recordtransfer/forms/mixins.py:17
-#: recordtransfer/forms/mixins.py:147
+#: recordtransfer/forms/mixins.py:145
 #: recordtransfer/forms/submission_forms.py:186
 #: recordtransfer/forms/submission_forms.py:197
 #: recordtransfer/forms/submission_forms.py:212
@@ -632,7 +632,7 @@ msgstr ""
 
 #: recordtransfer/admin.py:578
 #: recordtransfer/templates/includes/profile_forms.html:18
-#: recordtransfer/views/pre_submission.py:183
+#: recordtransfer/views/pre_submission.py:181
 msgid "Contact Information"
 msgstr ""
 
@@ -1076,51 +1076,51 @@ msgstr ""
 msgid "City"
 msgstr ""
 
-#: recordtransfer/forms/mixins.py:57
+#: recordtransfer/forms/mixins.py:56
 msgid "Select your province"
 msgstr ""
 
-#: recordtransfer/forms/mixins.py:128 recordtransfer/models.py:79
+#: recordtransfer/forms/mixins.py:127 recordtransfer/models.py:79
 msgid "Province or state"
 msgstr ""
 
-#: recordtransfer/forms/mixins.py:141
+#: recordtransfer/forms/mixins.py:139
 msgid "Other province or state"
 msgstr ""
 
-#: recordtransfer/forms/mixins.py:149
+#: recordtransfer/forms/mixins.py:147
 msgid ""
 "Postal code must look like \"Z0Z 0Z0\", zip code must look like \"12345\" or "
 "\"12345-1234\""
 msgstr ""
 
-#: recordtransfer/forms/mixins.py:158
+#: recordtransfer/forms/mixins.py:156
 msgid "Postal / Zip code"
 msgstr ""
 
-#: recordtransfer/forms/mixins.py:161
+#: recordtransfer/forms/mixins.py:159
 msgid "Select your Country"
 msgstr ""
 
-#: recordtransfer/forms/mixins.py:167
+#: recordtransfer/forms/mixins.py:161
 msgid "Country"
 msgstr ""
 
-#: recordtransfer/forms/mixins.py:181
+#: recordtransfer/forms/mixins.py:175
 msgid "Address line 1 is required if address line 2 is provided."
 msgstr ""
 
-#: recordtransfer/forms/mixins.py:187
+#: recordtransfer/forms/mixins.py:181
 msgid ""
 "You must select a province or state, use \"Other\" to enter a custom location"
 msgstr ""
 
-#: recordtransfer/forms/mixins.py:193
+#: recordtransfer/forms/mixins.py:187
 msgid ""
 "This field must be filled out if \"Other\" province or state is selected"
 msgstr ""
 
-#: recordtransfer/forms/mixins.py:211
+#: recordtransfer/forms/mixins.py:205
 msgid "Please verify you are human"
 msgstr ""
 
@@ -1151,12 +1151,12 @@ msgstr ""
 #: recordtransfer/forms/submission_forms.py:225
 #: recordtransfer/templates/includes/delete_in_progress_submission_modal.html:22
 #: recordtransfer/templates/includes/delete_submission_group_modal.html:20
-#: recordtransfer/templates/recordtransfer/submission_form_review.html:70
+#: recordtransfer/templates/recordtransfer/submission_form_review.html:64
 msgid "Yes"
 msgstr ""
 
 #: recordtransfer/forms/submission_forms.py:226
-#: recordtransfer/templates/recordtransfer/submission_form_review.html:72
+#: recordtransfer/templates/recordtransfer/submission_form_review.html:66
 msgid "No"
 msgstr ""
 
@@ -1390,45 +1390,45 @@ msgstr ""
 msgid "Notes for identifier"
 msgstr ""
 
-#: recordtransfer/forms/submission_forms.py:736
+#: recordtransfer/forms/submission_forms.py:735
 msgid "Assigned group"
 msgstr ""
 
-#: recordtransfer/forms/submission_forms.py:760
-#: recordtransfer/forms/submission_forms.py:825
+#: recordtransfer/forms/submission_forms.py:759
+#: recordtransfer/forms/submission_forms.py:824
 msgid "Record any general notes you have about the records here (optional)"
 msgstr ""
 
-#: recordtransfer/forms/submission_forms.py:765
-#: recordtransfer/forms/submission_forms.py:830
+#: recordtransfer/forms/submission_forms.py:764
+#: recordtransfer/forms/submission_forms.py:829
 msgid ""
 "These should be notes that did not fit in any of the previous steps of this "
 "form"
 msgstr ""
 
-#: recordtransfer/forms/submission_forms.py:767
-#: recordtransfer/forms/submission_forms.py:832
+#: recordtransfer/forms/submission_forms.py:766
+#: recordtransfer/forms/submission_forms.py:831
 msgid "Other notes"
 msgstr ""
 
-#: recordtransfer/forms/submission_forms.py:774
+#: recordtransfer/forms/submission_forms.py:773
 msgid "Upload session token is required"
 msgstr ""
 
-#: recordtransfer/forms/submission_forms.py:785
-#: recordtransfer/forms/submission_forms.py:794
+#: recordtransfer/forms/submission_forms.py:784
+#: recordtransfer/forms/submission_forms.py:793
 msgid "Invalid upload session state. Please try again."
 msgstr ""
 
-#: recordtransfer/forms/submission_forms.py:798
+#: recordtransfer/forms/submission_forms.py:797
 msgid "You must upload at least one file"
 msgstr ""
 
-#: recordtransfer/forms/submission_forms.py:915
+#: recordtransfer/forms/submission_forms.py:914
 msgid "No identifiers were provided."
 msgstr ""
 
-#: recordtransfer/forms/submission_forms.py:917
+#: recordtransfer/forms/submission_forms.py:916
 msgid "No record rights or restrictions were provided."
 msgstr ""
 
@@ -1444,7 +1444,7 @@ msgstr ""
 
 #: recordtransfer/forms/submission_group_form.py:31
 #: recordtransfer/templates/includes/submission_group_table.html:5
-#: recordtransfer/templates/recordtransfer/submission_form_groupsubmission.html:34
+#: recordtransfer/templates/recordtransfer/submission_form_groupsubmission.html:31
 #: recordtransfer/views/profile.py:174
 msgid "Group Description"
 msgstr ""
@@ -1788,76 +1788,6 @@ msgid ""
 "be unassigned from all submissions and will no longer be available for use."
 msgstr ""
 
-#: recordtransfer/templates/includes/frequently_asked_questions.html:4
-msgid "Frequently Asked Questions"
-msgstr ""
-
-#: recordtransfer/templates/includes/frequently_asked_questions.html:9
-msgid "Why would I want to make a submission group?"
-msgstr ""
-
-#: recordtransfer/templates/includes/frequently_asked_questions.html:12
-msgid "Submission groups are useful when:"
-msgstr ""
-
-#: recordtransfer/templates/includes/frequently_asked_questions.html:15
-msgid "You have large collections"
-msgstr ""
-
-#: recordtransfer/templates/includes/frequently_asked_questions.html:16
-#, python-format
-msgid ""
-"If you have too many files for a single submission (exceeding "
-"%(MAX_TOTAL_UPLOAD_COUNT)s\n"
-"                        files or %(MAX_TOTAL_UPLOAD_SIZE_MB)s MB), you can "
-"split them into multiple submissions\n"
-"                        within the same group.\n"
-"                        "
-msgstr ""
-
-#: recordtransfer/templates/includes/frequently_asked_questions.html:22
-msgid "You want logical organization"
-msgstr ""
-
-#: recordtransfer/templates/includes/frequently_asked_questions.html:23
-msgid ""
-"You can organize related records by theme, time period, or project, even if "
-"they're submitted at different times."
-msgstr ""
-
-#: recordtransfer/templates/includes/frequently_asked_questions.html:26
-msgid "You need easier tracking"
-msgstr ""
-
-#: recordtransfer/templates/includes/frequently_asked_questions.html:27
-msgid ""
-"Grouping helps you and archivists track related submissions through the "
-"processing workflow."
-msgstr ""
-
-#: recordtransfer/templates/includes/frequently_asked_questions.html:30
-msgid "You want consistent metadata"
-msgstr ""
-
-#: recordtransfer/templates/includes/frequently_asked_questions.html:31
-msgid ""
-"Groups ensure related submissions are cataloged with consistent metadata."
-msgstr ""
-
-#: recordtransfer/templates/includes/frequently_asked_questions.html:35
-msgid "Pro Tip:"
-msgstr ""
-
-#: recordtransfer/templates/includes/frequently_asked_questions.html:37
-msgid ""
-"\n"
-"                        When creating a new group, use a descriptive naming "
-"convention (e.g., \"Smith Research Project 2025\"\n"
-"                        or \"Financial Records 2020-2025\") to easily "
-"identify it for future submissions.\n"
-"                        "
-msgstr ""
-
 #: recordtransfer/templates/includes/in_progress_submission_table.html:4
 #: recordtransfer/views/profile.py:224 recordtransfer/views/profile.py:244
 msgid "Last Updated"
@@ -2005,7 +1935,7 @@ msgid "Language"
 msgstr ""
 
 #: recordtransfer/templates/includes/save_contact_info_modal.html:9
-#: recordtransfer/views/pre_submission.py:594
+#: recordtransfer/views/pre_submission.py:589
 msgid "Would you like to save your contact information to your profile?"
 msgstr ""
 
@@ -2175,7 +2105,7 @@ msgid ""
 msgstr ""
 
 #: recordtransfer/templates/recordtransfer/about.html:35
-#: recordtransfer/templates/recordtransfer/submission_form_uploadfiles.html:41
+#: recordtransfer/templates/recordtransfer/submission_form_uploadfiles.html:35
 msgid "Accepted File Types"
 msgstr ""
 
@@ -2554,16 +2484,81 @@ msgid ""
 "you need assistance with."
 msgstr ""
 
-#: recordtransfer/templates/recordtransfer/help.html:20
-msgid "Source Types"
+#: recordtransfer/templates/recordtransfer/help.html:16
+msgid "Frequently Asked Questions"
 msgstr ""
 
 #: recordtransfer/templates/recordtransfer/help.html:21
-#: recordtransfer/templates/recordtransfer/help.html:53
-msgid "Step 3 of Submission Form"
+msgid "Why would I want to make a submission group?"
 msgstr ""
 
-#: recordtransfer/templates/recordtransfer/help.html:23
+#: recordtransfer/templates/recordtransfer/help.html:24
+msgid "Submission groups are useful when:"
+msgstr ""
+
+#: recordtransfer/templates/recordtransfer/help.html:27
+msgid "You have large collections"
+msgstr ""
+
+#: recordtransfer/templates/recordtransfer/help.html:28
+#, python-format
+msgid ""
+"If you have too many files for a single submission (exceeding "
+"%(MAX_TOTAL_UPLOAD_COUNT)s\n"
+"                            files or %(MAX_TOTAL_UPLOAD_SIZE_MB)s MB), you "
+"can split them into multiple submissions\n"
+"                            within the same group.\n"
+"                            "
+msgstr ""
+
+#: recordtransfer/templates/recordtransfer/help.html:34
+msgid "You want logical organization"
+msgstr ""
+
+#: recordtransfer/templates/recordtransfer/help.html:35
+msgid ""
+"You can organize related records by theme, time period, or project, even if "
+"they're submitted at different times."
+msgstr ""
+
+#: recordtransfer/templates/recordtransfer/help.html:38
+msgid "You need easier tracking"
+msgstr ""
+
+#: recordtransfer/templates/recordtransfer/help.html:39
+msgid ""
+"Grouping helps you and archivists track related submissions through the "
+"processing workflow."
+msgstr ""
+
+#: recordtransfer/templates/recordtransfer/help.html:42
+msgid "You want consistent metadata"
+msgstr ""
+
+#: recordtransfer/templates/recordtransfer/help.html:43
+msgid ""
+"Groups ensure related submissions are cataloged with consistent metadata."
+msgstr ""
+
+#: recordtransfer/templates/recordtransfer/help.html:47
+msgid "Pro Tip:"
+msgstr ""
+
+#: recordtransfer/templates/recordtransfer/help.html:49
+msgid ""
+"\n"
+"                            When creating a new group, use a descriptive "
+"naming convention (e.g., \"Smith Research Project 2025\"\n"
+"                            or \"Financial Records 2020-2025\") to easily "
+"identify it for future submissions.\n"
+"                            "
+msgstr ""
+
+#: recordtransfer/templates/recordtransfer/help.html:59
+msgid "Source Types (Step 3 of Submission Form)"
+msgstr ""
+
+#: recordtransfer/templates/recordtransfer/help.html:62
 msgid ""
 "\n"
 "                    The <i>source type</i> describes what type of entity the "
@@ -2574,21 +2569,19 @@ msgid ""
 "                    "
 msgstr ""
 
-#: recordtransfer/templates/recordtransfer/help.html:31
-#: recordtransfer/templates/recordtransfer/help.html:63
-#: recordtransfer/templates/recordtransfer/help.html:96
-msgid "Show details"
+#: recordtransfer/templates/recordtransfer/help.html:72
+msgid "Show source type details"
 msgstr ""
 
-#: recordtransfer/templates/recordtransfer/help.html:35
+#: recordtransfer/templates/recordtransfer/help.html:75
 msgid "The following is a description of each source type:"
 msgstr ""
 
-#: recordtransfer/templates/recordtransfer/help.html:52
-msgid "Source Roles"
+#: recordtransfer/templates/recordtransfer/help.html:90
+msgid "Source Roles (Step 3 of Submission Form)"
 msgstr ""
 
-#: recordtransfer/templates/recordtransfer/help.html:55
+#: recordtransfer/templates/recordtransfer/help.html:93
 msgid ""
 "\n"
 "                    The <i>source role</i> describes how the entity relates "
@@ -2600,19 +2593,19 @@ msgid ""
 "                    "
 msgstr ""
 
-#: recordtransfer/templates/recordtransfer/help.html:67
+#: recordtransfer/templates/recordtransfer/help.html:103
+msgid "Show source role details"
+msgstr ""
+
+#: recordtransfer/templates/recordtransfer/help.html:106
 msgid "The following is a description of each source role:"
 msgstr ""
 
-#: recordtransfer/templates/recordtransfer/help.html:84
-msgid "Rights Types"
+#: recordtransfer/templates/recordtransfer/help.html:121
+msgid "Rights Types (Step 5 of Submission Form)"
 msgstr ""
 
-#: recordtransfer/templates/recordtransfer/help.html:85
-msgid "Step 5 of Submission Form"
-msgstr ""
-
-#: recordtransfer/templates/recordtransfer/help.html:87
+#: recordtransfer/templates/recordtransfer/help.html:124
 msgid ""
 "\n"
 "                    Depending on the records you are submitting, there may "
@@ -2625,7 +2618,11 @@ msgid ""
 "                    "
 msgstr ""
 
-#: recordtransfer/templates/recordtransfer/help.html:100
+#: recordtransfer/templates/recordtransfer/help.html:135
+msgid "Show rights type details"
+msgstr ""
+
+#: recordtransfer/templates/recordtransfer/help.html:138
 msgid "The following is a description of each rights type:"
 msgstr ""
 
@@ -2895,7 +2892,7 @@ msgid "Submission Groups"
 msgstr ""
 
 #: recordtransfer/templates/recordtransfer/profile.html:82
-#: recordtransfer/templates/recordtransfer/submission_form_groupsubmission.html:27
+#: recordtransfer/templates/recordtransfer/submission_form_groupsubmission.html:24
 msgid "New submission group"
 msgstr ""
 
@@ -3431,23 +3428,23 @@ msgid "Next"
 msgstr ""
 
 #: recordtransfer/templates/recordtransfer/submission_form_base.html:112
-#: recordtransfer/views/pre_submission.py:273
+#: recordtransfer/views/pre_submission.py:271
 msgid "Review"
 msgstr ""
 
-#: recordtransfer/templates/recordtransfer/submission_form_formset.html:23
+#: recordtransfer/templates/recordtransfer/submission_form_formset.html:21
 msgid "More"
 msgstr ""
 
-#: recordtransfer/templates/recordtransfer/submission_form_formset.html:26
+#: recordtransfer/templates/recordtransfer/submission_form_formset.html:24
 msgid "Remove"
 msgstr ""
 
-#: recordtransfer/templates/recordtransfer/submission_form_groupsubmission.html:37
+#: recordtransfer/templates/recordtransfer/submission_form_groupsubmission.html:34
 msgid "Describe the group and its purpose."
 msgstr ""
 
-#: recordtransfer/templates/recordtransfer/submission_form_groupsubmission.html:47
+#: recordtransfer/templates/recordtransfer/submission_form_groupsubmission.html:44
 msgid "Why would I want to make a group?"
 msgstr ""
 
@@ -3489,16 +3486,16 @@ msgid ""
 "            "
 msgstr ""
 
-#: recordtransfer/templates/recordtransfer/submission_form_review.html:25
+#: recordtransfer/templates/recordtransfer/submission_form_review.html:19
 msgid "Go to step"
 msgstr ""
 
-#: recordtransfer/templates/recordtransfer/submission_form_review.html:52
+#: recordtransfer/templates/recordtransfer/submission_form_review.html:46
 msgid "more"
 msgstr ""
 
-#: recordtransfer/templates/recordtransfer/submission_form_review.html:74
-#: recordtransfer/templates/recordtransfer/submission_form_review.html:94
+#: recordtransfer/templates/recordtransfer/submission_form_review.html:68
+#: recordtransfer/templates/recordtransfer/submission_form_review.html:88
 msgid "Not provided"
 msgstr ""
 
@@ -3520,11 +3517,11 @@ msgid ""
 "                        "
 msgstr ""
 
-#: recordtransfer/templates/recordtransfer/submission_form_uploadfiles.html:15
+#: recordtransfer/templates/recordtransfer/submission_form_uploadfiles.html:9
 msgid "Upload your files"
 msgstr ""
 
-#: recordtransfer/templates/recordtransfer/submission_form_uploadfiles.html:19
+#: recordtransfer/templates/recordtransfer/submission_form_uploadfiles.html:13
 #, python-format
 msgid ""
 "\n"
@@ -3539,33 +3536,33 @@ msgid ""
 "            "
 msgstr ""
 
-#: recordtransfer/templates/recordtransfer/submission_form_uploadfiles.html:31
+#: recordtransfer/templates/recordtransfer/submission_form_uploadfiles.html:25
 msgid "Toggle accepted file types"
 msgstr ""
 
-#: recordtransfer/templates/recordtransfer/submission_form_uploadfiles.html:53
+#: recordtransfer/templates/recordtransfer/submission_form_uploadfiles.html:47
 msgid "Total size of transfer:"
 msgstr ""
 
-#: recordtransfer/templates/recordtransfer/submission_form_uploadfiles.html:56
-#: recordtransfer/templates/recordtransfer/submission_form_uploadfiles.html:63
+#: recordtransfer/templates/recordtransfer/submission_form_uploadfiles.html:50
+#: recordtransfer/templates/recordtransfer/submission_form_uploadfiles.html:57
 msgid "MB"
 msgstr ""
 
-#: recordtransfer/templates/recordtransfer/submission_form_uploadfiles.html:60
+#: recordtransfer/templates/recordtransfer/submission_form_uploadfiles.html:54
 msgid "Remaining size allowed:"
 msgstr ""
 
-#: recordtransfer/templates/recordtransfer/submission_form_uploadfiles.html:67
+#: recordtransfer/templates/recordtransfer/submission_form_uploadfiles.html:61
 msgid "Files added:"
 msgstr ""
 
-#: recordtransfer/templates/recordtransfer/submission_form_uploadfiles.html:70
-#: recordtransfer/templates/recordtransfer/submission_form_uploadfiles.html:77
+#: recordtransfer/templates/recordtransfer/submission_form_uploadfiles.html:64
+#: recordtransfer/templates/recordtransfer/submission_form_uploadfiles.html:71
 msgid "files"
 msgstr ""
 
-#: recordtransfer/templates/recordtransfer/submission_form_uploadfiles.html:74
+#: recordtransfer/templates/recordtransfer/submission_form_uploadfiles.html:68
 msgid "Files remaining:"
 msgstr ""
 
@@ -3788,7 +3785,7 @@ msgstr ""
 
 #: recordtransfer/tests/unit/views/test_profile.py:146
 #: recordtransfer/tests/unit/views/test_profile.py:241
-#: recordtransfer/views/pre_submission.py:535
+#: recordtransfer/views/pre_submission.py:530
 #: recordtransfer/views/profile.py:115
 msgid "Please correct the errors below."
 msgstr ""
@@ -3887,51 +3884,51 @@ msgstr ""
 msgid "Direct access is not allowed."
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:101
+#: recordtransfer/views/pre_submission.py:99
 msgid "Date Last Changed"
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:102
+#: recordtransfer/views/pre_submission.py:100
 msgid "Date Started"
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:103
+#: recordtransfer/views/pre_submission.py:101
 msgid "Files Uploaded"
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:178
+#: recordtransfer/views/pre_submission.py:176
 msgid "Legal Agreement"
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:186
+#: recordtransfer/views/pre_submission.py:184
 msgid ""
 "Enter your contact information in case you need to be contacted by one of "
 "our archivists regarding your submission"
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:192
+#: recordtransfer/views/pre_submission.py:190
 msgid "Record Source Information (Optional)"
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:195
+#: recordtransfer/views/pre_submission.py:193
 msgid ""
 "Are you submitting records on behalf of another person or organization? "
 "Select Yes to enter information about them."
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:200
+#: recordtransfer/views/pre_submission.py:198
 msgid "Record Description"
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:204
+#: recordtransfer/views/pre_submission.py:202
 msgid "Provide a brief description of the records you're submitting"
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:208
+#: recordtransfer/views/pre_submission.py:206
 msgid "Record Rights and Restrictions (Optional)"
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:212
+#: recordtransfer/views/pre_submission.py:210
 #, python-format
 msgid ""
 "Depending on the records you are submitting, there may be specific rights "
@@ -3940,11 +3937,11 @@ msgid ""
 "explanations."
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:227
+#: recordtransfer/views/pre_submission.py:225
 msgid "Identifiers (Optional)"
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:234
+#: recordtransfer/views/pre_submission.py:232
 msgid ""
 "If you have any identifiers associated with these records, such as reference "
 "numbers, codes, or other unique IDs, you may enter them here. <b> This step "
@@ -3952,76 +3949,76 @@ msgid ""
 "records, you may proceed to the next step."
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:240
+#: recordtransfer/views/pre_submission.py:238
 msgid "Assign Submission to Group (Optional)"
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:243
+#: recordtransfer/views/pre_submission.py:241
 msgid ""
 "You may assign this submission to a group to keep your records organized. "
 "<b>This step is optional</b>. If you do not wish to assign a group, you can "
 "proceed to the next step."
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:252
+#: recordtransfer/views/pre_submission.py:250
 msgid "Upload Files"
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:255
+#: recordtransfer/views/pre_submission.py:253
 msgid "Add any final notes you would like to add, and upload your files"
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:263
+#: recordtransfer/views/pre_submission.py:261
 msgid "Final Notes"
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:266
+#: recordtransfer/views/pre_submission.py:264
 msgid "Add any final notes that may not have fit in previous steps"
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:275
+#: recordtransfer/views/pre_submission.py:273
 msgid "Review the information you've entered before submitting"
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:297
+#: recordtransfer/views/pre_submission.py:295
 msgid "Invalid step name"
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:346
+#: recordtransfer/views/pre_submission.py:342
 msgid ""
 "Can't load this in-progress submission because it will put you over the "
 "maximum concurrent session limit."
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:356
+#: recordtransfer/views/pre_submission.py:352
 msgid ""
 "Can't create a new submission because it will put you over the maximum "
 "concurrent session limit."
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:408
+#: recordtransfer/views/pre_submission.py:403
 #, python-format
 msgid ""
 "Your submission was saved, but you have reached your session limit. Go to "
 "%(link_start)syour profile%(link_end)s to see your saved submissions."
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:423
+#: recordtransfer/views/pre_submission.py:418
 msgid "Submission saved successfully."
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:442
+#: recordtransfer/views/pre_submission.py:437
 #, python-format
 msgid ""
 "This submission will expire on %(date)s. Please be sure to complete your "
 "submission before then."
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:450
+#: recordtransfer/views/pre_submission.py:445
 msgid "There was an error saving the submission."
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:991
+#: recordtransfer/views/pre_submission.py:986
 msgid ""
 "There was an error creating your submission. Please try again later or "
 "contact us for assistance."

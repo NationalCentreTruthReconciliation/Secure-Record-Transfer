@@ -4,15 +4,9 @@
 {% block javascript %}
     {{ block.super }}
 {% endblock javascript %}
-{% block buttonarrayclass %}
-    flex-med-width-item
-{% endblock buttonarrayclass %}
-{% block savelinkclass %}
-    flex-med-width-item
-{% endblock savelinkclass %}
 {% block formfields %}
     {{ block.super }}
-    <div class="flex-med-width-item margin-top-25px text-lg text-primary">{% trans "Upload your files" %}</div>
+    <div class="flex-med-width-item text-lg text-primary">{% trans "Upload your files" %}</div>
     <div class="alert !p-5">
         <i class="fas fa-exclamation-triangle pointer-events-none text-gray-400"></i>
         <p class="flex-med-width-item">

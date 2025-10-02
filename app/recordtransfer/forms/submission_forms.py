@@ -264,7 +264,7 @@ class SourceInfoForm(SubmissionForm):
         ),
         widget=forms.Select(
             attrs={
-                "class": "reduce-form-field-width faux-required-field",
+                "class": "faux-required-field",
                 "id": HtmlIds.ID_SOURCE_INFO_SOURCE_TYPE,
             }
         ),
@@ -298,7 +298,7 @@ class SourceInfoForm(SubmissionForm):
         help_text=_("How does the source relate to the records? "),
         widget=forms.Select(
             attrs={
-                "class": "reduce-form-field-width faux-required-field",
+                "class": "faux-required-field",
                 "id": HtmlIds.ID_SOURCE_INFO_SOURCE_ROLE,
             }
         ),
@@ -729,7 +729,6 @@ class GroupSubmissionForm(SubmissionForm):
         coerce=UUID,
         widget=forms.Select(
             attrs={
-                "class": "reduce-form-field-width",
                 "id": HtmlIds.ID_SUBMISSION_GROUP_SELECTION,
             }
         ),
