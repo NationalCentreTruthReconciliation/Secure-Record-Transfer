@@ -1,6 +1,6 @@
-# SOME DESCRIPTIVE TITLE.
+# French translations for NCTR Secure Record Transfer application.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
+# This file is distributed under the same license as the Secure Record Transfer app.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 #, fuzzy
@@ -8,11 +8,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-01 09:18-0500\n"
+"POT-Creation-Date: 2025-10-14 10:00-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Last-Translator: Gabrielle Archambault <Gabrielle.Archambault@umanitoba.ca>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -20,35 +20,56 @@ msgstr ""
 
 #: app/settings/base.py:143
 msgid "English"
-msgstr ""
+msgstr "Anglais"
 
 #: app/settings/base.py:144
 msgid "French"
-msgstr ""
+msgstr "Français"
 
 #: app/settings/base.py:145
 msgid "Hindi"
-msgstr ""
+msgstr "Hindi"
 
-#: caais/admin.py:333
+#: caais/admin.py:336
+msgctxt "\"Selected\" refers to one or more Metadata objects."
 msgid "Export CAAIS 1.0 CSV for Selected"
-msgstr ""
+msgstr "Exporter CSV NCIAA 1.0 pour Sélectionnés"
 
-#: caais/admin.py:338
+#: caais/admin.py:346
+msgctxt "\"Selected\" refers to one or more Metadata objects."
 msgid "Export AtoM 2.6 Accession CSV for Selected"
-msgstr ""
+msgstr "Exporter AtoM 2.6 Accession CSV pour Sélectionnés"
 
-#: caais/admin.py:345
+#: caais/admin.py:358
+msgctxt "\"Selected\" refers to one or more Metadata objects."
 msgid "Export AtoM 2.3 Accession CSV for Selected"
-msgstr ""
+msgstr "Exporter AtoM 2.3 Accession CSV pour Sélectionnés"
 
-#: caais/admin.py:352
+#: caais/admin.py:370
+msgctxt "\"Selected\" refers to one or more Metadata objects."
 msgid "Export AtoM 2.2 Accession CSV for Selected"
-msgstr ""
+msgstr "Exporter AtoM 2.2 Accession CSV pour Sélectionnés"
 
-#: caais/admin.py:359
+#: caais/admin.py:382
+msgctxt "\"Selected\" refers to one or more Metadata objects."
 msgid "Export AtoM 2.1 Accession CSV for Selected"
+msgstr "Exporter AtoM 2.1 Accession CSV pour Sélectionnés"
+
+#: caais/citation.py:5
+msgid ""
+"https://archivescanada.ca/wp-content/uploads/2022/12/CAAIS_2019May15_EN.pdf"
 msgstr ""
+"https://archivescanada.ca/wp-content/uploads/2022/12/CAAIS_2019May15_FR.pdf"
+
+#: caais/citation.py:13
+#, python-format
+msgid "%(text)s [%(link_start)sCAAIS%(link_end)s %(section)s]"
+msgstr "%(text)s [%(link_start)sNCIAA%(link_end)s %(section)s]"
+
+#: caais/citation.py:22
+#, python-format
+msgid "%(text)s [CAAIS %(section)s]"
+msgstr "%(text)s [NCIAA %(section)s]"
 
 #: caais/forms.py:101
 #, python-format
@@ -56,45 +77,50 @@ msgid ""
 "%(help_text)s. Use the date format YYYY-MM-DD for a single date or YYYY-MM-"
 "DD - YYYY-MM-DD for a date range"
 msgstr ""
+"%(help_text)s. Utilisez le format de date AAAA-MM-JJ pour une seule date ou "
+"AAAA-MM-JJ - AAAA-MM-JJ pour une plage de dates"
 
 #: caais/forms.py:143
 msgid "Record an identifier to uniquely identify this accession"
 msgstr ""
+"Enregistrez un identifiant pour identifier cette accession de manière unique"
 
 #: caais/forms.py:172 caais/forms.py:209
 #: recordtransfer/forms/submission_forms.py:365
 #: recordtransfer/forms/submission_forms.py:402
 msgid "Invalid date format"
-msgstr ""
+msgstr "Format de date invalide"
 
 #: caais/forms.py:191 recordtransfer/forms/submission_forms.py:384
 msgid "Date cannot be in the future"
-msgstr ""
+msgstr "La date ne peut pas être dans le futur"
 
 #: caais/forms.py:193 recordtransfer/forms/submission_forms.py:386
 msgid "End date cannot be in the future"
-msgstr ""
+msgstr "La date de fin ne peut pas être dans le futur"
 
 #: caais/forms.py:199 recordtransfer/forms/submission_forms.py:392
 msgid "Date cannot be before 1800"
-msgstr ""
+msgstr "La date ne peut pas être avant 1800"
 
 #: caais/forms.py:201 recordtransfer/forms/submission_forms.py:394
 msgid "End date cannot be before 1800"
-msgstr ""
+msgstr "La date de fin ne peut pas être avant 1800"
 
 #: caais/forms.py:211 recordtransfer/forms/submission_forms.py:404
 msgid "Invalid date format for end date"
-msgstr ""
+msgstr "Format de date invalide pour la date de fin"
 
 #: caais/forms.py:221 recordtransfer/forms/submission_forms.py:414
 msgid "End date must be later than start date"
-msgstr ""
+msgstr "La date de fin doit être postérieure à la date de début"
 
 #: caais/forms.py:286
 #, python-format
 msgid "'%(id)s' is a reserved Identifier type - please use another type name"
 msgstr ""
+"'%(id)s' est un type d’identifiant réservé - veuillez utiliser un autre nom "
+"de type"
 
 #: caais/forms.py:366 recordtransfer/forms/mixins.py:17
 #: recordtransfer/forms/mixins.py:145
@@ -103,63 +129,68 @@ msgstr ""
 #: recordtransfer/forms/submission_forms.py:212
 #: recordtransfer/forms/submission_forms.py:442
 msgid "This field is required."
-msgstr ""
+msgstr "Ce champ est obligatoire."
 
 #: caais/forms.py:367 recordtransfer/forms/mixins.py:18
 msgid "Phone number must look like \"+1 (999) 999-9999\""
-msgstr ""
+msgstr "Le numéro de téléphone doit ressembler à \"+1 (999) 999-9999\""
 
 #: caais/forms.py:375 recordtransfer/forms/mixins.py:25
 msgid "Phone number"
-msgstr ""
+msgstr "Numéro de téléphone"
 
 #: caais/forms.py:379 recordtransfer/forms/submission_forms.py:125
 #: recordtransfer/forms/user_forms.py:36
 #: recordtransfer/templates/includes/account_info_form.html:13
 msgid "Email"
-msgstr ""
+msgstr "Courriel"
 
 #: caais/forms.py:388
 msgid "Select a Country"
-msgstr ""
+msgstr "Sélectionner un pays"
 
 #: caais/models.py:94
 msgid "Acquisition methods"
-msgstr ""
+msgstr "Méthodes d'acquisition"
 
 #: caais/models.py:95
 msgid "Acquisition method"
-msgstr ""
+msgstr "Méthode d'acquisition"
 
 #: caais/models.py:99
 msgid ""
 "Record the acquisition method in accordance with a controlled vocabulary"
 msgstr ""
+"Enregistrer la méthode d’acquisition conformément à un vocabulaire contrôlé"
 
 #: caais/models.py:120
 msgid "Statuses"
-msgstr ""
+msgstr "Statuts"
 
 #: caais/models.py:121
 #: recordtransfer/templates/includes/open_session_table.html:9
 msgid "Status"
-msgstr ""
+msgstr "Statut"
 
 #: caais/models.py:126
 msgid ""
 "Record the current position of the material with respect to the repository's "
 "workflows and business processes using a controlled vocabulary"
 msgstr ""
+"Enregistrez la position actuelle des documents dans les activités et les "
+"processus d’affaires de l’établissement"
 
 #: caais/models.py:238 caais/models.py:239
 msgid "CAAIS metadata"
-msgstr ""
+msgstr "Métadonnées NCIAA"
 
 #: caais/models.py:260
 msgid ""
 "Give the authorized form(s) of the name of the institution in accordance "
 "with the repository's naming standard"
 msgstr ""
+"Fournir la forme autorisée du nom de l’établissement conformément  aux norms "
+"de nommage de l’organisme"
 
 #: caais/models.py:274
 msgid ""
@@ -167,511 +198,643 @@ msgid ""
 "standard, typically consisting of the creator's name(s) and the type of "
 "material"
 msgstr ""
+"Établir un titre d’acquisition conformément aux normes de description de "
+"l’établissement celles-ci consistent généralement du nom du créateur et du "
+"type de documents"
 
 #: caais/models.py:293
 msgid ""
 "Provide a preliminary estimate of the date range or explicitly indicate if "
 "not it has yet been determined"
 msgstr ""
+"Fournir une estimation préliminaire de dates échelonnées ou préciser en "
+"toutes lettres si elles n’ont pas encore été déterminées"
 
-#: caais/models.py:312
+#: caais/models.py:311
 msgid ""
 "Record information about the standards, rules or conventions that were "
 "followed when creating or maintaining the accession record."
 msgstr ""
+"Consigner les informations sur les normes, règles ou conventionsutilisées "
+"lors de la création ou de la mise à jour de la notice d'acquisition."
 
-#: caais/models.py:325
+#: caais/models.py:324
 msgid ""
 "Record the language(s) and script(s) used to create the accession record."
 msgstr ""
+"Consigner la ou les langue(s) ou typographie(s) utilisée(s) lors de la "
+"création de la notice d'acquisition."
+
+#: caais/models.py:566
+msgid "Identifiers"
+msgstr "Identifiants"
 
 #: caais/models.py:567
-msgid "Identifiers"
-msgstr ""
-
-#: caais/models.py:568
 msgid "Identifier"
-msgstr ""
+msgstr "Identifiant"
 
-#: caais/models.py:583
+#: caais/models.py:582
 msgid ""
 "Record the identifier type in accordance with a controlled vocabulary "
 "maintained by the repository"
 msgstr ""
+"Enregistrer le type d’identifiant en accord avec un vocabulaire contrôlé "
+"utilisé par l’établissement"
 
-#: caais/models.py:596
+#: caais/models.py:594
 msgid ""
 "Record the other identifier value as received or generated by the repository"
 msgstr ""
+"Enregistrer l’autre identifiant comme reçu ou généré par l’établissement"
 
-#: caais/models.py:608
+#: caais/models.py:605
 msgid ""
 "Record any additional information that clarifies the purpose, use or "
 "generation of the identifier."
 msgstr ""
+"Consigner toute information additionnelle qui précise la raison d’être, "
+"l’utilisation ou la création de l’identifiant."
 
-#: caais/models.py:639
+#: caais/models.py:636
 msgid "Archival units"
-msgstr ""
+msgstr "Unités archivistiques"
 
-#: caais/models.py:640
+#: caais/models.py:637
 msgid "Archival unit"
-msgstr ""
+msgstr "Unité archivistique"
 
-#: caais/models.py:653
+#: caais/models.py:650
 msgid ""
 "Record the reference code and/or title of the archival unit to which the "
 "accession belongs"
 msgstr ""
+"Enregistrer le code de référence et/ou le titre de l’unité archivistique "
+"auquelappartient l’acquisition"
 
-#: caais/models.py:684
+#: caais/models.py:681
 msgid "Disposition authorities"
-msgstr ""
+msgstr "Autorisations de disposition"
 
-#: caais/models.py:685
+#: caais/models.py:682
 msgid "Disposition authority"
-msgstr ""
+msgstr "Autorisation de disposition"
 
-#: caais/models.py:698
+#: caais/models.py:695
 msgid ""
 "Record information about any legal instruments that apply to the accessioned "
 "material. Legal instruments include statutes, records schedules or "
 "disposition authorities, and donor agreements"
 msgstr ""
+"Consigner l’information à propos de toute référence légale qui s’applique "
+"aux documents acquis. Les références légales incluent les statuts, "
+"calendriers de conservation ou instance décisionnelle, de même que les "
+"ententes avec les donateurs"
 
-#: caais/models.py:728
+#: caais/models.py:725
 msgid "Source types"
-msgstr ""
+msgstr "Types de sources"
 
-#: caais/models.py:729 recordtransfer/forms/submission_forms.py:260
+#: caais/models.py:726 recordtransfer/forms/submission_forms.py:260
 msgid "Source type"
-msgstr ""
+msgstr "Type de source"
 
-#: caais/models.py:734
+#: caais/models.py:730
 msgid ""
 "Record the source in accordance with a controlled vocabulary maintained by "
 "the repository"
 msgstr ""
+"Consigner le type de source conformément au vocabulaire contrôlé utilisé par "
+"l’établissement"
 
-#: caais/models.py:755
+#: caais/models.py:750
 msgid "Source roles"
-msgstr ""
+msgstr "Rôles de la source"
 
-#: caais/models.py:756 recordtransfer/forms/submission_forms.py:297
+#: caais/models.py:751 recordtransfer/forms/submission_forms.py:297
 msgid "Source role"
-msgstr ""
+msgstr "Rôle de la source"
 
-#: caais/models.py:761
+#: caais/models.py:756
 msgid ""
 "Record the source role (when known) in accordance with a controlled "
 "vocabulary maintained by the repository"
 msgstr ""
+"Consigner le rôle de la source (lorsqu’il est connu) conformément au "
+"vocabulaire contrôlé utilisé par l’établissement"
 
-#: caais/models.py:784
+#: caais/models.py:779
 msgid "Source confidentialities"
-msgstr ""
+msgstr "Confidentialités de la source"
+
+#: caais/models.py:780
+msgid "Source confidentiality"
+msgstr "Confidentialité de la source"
 
 #: caais/models.py:785
-msgid "Source confidentiality"
-msgstr ""
-
-#: caais/models.py:790
 msgid ""
 "Record source statements or source information that is for internal use only "
 "by the repository. Repositories should develop a controlled vocabulary with "
 "terms that can be translated into clear rules for handling source information"
 msgstr ""
+"Identifier des déclarations de source ou de l’information sur la source à "
+"l’intention de l’établissement. Les établissements devraient développer un "
+"vocabulaire contrôlé contenant des termes qui peuvent être transposés en "
+"règles claires pour la manipulation de l’information sur la source"
 
-#: caais/models.py:864
+#: caais/models.py:859
 msgid "Sources of material"
-msgstr ""
+msgstr "Sources du matériel"
 
-#: caais/models.py:865
+#: caais/models.py:860
 msgid "Source of material"
-msgstr ""
+msgstr "Source du matériel"
 
-#: caais/models.py:884
+#: caais/models.py:878
 msgid ""
 "Record the source name in accordance with the repository's descriptive "
 "standard"
 msgstr ""
+"Consigner le nom de la source conformément aux normes de description "
+"utilisées\n"
+"pas l’établissement"
 
-#: caais/models.py:911
+#: caais/models.py:904
 msgid ""
 "Record any other information about the source of the accessioned materials. "
 "If the source performed the role for only a specific period of time (e.g. "
 "was a custodian for several years), record the dates in this element"
 msgstr ""
+"Consigner toute autre information sur la source des documents acquis. Si la "
+"source a seulement joué un rôle pour un laps de temps défini (par ex. la "
+"source\n"
+"a entreposé les documents pendant plusieurs années), consigner les dates "
+"dans cet\n"
+"élément"
 
-#: caais/models.py:952
+#: caais/models.py:945
 msgid "Preliminary custodial histories"
-msgstr ""
+msgstr "Historiques préliminaires de la conservation"
 
-#: caais/models.py:953
+#: caais/models.py:946
 msgid "Preliminary custodial history"
-msgstr ""
+msgstr "Historique préliminaire de la conservation"
 
-#: caais/models.py:969
+#: caais/models.py:962
 msgid ""
 "Provide relevant custodial history information in accordance with the "
 "repository's descriptive standard. Record the successive transfers of "
 "ownership, responsibility and/or custody of the accessioned material prior "
 "to its transfer to the repository"
 msgstr ""
+"Fournir de l’information pertinente sur l’historique de la conservation "
+"conformément\n"
+"aux normes de description utilisées par l’établissement. Établir les "
+"transferts successifs de propriété, de responsabilité et/ou de conservation "
+"des documents avant leur acquisition par l’établissement"
 
-#: caais/models.py:1000
+#: caais/models.py:993
 msgid "Extent types"
-msgstr ""
+msgstr "Types d’étendue"
 
-#: caais/models.py:1001
+#: caais/models.py:994
 msgid "Extent type"
-msgstr ""
+msgstr "Type d’étendue"
 
-#: caais/models.py:1006
+#: caais/models.py:999
 msgid ""
 "Record the extent statement type in accordance with a controlled vocabulary "
 "maintained by the repository"
 msgstr ""
+"Consigner le type d’énoncé d’étendue conformément au vocabulaire contrôlé "
+"utilisé par l’établissement"
 
-#: caais/models.py:1029
+#: caais/models.py:1022
 msgid "Content types"
-msgstr ""
+msgstr "Types de contenu"
 
-#: caais/models.py:1030
+#: caais/models.py:1023
 msgid "Content type"
-msgstr ""
+msgstr "Type de contenu"
 
-#: caais/models.py:1035
+#: caais/models.py:1028
 msgid ""
 "Record the type of material contained in the units measured, i.e., the genre "
 "of the material"
 msgstr ""
+"Consigner le type de documents que contiennent les unités mesurées, e.g. la "
+"forme documentaire"
 
-#: caais/models.py:1058
+#: caais/models.py:1051
 msgid "Carrier types"
-msgstr ""
+msgstr "Types de support"
 
-#: caais/models.py:1059
+#: caais/models.py:1052
 msgid "Carrier type"
-msgstr ""
+msgstr "Type de support"
 
-#: caais/models.py:1064
+#: caais/models.py:1057
 msgid ""
 "Record the physical format of an object that supports or carries archival "
 "materials using a controlled vocabulary maintained by the repository"
 msgstr ""
+"Consigner la forme matérielle d’un objet qui contient ou supporte des "
+"documents d’archives conformément au vocabulaire contrôlé utilisé par\n"
+"l’établissement"
 
-#: caais/models.py:1099
+#: caais/models.py:1092
 msgid "Extent statement"
-msgstr ""
+msgstr "Énoncé d’étendue"
 
-#: caais/models.py:1100
+#: caais/models.py:1093
 msgid "Extent statements"
-msgstr ""
+msgstr "Énoncés d’étendue"
 
-#: caais/models.py:1118
+#: caais/models.py:1111
 msgid ""
 "Record the number and unit of measure expressing the quantity of the extent "
 "(e.g., 5 files, totalling 2.5MB)"
 msgstr ""
+"Consigner le nombre et l’unité de mesure applicables à l’étendue (p. ex., 5 "
+"fichiers, totalisant 2,5 Mo)."
 
-#: caais/models.py:1139
+#: caais/models.py:1132
 msgid ""
 "Record additional information related to the number and type of units "
 "received, retained, or removed not otherwise recorded"
 msgstr ""
+"Consigner des informations additionnelles liées à l’étendue et au type de "
+"documents reçus, conservés ou supprimés, lorsque l’information n’a pas déjà "
+"été consignée ailleurs"
 
-#: caais/models.py:1172 caais/models.py:1173
+#: caais/models.py:1165 caais/models.py:1166
 msgid "Preliminary scope and content"
-msgstr ""
+msgstr "Portée et contenu préliminaire"
 
-#: caais/models.py:1189
+#: caais/models.py:1182
 msgid ""
 "Record a preliminary description that may include: functions and activities "
 "that resulted in the material's generation, dates, the geographic area to "
 "which the material pertains, subject matter, arrangement, classification, "
 "and documentary forms"
 msgstr ""
+"Consigner une description préliminaire qui inclut : les fonctions et les "
+"activités ayant\n"
+"générées les documents, la période couverte par leur contenu, les lieux\n"
+"géographiques sur lesquels ils portent, le(s) sujet(s), l’organisation, la "
+"classification\n"
+"et les formes documentaires"
 
-#: caais/models.py:1222
+#: caais/models.py:1215
 msgid "Language of materials"
-msgstr ""
+msgstr "Langue des documents"
 
-#: caais/models.py:1223
+#: caais/models.py:1216
 msgid "Language of material"
-msgstr ""
+msgstr "Langue du document"
 
-#: caais/models.py:1236
+#: caais/models.py:1229
 msgid ""
 "Record, at a minimum, the language that is predominantly found in the "
 "accessioned material"
 msgstr ""
+"Consigner, de façon minimale, la langue prédominante trouvée dans les "
+"documents"
 
-#: caais/models.py:1280
+#: caais/models.py:1273
 msgid ""
 "Record the physical and/or digital location(s) within the repository in "
 "which the accessioned material is stored"
 msgstr ""
+"Indiquer la localisation physique ou numérique des documents au sein de\n"
+"l’établissement"
 
-#: caais/models.py:1315
+#: caais/models.py:1308
 msgid ""
 "Record the rights statement type in accordance with a controlled vocabulary "
 "maintained by the repository"
 msgstr ""
+"Consigner le type de déclaration sur les droits conformément au vocabulaire\n"
+"contrôlé utilisé par l’établissement"
 
-#: caais/models.py:1366
+#: caais/models.py:1359
 msgid ""
 "Record the nature and duration of the permission granted or restriction "
 "imposed. Specify where the condition applies only to part of the accession"
 msgstr ""
+"Consigner la nature et la durée des accès accordés, ou les restrictions "
+"imposées.\n"
+"S’il s’agit seulement d’une partie de l’acquisition, spécifier à quoi "
+"s’applique les\n"
+"restrictions"
 
-#: caais/models.py:1378
+#: caais/models.py:1371
 msgid ""
 "Record any other information relevant to describing the rights statement"
 msgstr ""
+"Consigner toute autre information pertinente pour décrire la déclaration sur "
+"les droits"
 
-#: caais/models.py:1412
+#: caais/models.py:1405
 msgid ""
 "Record the type of preservation requirement in accordance with a controlled "
 "vocabulary maintained by the repository."
 msgstr ""
+"Enregistrer le type d’exigence de préservation conformément au vocabulaire\n"
+"contrôlé utilisé par l’établissement."
 
-#: caais/models.py:1467
+#: caais/models.py:1460
 msgid ""
 "Record information about the assessment of the material with respect to its "
 "physical condition, dependencies, processing or access"
 msgstr ""
+"Consigner les informations sur l'évaluation de l'état physique des "
+"documents, leurs\n"
+"dépendances, leur traitement ou leur accès"
 
-#: caais/models.py:1480
+#: caais/models.py:1473
 msgid ""
 "Record any other information relevant to the long-term preservation of the "
 "material"
 msgstr ""
+"Consigner toute autre information pertinente à la préservation à long terme "
+"des\n"
+"documents"
 
-#: caais/models.py:1515
+#: caais/models.py:1508
 msgid ""
 "Record the appraisal type in accordance with a controlled vocabulary "
 "maintained by the repository"
 msgstr ""
+"Consigner le type d’évaluation conformément au vocabulaire contrôlé utilisé "
+"par\n"
+"l’établissement"
 
-#: caais/models.py:1565
+#: caais/models.py:1558
 msgid ""
 "Where the accession process includes appraisal activities, record the "
 "appraisal statement value."
 msgstr ""
+"Lorsque le processus d’acquisition comprend des activités d’évaluation, "
+"consigner\n"
+"la valeur de l’évaluation."
 
-#: caais/models.py:1578
+#: caais/models.py:1570
 msgid ""
 "Record any other information relevant to describing the appraisal activities."
 msgstr ""
+"Consigner toute autre information utile à la description des activités "
+"d’évaluation."
 
-#: caais/models.py:1612
+#: caais/models.py:1603
 msgid ""
 "Where the accession process generates associated documents, record the "
 "associated documentation type in accordance with a controlled vocabulary "
 "maintained by the repository."
 msgstr ""
+"Lorsque le processus d'acquisition génère de la documentation apparentée,\n"
+"consigner le type de documentation apparentée conformément au vocabulaire\n"
+"contrôlé utilisé par l’établissement."
 
-#: caais/models.py:1667
+#: caais/models.py:1658
 msgid "Record the title of the associated documentation"
-msgstr ""
+msgstr "Consigner le titre de la documentation apparentée"
 
-#: caais/models.py:1677
+#: caais/models.py:1668
 msgid ""
 "Record any other information relevant to describing documentation associated "
 "to the accessioned material"
 msgstr ""
+"Consigner toute information utile à la description de la documentation "
+"apparentée\n"
+"aux documents acquis"
 
-#: caais/models.py:1713
+#: caais/models.py:1704
 msgid ""
 "Record the event type in accordance with a controlled vocabulary maintained "
 "by the repository"
 msgstr ""
+"Consigner le type d’événement conformément au vocabulaire contrôlé utilisé "
+"par\n"
+"l’établissement"
 
-#: caais/models.py:1769
+#: caais/models.py:1759
 msgid ""
 "Record the name of the staff member or application responsible for the event"
 msgstr ""
+"Consigner le nom du membre du personnel ou l'application responsable de\n"
+"l'événement"
 
-#: caais/models.py:1780
+#: caais/models.py:1769
 msgid "Record any other information relevant to describing the event."
 msgstr ""
+"Consigner toute autre information utile à la description de l’événement."
 
-#: caais/models.py:1823
+#: caais/models.py:1812
 msgid ""
 "Record any other information relevant to the accession record or "
 "accessioning process"
 msgstr ""
+"Consigner toute autre information utile à la notice d’acquisition ou au "
+"processus lui-même"
 
-#: caais/models.py:1859
+#: caais/models.py:1848
 msgid ""
 "Record the action type in accordance with a controlled vocabulary maintained "
 "by the repository."
 msgstr ""
+"Consigner le type d’intervention conformément au vocabulaire contrôlé "
+"utilisé par\n"
+"l’établissement."
 
-#: caais/models.py:1924
+#: caais/models.py:1913
 msgid ""
 "Record the name of the staff member who performed the action (creation or "
 "revision) on the accession record"
 msgstr ""
+"Consigner le nom du membre du personnel de l’établissement qui a appliqué\n"
+"l’intervention (création ou révision) à la notice d’acquisition"
 
-#: caais/models.py:1936
+#: caais/models.py:1925
 msgid ""
 "Record any information summarizing actions applied to the accession record."
 msgstr ""
+"Consigner toute information résumant les interventions faites sur la notice\n"
+"d’acquisition."
 
 #: caais/templates/admin/metadata_change_form.html:28
 msgid "No other details listed"
-msgstr ""
+msgstr "Aucun autre détail indiqué"
 
-#: recordtransfer/admin.py:217
+#: recordtransfer/admin.py:218
 msgid ""
 "The selected submission group(s) do not contain any submissions to export."
 msgstr ""
+"Le(s) groupe(s) de soumission sélectionné(s) ne contiennent aucune "
+"soumission à exporter."
 
-#: recordtransfer/admin.py:225
+#: recordtransfer/admin.py:229
+msgctxt "\"Selected\" refers to one or more Submission Group objects."
 msgid "Export CAAIS 1.0 CSV for Submissions in Selected"
-msgstr ""
+msgstr "Exporter CSV NCIAA 1.0 pour Sélectionnés"
 
-#: recordtransfer/admin.py:230
+#: recordtransfer/admin.py:239
+msgctxt "\"Selected\" refers to one or more Submission Group objects."
 msgid "Export AtoM 2.6 Accession CSV for Submissions in Selected"
-msgstr ""
+msgstr "Exporter AtoM 2.6 Accession CSV pour Sélectionnés"
 
-#: recordtransfer/admin.py:235
+#: recordtransfer/admin.py:249
+msgctxt "\"Selected\" refers to one or more Submission Group objects."
 msgid "Export AtoM 2.3 Accession CSV for Submissions in Selected"
-msgstr ""
+msgstr "Exporter AtoM 2.3 Accession CSV pour Sélectionnés"
 
-#: recordtransfer/admin.py:240
+#: recordtransfer/admin.py:259
+msgctxt "\"Selected\" refers to one or more Submission Group objects."
 msgid "Export AtoM 2.2 Accession CSV for Submissions in Selected"
-msgstr ""
+msgstr "Exporter AtoM 2.2 Accession CSV pour Sélectionnés"
 
-#: recordtransfer/admin.py:245
+#: recordtransfer/admin.py:269
+msgctxt "\"Selected\" refers to one or more Submission Group objects."
 msgid "Export AtoM 2.1 Accession CSV for Submissions in Selected"
-msgstr ""
+msgstr "Exporter AtoM 2.1 Accession CSV pour Sélectionnés"
 
-#: recordtransfer/admin.py:362
+#: recordtransfer/admin.py:388
 msgid "Click link to view uploaded files"
-msgstr ""
+msgstr "Cliquez sur le lien pour voir les fichiers téléchargés"
 
-#: recordtransfer/admin.py:386
+#: recordtransfer/admin.py:412
 #, python-format
 msgid ""
 "A downloadable bag is being generated. Visit the %(link_start)sjobs "
 "page%(link_end)s for the status of the bag generation, or check the "
 "Submission page for a download link"
 msgstr ""
+"Un sac téléchargeable est en cours de génération. Visitez  la  "
+"%(link_start)s page des emplois %(link_end)s pour le statut de génération du "
+"sac, ou consultez la page de Soumission pour un lien de téléchargement"
 
-#: recordtransfer/admin.py:402
+#: recordtransfer/admin.py:428
 msgid ""
 "There are no files associated with this submission, it is not possible to "
 "create a Bag"
 msgstr ""
+"Il n'y a pas de fichiers associés à cette soumission, il n'est pas possible "
+"de créer un sac"
 
-#: recordtransfer/admin.py:411
+#: recordtransfer/admin.py:437
 #, python-format
 msgid "Submission with ID '%(id)s' doesn't exist. Perhaps it was deleted?"
 msgstr ""
+"Soumission avec l'identifiant '%(id)s' n'existe pas. Peut-être a-t-il été "
+"supprimé?"
 
-#: recordtransfer/admin.py:418
+#: recordtransfer/admin.py:447
+msgctxt "\"Selected\" refers to one or more Submission objects."
 msgid "Export CAAIS 1.0 CSV for Metadata in Selected"
-msgstr ""
+msgstr "Exporter CSV NCIAA 1.0 pour Sélectionnés"
 
-#: recordtransfer/admin.py:425
+#: recordtransfer/admin.py:459
+msgctxt "\"Selected\" refers to one or more Submission objects."
 msgid "Export AtoM 2.6 Accession CSV for Metadata in Selected"
-msgstr ""
+msgstr "Exporter AtoM 2.6 Accession CSV pour Sélectionnés"
 
-#: recordtransfer/admin.py:432
+#: recordtransfer/admin.py:471
+msgctxt "\"Selected\" refers to one or more Submission objects."
 msgid "Export AtoM 2.3 Accession CSV for Metadata in Selected"
-msgstr ""
+msgstr "Exporter AtoM 2.3 Accession CSV pour Sélectionnés"
 
-#: recordtransfer/admin.py:439
+#: recordtransfer/admin.py:483
+msgctxt "\"Selected\" refers to one or more Submission objects."
 msgid "Export AtoM 2.2 Accession CSV for Metadata in Selected"
-msgstr ""
+msgstr "Exporter AtoM 2.2 Accession CSV pour Sélectionnés"
 
-#: recordtransfer/admin.py:446
+#: recordtransfer/admin.py:495
+msgctxt "\"Selected\" refers to one or more Submission objects."
 msgid "Export AtoM 2.1 Accession CSV for Metadata in Selected"
-msgstr ""
+msgstr "Exporter AtoM 2.1 Accession CSV pour Sélectionnés"
 
-#: recordtransfer/admin.py:494 upload/admin.py:53
+#: recordtransfer/admin.py:545 upload/admin.py:53
 msgid "File Link"
-msgstr ""
+msgstr "Lien de fichier"
 
-#: recordtransfer/admin.py:500
+#: recordtransfer/admin.py:551
 msgid "No file attached"
-msgstr ""
+msgstr "Pas de fichier joint"
 
-#: recordtransfer/admin.py:527
+#: recordtransfer/admin.py:578
 #: recordtransfer/templates/includes/profile_forms.html:18
 #: recordtransfer/views/pre_submission.py:181
 msgid "Contact Information"
-msgstr ""
+msgstr "Coordonnées"
 
-#: recordtransfer/admin.py:542
+#: recordtransfer/admin.py:593
 msgid "Language Preferences"
-msgstr ""
+msgstr "Préférences de langues"
 
-#: recordtransfer/admin.py:548
+#: recordtransfer/admin.py:599
 msgid "Email Updates"
-msgstr ""
+msgstr "Mises à jour par courriel"
 
-#: recordtransfer/admin.py:602 recordtransfer/views/account.py:324
+#: recordtransfer/admin.py:653 recordtransfer/views/account.py:324
 msgid "Password updated"
-msgstr ""
+msgstr "Mot de passe mis à jour"
 
-#: recordtransfer/admin.py:603 recordtransfer/views/account.py:325
+#: recordtransfer/admin.py:654 recordtransfer/views/account.py:325
 #: recordtransfer/views/account.py:366
 msgid "password"
-msgstr ""
+msgstr "mot de passe"
 
-#: recordtransfer/admin.py:604 recordtransfer/admin.py:634
+#: recordtransfer/admin.py:655 recordtransfer/admin.py:685
 #: recordtransfer/management/commands/send_test_email.py:178
 #: recordtransfer/views/account.py:326
 msgid "updated"
-msgstr ""
+msgstr "mis à jour"
 
-#: recordtransfer/admin.py:615
+#: recordtransfer/admin.py:666
 msgid "Non-superusers cannot modify superuser accounts."
 msgstr ""
+"Les non-superutilisateurs ne peuvent pas modifier les comptes "
+"superutilisateurs."
 
-#: recordtransfer/admin.py:626
+#: recordtransfer/admin.py:677
 msgid "Account Deactivated"
-msgstr ""
+msgstr "Compte désactivé"
 
-#: recordtransfer/admin.py:627 recordtransfer/admin.py:633
+#: recordtransfer/admin.py:678 recordtransfer/admin.py:684
 #: recordtransfer/management/commands/send_test_email.py:177
 msgid "account"
-msgstr ""
+msgstr "compte"
 
-#: recordtransfer/admin.py:628
+#: recordtransfer/admin.py:679
 msgid "deactivated"
-msgstr ""
+msgstr "désactivé"
 
-#: recordtransfer/admin.py:632
+#: recordtransfer/admin.py:683
 #: recordtransfer/management/commands/send_test_email.py:176
 msgid "Account updated"
-msgstr ""
+msgstr "Compte mis à jour"
 
-#: recordtransfer/admin.py:645
+#: recordtransfer/admin.py:696
 msgid "Superuser privileges have been added to your account."
-msgstr ""
+msgstr "Les privilèges de superutilisateur ont été ajoutés à votre compte."
 
-#: recordtransfer/admin.py:647
+#: recordtransfer/admin.py:698
 msgid "Superuser privileges have been removed from your account."
-msgstr ""
+msgstr "Les privilèges de superutilisateur ont été retirés de votre compte."
 
-#: recordtransfer/admin.py:650
+#: recordtransfer/admin.py:701
 #: recordtransfer/management/commands/send_test_email.py:179
 msgid "Staff privileges have been added to your account."
-msgstr ""
+msgstr "Les privilèges du personnel ont été ajoutés à votre compte."
 
-#: recordtransfer/admin.py:652
+#: recordtransfer/admin.py:703
 msgid "Staff privileges have been removed from your account."
-msgstr ""
+msgstr "Les privilèges du personnel ont été retirés de votre compte."
 
-#: recordtransfer/admin.py:709
+#: recordtransfer/admin.py:760
 #, python-format
 msgid "Setting \"%(key)s\" has been reset to its default value of %(value)s."
 msgstr ""
+"Réglage \"%(key)s\" a été réinitialisé à sa valeur par défaut de %(value)s."
 
 #: recordtransfer/caais.py:541
 #, python-format
@@ -679,48 +842,50 @@ msgctxt ""
 "class_name is the name of a Python class and term_name is the user-entered "
 "value"
 msgid "%(class_name)s was noted as %(term_name)s"
-msgstr ""
+msgstr "%(class_name)s a été noté comme %(term_name)s"
 
 #: recordtransfer/emails.py:101
 msgid "New Submission Ready for Review"
-msgstr ""
+msgstr "Nouvelle soumission prête pour révision"
 
 #: recordtransfer/emails.py:150
 msgid "Submission Failed"
-msgstr ""
+msgstr "La soumission a échoué"
 
 #: recordtransfer/emails.py:181
 msgid "Thank You For Your Submission"
-msgstr ""
+msgstr "Merci pour votre soumission"
 
 #: recordtransfer/emails.py:203
 msgid "Issue With Your Submission"
-msgstr ""
+msgstr "Problème avec votre soumission"
 
 #: recordtransfer/emails.py:229
 msgid "Activate Your Account"
-msgstr ""
+msgstr "Activer votre compte"
 
 #: recordtransfer/emails.py:268
 #: recordtransfer/templates/recordtransfer/email/in_progress_submission_expiring.html:5
 msgid "Your In-Progress Submission is Expiring Soon"
-msgstr ""
+msgstr "Votre soumission en cours expire bientôt"
 
 #: recordtransfer/emails.py:303
 msgid "Password Reset on NCTR Secure Record Transfer App"
 msgstr ""
+"Réinitialisation du mot de passe sur l'application de transfert sécurisé de "
+"dossiers du CNVR"
 
 #: recordtransfer/enums.py:29
 msgid "Integer"
-msgstr ""
+msgstr "Entier"
 
 #: recordtransfer/enums.py:30
 msgid "String"
-msgstr ""
+msgstr "Chaine"
 
 #: recordtransfer/enums.py:49
 msgid "The email displayed for people to contact an archivist."
-msgstr ""
+msgstr "Le courriel affiché pour contacter un archiviste."
 
 #: recordtransfer/enums.py:55
 msgid ""
@@ -728,20 +893,30 @@ msgid ""
 "username is combined with the site's base URL to create an email address. "
 "The URL can be set from the admin site."
 msgstr ""
+"Un nom d'utilisateur pour l'application afin d'envoyer des courriels \"ne "
+"pas répondre\". Ce nom d'utilisateur est combiné avec l'URL de base du site "
+"pour créer une adresse courriel. L'URL peut être définie à partir du site "
+"administrateur."
 
 #: recordtransfer/enums.py:66
 msgid ""
 "This setting controls how many rows of items are shown per page in tables "
 "that support pagination."
 msgstr ""
+"Ce paramètre contrôle combien de lignes d'articles sont affichées par page "
+"dans les tables qui prennent en charge la pagination."
 
 #: recordtransfer/enums.py:75
 msgid "Default value to fill in metadata for CAAIS sec. 1.1 - Repository."
 msgstr ""
+"Valeur par défaut à remplir dans les métadonnées pour la section 1.1 de la "
+"NCIAA - Établissement."
 
 #: recordtransfer/enums.py:79
 msgid "Default value to fill in metadata for CAAIS sec. 1.3 - Accession Title"
 msgstr ""
+"Valeur par défaut à remplir dans les métadonnées pour la section 1.3 de la "
+"NCIAA - Titre de l’acquisition"
 
 #: recordtransfer/enums.py:84
 msgid ""
@@ -749,6 +924,11 @@ msgid ""
 "While the Archival Unit field is repeatable in CAAIS, it is not possible to "
 "specify multiple archival unit defaults."
 msgstr ""
+"Valeur par défaut à remplir dans les métadonnées pour la section 1.4 de la "
+"NCIAA - Unité archivistique\n"
+"Bien que le champ « Unité d'archivistique » soit répétable dans NCIAA, il "
+"n'est pas possible de spécifier plusieurs valeurs par défaut pour les unités "
+"d'archivistiques."
 
 #: recordtransfer/enums.py:92
 msgid ""
@@ -757,11 +937,18 @@ msgid ""
 "While the Disposition Authority field is repeatable, it is not possible to "
 "specify multiple disposition authority defaults."
 msgstr ""
+"Valeur par défaut à remplir dans les métadonnées pour la section 1.6 de la "
+"NCIAA - Autorisation de disposition.\n"
+"Bien que le champ « Autorisation de disposition » soit répétable, il n'est "
+"pas possible de spécifier plusieurs valeurs par défaut pour l'autorisation "
+"de disposition."
 
 #: recordtransfer/enums.py:99
 msgid ""
 "Default value to fill in metadata for CAAIS sec. 1.5 - Acquisition Method"
 msgstr ""
+"Valeur par défaut à remplir dans les métadonnées pour la section 1.5 de la "
+"NCIAA - Méthode d’acquisition"
 
 #: recordtransfer/enums.py:104
 msgid ""
@@ -769,6 +956,10 @@ msgid ""
 "Leave empty, or populate with a term like 'Waiting for review' to signify "
 "that the metadata has not been reviewed yet."
 msgstr ""
+"Valeur par défaut à remplir dans les métadonnées pour la section 1.7 de la "
+"NCIAA - Statut.\n"
+"Laissez vide ou remplissez avec une expression telle que « En attente de "
+"révision » pour indiquer que les métadonnées n'ont pas encore été révisées."
 
 #: recordtransfer/enums.py:112
 msgid ""
@@ -777,6 +968,10 @@ msgid ""
 "If a default is supplied, the source confidentiality will be applied to "
 "every source of material received."
 msgstr ""
+"Valeur par défaut à remplir dans les métadonnées pour la section 2.1.6 de la "
+"NCIAA - Confidentialité de la source.\n"
+"Si un standard est fourni, la confidentialité de la source sera appliquée à "
+"toutes les sources de documents reçues."
 
 #: recordtransfer/enums.py:120
 msgid ""
@@ -785,11 +980,18 @@ msgid ""
 "While the Preliminary Custodial History field is repeatable in CAAIS, it is "
 "not possible to specify multiple defaults here."
 msgstr ""
+"Valeur par défaut à remplir dans les métadonnées pour la section 2.2 de la "
+"NCIAA - Historique préliminaire de la conservation.\n"
+"Bien que le champ « Historique préliminaire de la conservation » soit "
+"réutilisable dans la NCIAA, il n'est pas possible de spécifier plusieurs "
+"valeurs par défaut ici."
 
 #: recordtransfer/enums.py:127
 msgid ""
 "Default value to fill in metadata for CAAIS sec. 3.1 - Date of Materials"
 msgstr ""
+"Valeur par défaut à remplir dans les métadonnées pour la section 3.1 de la "
+"NCIAA - Date des documents"
 
 #: recordtransfer/enums.py:132
 msgid ""
@@ -797,6 +999,10 @@ msgid ""
 "If a default is supplied, the extent type will be applied to every extent "
 "statement received."
 msgstr ""
+"Valeur par défaut à remplir dans les métadonnées pour la section 3.2.1 de la "
+"NCIAA - Type d’étendue.\n"
+"Si une valeur par défaut est fournie, le type d'étendue sera appliqué à "
+"énonce d'étendue reçue."
 
 #: recordtransfer/enums.py:140
 msgid ""
@@ -805,6 +1011,10 @@ msgid ""
 "If a default is supplied, the quantity and unit of measure will be applied "
 "to every extent statement received."
 msgstr ""
+"Valeur par défaut à remplir dans les métadonnées pour la section 3.2.2 de la "
+"NCIAA - Quantité et unité de mesure.\n"
+"Si une valeur par défaut est fournie, la quantité et unité de mesure seront "
+"appliquées à chaque énoncé d'étendue reçue."
 
 #: recordtransfer/enums.py:148
 msgid ""
@@ -812,6 +1022,10 @@ msgid ""
 "If a default is supplied, the content type will be applied to every extent "
 "statement received."
 msgstr ""
+"Valeur par défaut à remplir dans les métadonnées pour la section 3.2.3 de la "
+"NCIAA -Type de contenu.\n"
+"Si une valeur par défaut est fournie, le type de contenu sera appliqué à "
+"chaque énoncé d'étendue reçue."
 
 #: recordtransfer/enums.py:156
 msgid ""
@@ -819,6 +1033,10 @@ msgid ""
 "If a default is supplied, the carrier type will be applied to every extent "
 "statement received."
 msgstr ""
+"Valeur par défaut à remplir dans les métadonnées pour la section 3.2.4 de la "
+"NCIAA - Type de support.\n"
+"Si une valeur par défaut est fournie, le type de support sera appliqué à "
+"chaque énoncé d'étendue reçue."
 
 #: recordtransfer/enums.py:164
 msgid ""
@@ -826,6 +1044,10 @@ msgid ""
 "If a default is supplied, the extent note will be applied to every extent "
 "statement received."
 msgstr ""
+"Valeur par défaut à remplir dans les métadonnées pour la section 3.2.5 de la "
+"NCIAA - Note sur l’étendue.\n"
+"Si une valeur par défaut est fournie, la note sur l'étendue sera appliqué à "
+"chaque énoncé d'étendue reçue."
 
 #: recordtransfer/enums.py:172
 msgid ""
@@ -834,15 +1056,23 @@ msgid ""
 "While the Preliminary Scope and Content field is repeatable in CAAIS, it is "
 "not possible to specify multiple defaults here."
 msgstr ""
+"Valeur par défaut à remplir dans les métadonnées pour la section 3.3 de la "
+"NCIAA - Portée et contenu préliminaires.\n"
+"Bien que le champ « Portée et contenu préliminaires » soit réutilisable dans "
+"NCIAA, il n'est pas possible de spécifier plusieurs valeurs par défaut ici."
 
 #: recordtransfer/enums.py:179
 msgid ""
 "Default value to fill in metadata for CAAIS sec. 3.4 - Language of Material"
 msgstr ""
+"Valeur par défaut à remplir dans les métadonnées pour la section 3.4 de la "
+"NCIAA - Langue des documents"
 
 #: recordtransfer/enums.py:183
 msgid "Default value to fill in metadata for CAAIS sec. 4.1 - Storage Location"
 msgstr ""
+"Valeur par défaut à remplir dans les métadonnées pour la section 4.1 de la "
+"NCIAA - Lieu d’entreposage"
 
 #: recordtransfer/enums.py:188
 msgid ""
@@ -851,6 +1081,10 @@ msgid ""
 "If not empty, a default preservation requirements statement will be applied "
 "to each submission."
 msgstr ""
+"Valeur par défaut à remplir dans les métadonnées pour la section 4.3.1 de la "
+"NCIAA - Type d’exigence de preservation.\n"
+"Si ce champ n'est pas vide, une déclaration d’exigence de preservation sera "
+"appliquée par défaut à chaque soumission."
 
 #: recordtransfer/enums.py:196
 msgid ""
@@ -859,6 +1093,10 @@ msgid ""
 "If not empty, a default preservation requirements statement will be applied "
 "to each submission."
 msgstr ""
+"Valeur par défaut à remplir dans les métadonnées pour la section 4.3.2 de la "
+"NCIAA - Valeur de l’exigence de préservation.\n"
+"Si ce champ n'est pas vide, une déclaration de l’exigence de préservation "
+"sera appliquée par défaut à chaque soumission."
 
 #: recordtransfer/enums.py:204
 msgid ""
@@ -867,6 +1105,10 @@ msgid ""
 "If not empty, a default preservation requirements statement will be applied "
 "to each submission."
 msgstr ""
+"Valeur par défaut à remplir dans les métadonnées pour la section 4.3.3 de la "
+"NCIAA - Note sur l’exigence de préservation.\n"
+"Si ce champ n'est pas vide, une déclaration de l’exigence de préservation "
+"sera appliquée par défaut à chaque soumission."
 
 #: recordtransfer/enums.py:212
 msgid ""
@@ -874,6 +1116,10 @@ msgid ""
 "If not empty, a default appraisal statement will be applied to each "
 "submission."
 msgstr ""
+"Valeur par défaut à remplir dans les métadonnées pour la section 4.4.1 de la "
+"NCIAA - Type d’évaluation.\n"
+"Si ce champ n'est pas vide, une déclaration d'évaluation par défaut sera "
+"appliquée à chaque soumission."
 
 #: recordtransfer/enums.py:219
 msgid ""
@@ -881,6 +1127,10 @@ msgid ""
 "If not empty, a default appraisal statement will be applied to each "
 "submission."
 msgstr ""
+"Valeur par défaut à remplir dans les métadonnées pour la section 4.4.2 de la "
+"NCIAA - Valeur de l’évaluation.\n"
+"Si ce champ n'est pas vide, une déclaration d'évaluation par défaut sera "
+"appliquée à chaque soumission."
 
 #: recordtransfer/enums.py:226
 msgid ""
@@ -888,6 +1138,10 @@ msgid ""
 "If not empty, a default appraisal statement will be applied to each "
 "submission."
 msgstr ""
+"Valeur par défaut à remplir dans les métadonnées pour la section 4.4.3 de la "
+"NCIAA - Note sur l’évaluation.\n"
+"Si ce champ n'est pas vide, une déclaration d'évaluation par défaut sera "
+"appliquée à chaque soumission."
 
 #: recordtransfer/enums.py:233
 msgid ""
@@ -896,6 +1150,10 @@ msgid ""
 "If not empty, a default associated document will be applied to each "
 "submission."
 msgstr ""
+"Valeur par défaut à remplir dans les métadonnées pour la section 4.5.1 de la "
+"NCIAA - Type de documentation apparentée.\n"
+"Si ce champ n'est pas vide, une documentation apparentée par défaut sera "
+"appliqué à chaque soumission."
 
 #: recordtransfer/enums.py:241
 msgid ""
@@ -904,6 +1162,10 @@ msgid ""
 "If not empty, a default associated document will be applied to each "
 "submission."
 msgstr ""
+"Valeur par défaut à remplir dans les métadonnées pour la section 4.5.2 de la "
+"NCIAA - Titre de la documentation apparentée.\n"
+"Si ce champ n'est pas vide, une documentation apparentée par défaut sera "
+"appliqué à chaque soumission."
 
 #: recordtransfer/enums.py:249
 msgid ""
@@ -912,21 +1174,31 @@ msgid ""
 "If not empty, a default associated document will be applied to each "
 "submission."
 msgstr ""
+"Valeur par défaut à remplir dans les métadonnées pour la section 4.5.3 de la "
+"NCIAA - Note sur la documentation apparentée.\n"
+"Si ce champ n'est pas vide, une documentation apparentée par défaut sera "
+"appliqué à chaque soumission."
 
 #: recordtransfer/enums.py:256
 msgid "Default value to fill in metadata for CAAIS sec. 6.1 - General Note"
 msgstr ""
+"Valeur par défaut à remplir dans les métadonnées pour la section 6.1 de la "
+"NCIAA - Note générale"
 
 #: recordtransfer/enums.py:260
 msgid ""
 "Default value to fill in metadata for CAAIS sec. 7.1 - Rules or Conventions"
 msgstr ""
+"Valeur par défaut à remplir dans les métadonnées pour la section 7.1 de la "
+"NCIAA - Règles ou conventions"
 
 #: recordtransfer/enums.py:264
 msgid ""
 "Default value to fill in metadata for CAAIS sec. 7.3 - Language of Accession "
 "Record"
 msgstr ""
+"Valeur par défaut à remplir dans les métadonnées pour la section 7.3 de la "
+"NCIAA - Langue de la notice d’acquisition"
 
 #: recordtransfer/enums.py:270
 msgid ""
@@ -934,6 +1206,11 @@ msgid ""
 "At the time of receiving a submission, a 'Submission' type event is created "
 "for the submission. You can control the Event Type name for that event here."
 msgstr ""
+"Nom par défaut du type d'événement de soumission - relatif à la section "
+"5.1.1. de la NCIAA.\n"
+"Au moment de la réception d'une soumission, un événement de type "
+"« Soumission » est créé pour cette soumission. Vous pouvez contrôler le nom "
+"du Type d'événement pour cet événement ici."
 
 #: recordtransfer/enums.py:279
 msgid ""
@@ -942,6 +1219,11 @@ msgid ""
 "for the submission. You can control the Event Agent's name for that event "
 "here."
 msgstr ""
+"Valeur par défaut de l'Agent de l'événement - relatif à la section 5.1.3. de "
+"la NCIAA.\n"
+"Au moment de la réception d'une soumission, un événement de type "
+"« Soumission » est créé pour cette soumission. Vous pouvez contrôler le nom "
+"de l'Agent d'événement pour cet événement ici."
 
 #: recordtransfer/enums.py:287
 msgid ""
@@ -950,6 +1232,11 @@ msgid ""
 "for the submission. You can control whether an Event Note is added for the "
 "event here."
 msgstr ""
+"Valeur par défaut de la note sur l - relatif à la section 5.1.4. de la "
+"NCIAA.\n"
+"Au moment de la réception d'une soumission, un événement de type "
+"« Soumission » est créé pour cette soumission. Vous pouvez contrôler ici si "
+"une note sur l'événement est ajoutée pour cet événement."
 
 #: recordtransfer/enums.py:296
 msgid ""
@@ -958,6 +1245,12 @@ msgid ""
 "created to indicate the date the accession record was created. You can "
 "control the name of the event here if you do not want to call it 'Creation'."
 msgstr ""
+"Date par défaut de création du nom de l'événement - relatif à la section "
+"7.2.1. de la NCIAA.\n"
+"Au moment de la réception d'une soumission, une date de création ou de "
+"révision est générée pour indiquer la date à laquelle l'enregistrement "
+"d'accès a été créé. Vous pouvez modifier le nom de l'événement ici si vous "
+"ne souhaitez pas l'appeler « Création »."
 
 #: recordtransfer/enums.py:306
 msgid ""
@@ -966,6 +1259,11 @@ msgid ""
 "created to indicate the date the accession record was created. You can "
 "control the name of the event agent here."
 msgstr ""
+"Date par défaut de l'agent de création ou de revision - relatif à la section "
+"7.2.3. de la NCIAA.\n"
+"Au moment de la réception d'une soumission, une date de création ou de "
+"révision est générée pour indiquer la date à laquelle l'enregistrement "
+"d'accès a été créé. Vous pouvez contrôler le nom de l'agent événementiel ici."
 
 #: recordtransfer/enums.py:315
 msgid ""
@@ -975,399 +1273,449 @@ msgid ""
 "note to that event here by setting the value to something other than an "
 "empty string."
 msgstr ""
+"Date par défaut de la note sur la création ou la révision - relatif à la "
+"section 7.2.4. de la NCIAA.\n"
+"Au moment de la réception d'une soumission, une date de création ou de "
+"révision est générée afin d'indiquer la date à laquelle l'enregistrement "
+"d'accès a été créé. Vous pouvez ajouter une note à cet événement ici en "
+"définissant une valeur autre qu'une chaîne vide."
 
 #: recordtransfer/forms/admin_forms.py:65
 msgid "Email updates can only be enabled for staff users."
 msgstr ""
+"Les mises à jour par courriel ne peuvent être activées que pour les "
+"utilisateurs qui sont membres du personnel."
 
 #: recordtransfer/forms/admin_forms.py:77
 msgid "This field is required when contact information is provided."
-msgstr ""
+msgstr "Ce champ est obligatoire lorsque des coordonnées sont fournies."
 
 #: recordtransfer/forms/admin_forms.py:132
 msgid "View or Change Metadata"
-msgstr ""
+msgstr "Afficher ou modifier les métadonnées"
 
 #: recordtransfer/forms/admin_forms.py:161
 #: recordtransfer/forms/admin_forms.py:165
 msgid "No description available for this setting."
-msgstr ""
+msgstr "Aucune description disponible pour ce paramètre."
 
 #: recordtransfer/forms/admin_forms.py:175
 msgid "Value must be a text value."
-msgstr ""
+msgstr "La valeur doit être une valeur textuelle."
 
 #: recordtransfer/forms/admin_forms.py:177
 msgid "Value must be a non-empty text value."
-msgstr ""
+msgstr "La valeur doit être une valeur textuelle non vide."
 
 #: recordtransfer/forms/admin_forms.py:181
 msgid "Value must be a number."
-msgstr ""
+msgstr "La valeur doit être un nombre."
 
 #: recordtransfer/forms/admin_forms.py:187
 #, python-format
 msgid "Value must be a valid whole number. '%(num)s' is not a valid number."
 msgstr ""
+"La valeur doit être un nombre entier valide. « %(num)s » n'est pas un nombre "
+"valide."
 
 #: recordtransfer/forms/admin_forms.py:201
 #, python-format
 msgid "Invalid setting key: %(key)s"
-msgstr ""
+msgstr "Clé de paramètre non valide : %(key)s"
 
 #: recordtransfer/forms/admin_forms.py:211
 #: recordtransfer/forms/admin_forms.py:216
 #, python-format
 msgid "%(setting)s must be a positive whole number."
-msgstr ""
+msgstr "%(setting)s doit être un nombre entier positif."
 
 #: recordtransfer/forms/admin_forms.py:225
 #, python-format
 msgid "%(setting)s must be a valid email address."
-msgstr ""
+msgstr "%(setting)s doit être une adresse courriel valide."
 
 #: recordtransfer/forms/mixins.py:31
 msgid "Street, and street number"
-msgstr ""
+msgstr "Rue et numéro de rue"
 
 #: recordtransfer/forms/mixins.py:32
 msgid "Address line 1"
-msgstr ""
+msgstr "Adresse ligne 1"
 
 #: recordtransfer/forms/mixins.py:38
 msgid "Unit Number, RPO, PO BOX... (optional)"
-msgstr ""
+msgstr "Numéro d'unité, RPO, boîte postale... (facultatif)"
 
 #: recordtransfer/forms/mixins.py:39
 msgid "Address line 2"
-msgstr ""
+msgstr "Adresse ligne 2"
 
 #: recordtransfer/forms/mixins.py:45 recordtransfer/models.py:73
 msgid "City"
-msgstr ""
+msgstr "Ville"
 
 #: recordtransfer/forms/mixins.py:56
 msgid "Select your province"
-msgstr ""
+msgstr "Sélectionnez votre province"
 
 #: recordtransfer/forms/mixins.py:127 recordtransfer/models.py:79
 msgid "Province or state"
-msgstr ""
+msgstr "Province ou état"
 
 #: recordtransfer/forms/mixins.py:139
 msgid "Other province or state"
-msgstr ""
+msgstr "Autre province ou état"
 
 #: recordtransfer/forms/mixins.py:147
 msgid ""
 "Postal code must look like \"Z0Z 0Z0\", zip code must look like \"12345\" or "
 "\"12345-1234\""
 msgstr ""
+"Le code postal doit ressembler à « Z0Z 0Z0 », « 12345 » ou « 12345-1234 »."
 
 #: recordtransfer/forms/mixins.py:156
 msgid "Postal / Zip code"
-msgstr ""
+msgstr "Code postal"
 
 #: recordtransfer/forms/mixins.py:159
 msgid "Select your Country"
-msgstr ""
+msgstr "Sélectionnez votre pays"
 
 #: recordtransfer/forms/mixins.py:161
 msgid "Country"
-msgstr ""
+msgstr "Pays"
 
 #: recordtransfer/forms/mixins.py:175
 msgid "Address line 1 is required if address line 2 is provided."
 msgstr ""
+"La ligne d'adresse 1 est obligatoire si la ligne d'adresse 2 est fournie."
 
 #: recordtransfer/forms/mixins.py:181
 msgid ""
 "You must select a province or state, use \"Other\" to enter a custom location"
 msgstr ""
+"Vous devez sélectionner une province ou un état, utilisez « Autre » pour "
+"saisir un emplacement personnalisé"
 
 #: recordtransfer/forms/mixins.py:187
 msgid ""
 "This field must be filled out if \"Other\" province or state is selected"
 msgstr ""
+"Ce champ doit être rempli si « Autre » province ou état est sélectionné"
 
 #: recordtransfer/forms/mixins.py:205
 msgid "Please verify you are human"
-msgstr ""
+msgstr "Veuillez vérifier que vous êtes bien un être humain"
 
 #: recordtransfer/forms/submission_forms.py:71
 msgid "I accept these terms"
-msgstr ""
+msgstr "J'accepte ces conditions"
 
 #: recordtransfer/forms/submission_forms.py:107
 msgid "Contact name"
-msgstr ""
+msgstr "Nom du contact"
 
 #: recordtransfer/forms/submission_forms.py:114
 msgid "Job title"
-msgstr ""
+msgstr "Titre du poste"
 
 #: recordtransfer/forms/submission_forms.py:121
 msgid "Organization"
-msgstr ""
+msgstr "Organisation"
 
 #: recordtransfer/forms/submission_forms.py:201
 msgid "If \"Source type\" is Other, enter your own source type"
-msgstr ""
+msgstr "Si « Type de source » est Autre, entrez votre propre type de source"
 
 #: recordtransfer/forms/submission_forms.py:216
 msgid "If \"Source role\" is Other, enter your own source role"
-msgstr ""
+msgstr "Si « rôle de source » est Autre, entrez votre propre rôle de source"
 
 #: recordtransfer/forms/submission_forms.py:225
 #: recordtransfer/templates/includes/delete_in_progress_submission_modal.html:22
 #: recordtransfer/templates/includes/delete_submission_group_modal.html:20
 #: recordtransfer/templates/recordtransfer/submission_form_review.html:64
 msgid "Yes"
-msgstr ""
+msgstr "Oui"
 
 #: recordtransfer/forms/submission_forms.py:226
 #: recordtransfer/templates/recordtransfer/submission_form_review.html:66
 msgid "No"
-msgstr ""
+msgstr "Non"
 
 #: recordtransfer/forms/submission_forms.py:231
 msgid "Fill out this section?"
-msgstr ""
+msgstr "Remplir cette section?"
 
 #: recordtransfer/forms/submission_forms.py:244
 msgid "Name of source"
-msgstr ""
+msgstr "Nom de la source"
 
 #: recordtransfer/forms/submission_forms.py:245
 msgid "The organization or entity submitting the records"
-msgstr ""
+msgstr "L'organisation ou l'entité qui soumet les documents"
 
 #: recordtransfer/forms/submission_forms.py:259
 #: recordtransfer/forms/submission_forms.py:296
 msgid "Please select one"
-msgstr ""
+msgstr "Veuillez sélectionner une option"
 
 #: recordtransfer/forms/submission_forms.py:262
 msgid ""
 "How would you describe <b>what</b> the source entity is? i.e., The source is "
 "a(n) ______"
 msgstr ""
+"Comment décririez-vous <b>ce qu'est</b> l'entité source ? Autrement dit, la "
+"source est un(e)"
 
 #: recordtransfer/forms/submission_forms.py:277
 msgid "A source type not covered by the other choices"
-msgstr ""
+msgstr "Un type de source non couvert par les autres choix"
 
 #: recordtransfer/forms/submission_forms.py:282
 msgid "Other source type"
-msgstr ""
+msgstr "Autre type de source"
 
 #: recordtransfer/forms/submission_forms.py:298
 msgid "How does the source relate to the records? "
-msgstr ""
+msgstr "Quel est le lien entre la source et les dossiers? "
 
 #: recordtransfer/forms/submission_forms.py:311
 msgid "A source role not covered by the other choices"
-msgstr ""
+msgstr "Un rôle de source non couvert par les autres choix"
 
 #: recordtransfer/forms/submission_forms.py:316
 msgid "Other source role"
-msgstr ""
+msgstr "Autre rôle de source"
 
 #: recordtransfer/forms/submission_forms.py:326
 msgid ""
 "Enter any notes you think may be useful for the archives to have about this "
 "entity (optional)"
 msgstr ""
+"Entrez toute note qui pourrait être utile aux archives concernant cette "
+"entité (facultatif)."
 
 #: recordtransfer/forms/submission_forms.py:331
 msgid "Source notes"
-msgstr ""
+msgstr "Notes de la source"
 
 #: recordtransfer/forms/submission_forms.py:332
 msgid "e.g., The donor wishes to remain anonymous"
-msgstr ""
+msgstr "par exemple, le donateur souhaite rester anonyme"
 
 #: recordtransfer/forms/submission_forms.py:423
 msgid "e.g., Committee Meeting Minutes"
-msgstr ""
+msgstr "par exemple, Procès-verbal de la réunion du comité"
 
 #: recordtransfer/forms/submission_forms.py:424
 msgid "Title"
-msgstr ""
+msgstr "Titre"
 
 #: recordtransfer/forms/submission_forms.py:431
 msgid "English, French"
-msgstr ""
+msgstr "Anglais, Français"
 
 #: recordtransfer/forms/submission_forms.py:432
 msgid "Enter all relevant languages here"
-msgstr ""
+msgstr "Entrez toutes les langues pertinentes ici"
 
 #: recordtransfer/forms/submission_forms.py:433
 msgid "Language(s)"
-msgstr ""
+msgstr "Langue(s)"
 
 #: recordtransfer/forms/submission_forms.py:443
 msgid "Date must be in the format YYYY-MM-DD or YYYY-MM-DD - YYYY-MM-DD"
-msgstr ""
+msgstr "La date doit être dans le format AAAA-MM-JJ ou AAAA-MM-JJ - AAAA-MM-JJ"
 
 #: recordtransfer/forms/submission_forms.py:447
 msgid "2000-03-14 - 2001-05-06"
-msgstr ""
+msgstr "2000-03-14 - 2001-05-06"
 
 #: recordtransfer/forms/submission_forms.py:452
 msgid "Date of materials"
-msgstr ""
+msgstr "Date des matériaux"
 
 #: recordtransfer/forms/submission_forms.py:454
 msgid ""
 "Enter the range of dates that the materials cover, or a single date if there "
 "is no range."
 msgstr ""
+"Entrez l'intervalle de dates couverte par les documents, ou une seule date "
+"s'il n'y a pas d'intervalle."
 
 #: recordtransfer/forms/submission_forms.py:462
 msgid "Date is approximated"
-msgstr ""
+msgstr "La date est approximative"
 
 #: recordtransfer/forms/submission_forms.py:464
 msgid ""
 "Check this box if the date is approximate, or if you are unsure of the date."
 msgstr ""
+"Cochez cette case si la date est approximative ou si vous n'êtes pas sûr de "
+"la date."
+
+#: recordtransfer/forms/submission_forms.py:473
+msgid "e.g., These files contain images from ..."
+msgstr ""
 
 #: recordtransfer/forms/submission_forms.py:475
 msgid "Description of contents"
-msgstr ""
+msgstr "Description du contenu"
 
 #: recordtransfer/forms/submission_forms.py:477
 msgid ""
 "Briefly describe the content of the files you are submitting. What do the "
 "files contain?"
 msgstr ""
+"Décrivez brièvement le contenu des fichiers que vous soumettez. Que "
+"contiennent ces fichiers?"
 
 #: recordtransfer/forms/submission_forms.py:489
 msgid ""
 "Enter any information you have on the history of who has had custody of the "
 "records or who has kept the records in the past (optional)"
 msgstr ""
+"Entrez toutes les informations dont vous disposez sur l'historique des "
+"personnes qui ont eu la garde des documents ou qui les ont conservés dans le "
+"passé (facultatif)."
 
 #: recordtransfer/forms/submission_forms.py:495
 msgid "Custodial history"
-msgstr ""
+msgstr "Historique de conservation"
 
 #: recordtransfer/forms/submission_forms.py:496
 msgid "e.g., John Doe held these records before donating them in 1960"
 msgstr ""
+"par exemple, John Doe détenait ces documents avant de les donner en 1960"
 
 #: recordtransfer/forms/submission_forms.py:512
 msgid ""
 "Record how many files and of what type they are that you are planning on "
 "submitting (optional)"
 msgstr ""
+"Indiquez le nombre et le type de fichiers que vous prévoyez de soumettre "
+"(facultatif)."
 
 #: recordtransfer/forms/submission_forms.py:517
 msgid "For example, &quot;200 PDF documents, totalling 2.0GB&quot;"
-msgstr ""
+msgstr "Par exemple, « 200 documents PDF, pour un total de 2,0 Go »"
 
 #: recordtransfer/forms/submission_forms.py:518
 msgid "Quantity and type of files"
-msgstr ""
+msgstr "Quantité et type de fichiers"
 
 #: recordtransfer/forms/submission_forms.py:554
 msgid ""
 "If \"Other type of rights\" is empty, you must choose one of the Rights "
 "types here"
 msgstr ""
+"Si le champ « Autre type de droits » est vide, vous devez choisir ici l'un "
+"des types de droits"
 
 #: recordtransfer/forms/submission_forms.py:560
 msgid "If \"Type of rights\" is empty, you must enter a different type here"
 msgstr ""
+"Si le champ « Type de droits » est vide, vous devez saisir un autre type ici"
 
 #: recordtransfer/forms/submission_forms.py:578
 msgid "Type of rights"
-msgstr ""
+msgstr "Type de droits"
 
 #: recordtransfer/forms/submission_forms.py:579
 msgid "Select a rights type (optional)"
-msgstr ""
+msgstr "Sélectionnez un type de droits (facultatif)"
 
 #: recordtransfer/forms/submission_forms.py:587
 msgid "Other type of rights not covered by other choices"
-msgstr ""
+msgstr "Autres types de droits non couverts par les autres choix"
 
 #: recordtransfer/forms/submission_forms.py:591
 msgid "For example: &quot;UK Human Rights Act 1998&quot;"
-msgstr ""
+msgstr "Par exemple: &quot;UK Human Rights Act 1998&quot;"
 
 #: recordtransfer/forms/submission_forms.py:592
 msgid "Other type of rights"
-msgstr ""
+msgstr "Autres types de droits"
 
 #: recordtransfer/forms/submission_forms.py:601
 msgid "Any notes on these rights or which files they may apply to (optional)"
 msgstr ""
+"Notes concernant ces droits ou les fichiers auxquels ils s'appliquent "
+"(facultatif)"
 
 #: recordtransfer/forms/submission_forms.py:606
 msgid ""
 "For example: &quot;Copyright until 2050&quot;, &quot;Only applies to "
 "images&quot;, etc."
 msgstr ""
+"Par exemple : « droits d'auteur jusqu'en 2050 », « S'applique uniquement aux "
+"images », etc."
 
 #: recordtransfer/forms/submission_forms.py:608
 msgid "Notes for rights"
-msgstr ""
+msgstr "Notes relatives aux droits"
 
 #: recordtransfer/forms/submission_forms.py:637
 msgid "This identifier type is reserved and cannot be used"
-msgstr ""
+msgstr "Ce type d'identifiant est réservé et ne peut pas être utilisé"
 
 #: recordtransfer/forms/submission_forms.py:641
 #: recordtransfer/forms/submission_forms.py:646
 msgid "Must enter a value for this identifier"
-msgstr ""
+msgstr "Vous devez saisir une valeur pour cet identifiant"
 
 #: recordtransfer/forms/submission_forms.py:643
 #: recordtransfer/forms/submission_forms.py:645
 msgid "Must enter a type for this identifier"
-msgstr ""
+msgstr "Il faut entrer un type pour cet identifiant"
 
 #: recordtransfer/forms/submission_forms.py:648
 msgid "Cannot enter a note without entering a value and type"
-msgstr ""
+msgstr "Impossible de saisir une note sans entrer une valeur et un type"
 
 #: recordtransfer/forms/submission_forms.py:656
 msgid "The type of the identifier"
-msgstr ""
+msgstr "Le type de l'identifiant"
 
 #: recordtransfer/forms/submission_forms.py:659
 msgid ""
 "For example: &quot;Receipt number&quot;, &quot;LAC Record ID&quot;, etc."
-msgstr ""
+msgstr "Par exemple : « Numéro de reçu », « Identifiant BAC », etc."
 
 #: recordtransfer/forms/submission_forms.py:660
 msgid "Type of identifier"
-msgstr ""
+msgstr "Type d'identifiant"
 
 #: recordtransfer/forms/submission_forms.py:667
 #: recordtransfer/forms/submission_forms.py:670
 msgid "Identifier value"
-msgstr ""
+msgstr "Valeur de l'identifiant"
 
 #: recordtransfer/forms/submission_forms.py:679
 msgid "Any notes on this identifier or which files it may apply to (optional)."
 msgstr ""
+"Notes concernant cet identifiant ou les fichiers auxquels il peut "
+"s'appliquer (facultatif)."
 
 #: recordtransfer/forms/submission_forms.py:683
 msgid "Notes for identifier"
-msgstr ""
+msgstr "Notes pour l'identifiant"
+
+#: recordtransfer/forms/submission_forms.py:708
+msgid "Select a group"
+msgstr "Sélectionnez un groupe"
 
 #: recordtransfer/forms/submission_forms.py:735
 msgid "Assigned group"
-msgstr ""
+msgstr "Groupe assigné"
 
 #: recordtransfer/forms/submission_forms.py:759
 #: recordtransfer/forms/submission_forms.py:824
 msgid "Record any general notes you have about the records here (optional)"
 msgstr ""
+"Notez ici toutes les notes générales que vous avez concernant les dossiers "
+"(facultatif)."
 
 #: recordtransfer/forms/submission_forms.py:764
 #: recordtransfer/forms/submission_forms.py:829
@@ -1375,177 +1723,186 @@ msgid ""
 "These should be notes that did not fit in any of the previous steps of this "
 "form"
 msgstr ""
+"Il devrait s'agir de notes qui ne trouvaient pas leur place dans les étapes "
+"précédentes de ce formulaire"
 
 #: recordtransfer/forms/submission_forms.py:766
 #: recordtransfer/forms/submission_forms.py:831
 msgid "Other notes"
-msgstr ""
+msgstr "Autres notes"
 
 #: recordtransfer/forms/submission_forms.py:773
 msgid "Upload session token is required"
-msgstr ""
+msgstr "L'identifiant de session de téléchargement est requis"
 
 #: recordtransfer/forms/submission_forms.py:784
 #: recordtransfer/forms/submission_forms.py:793
 msgid "Invalid upload session state. Please try again."
-msgstr ""
+msgstr "État de session de téléchargement non valide. Veuillez réessayer."
 
 #: recordtransfer/forms/submission_forms.py:797
 msgid "You must upload at least one file"
-msgstr ""
+msgstr "Vous devez télécharger au moins un fichier"
 
 #: recordtransfer/forms/submission_forms.py:914
 msgid "No identifiers were provided."
-msgstr ""
+msgstr "Aucun identifiant n'a été fourni."
 
 #: recordtransfer/forms/submission_forms.py:916
 msgid "No record rights or restrictions were provided."
 msgstr ""
+"Aucun droit ni restriction n'ont été accordés en matière d'enregistrement."
 
 #: recordtransfer/forms/submission_group_form.py:19
 #: recordtransfer/templates/includes/submission_group_table.html:4
 #: recordtransfer/views/profile.py:173
 msgid "Group Name"
-msgstr ""
+msgstr "Nom du groupe"
 
 #: recordtransfer/forms/submission_group_form.py:26
 msgid "Enter group description"
-msgstr ""
+msgstr "Entrez la description du groupe"
 
 #: recordtransfer/forms/submission_group_form.py:31
 #: recordtransfer/templates/includes/submission_group_table.html:5
 #: recordtransfer/templates/recordtransfer/submission_form_groupsubmission.html:31
 #: recordtransfer/views/profile.py:174
 msgid "Group Description"
-msgstr ""
+msgstr "Description du groupe"
 
 #: recordtransfer/forms/submission_group_form.py:49
 msgid "Form is empty."
-msgstr ""
+msgstr "Le formulaire est vide."
 
 #: recordtransfer/forms/submission_group_form.py:58
 msgid "Required"
-msgstr ""
+msgstr "Requis"
 
 #: recordtransfer/forms/submission_group_form.py:72
 msgid "You have already created a group with this name."
-msgstr ""
+msgstr "Vous avez déjà créé un groupe avec ce nom."
 
 #: recordtransfer/forms/submission_group_form.py:78
 msgid "No changes detected."
-msgstr ""
+msgstr "Aucun changement détecté."
 
 #: recordtransfer/forms/user_forms.py:31
 #, python-format
 msgid "The email %(email)s is already in use"
-msgstr ""
+msgstr "Le courriel %(email)s est déjà utilisée"
 
 #: recordtransfer/forms/user_forms.py:44
 #: recordtransfer/templates/includes/account_info_form.html:23
 msgid "Username"
-msgstr ""
+msgstr "Nom d'utilisateur"
 
 #: recordtransfer/forms/user_forms.py:45
 msgid "This is the username you will use to log in to your account"
 msgstr ""
+"Il s'agit du nom d'utilisateur que vous utiliserez pour vous connecter à "
+"votre compte"
 
 #: recordtransfer/forms/user_forms.py:53
 msgid "First name"
-msgstr ""
+msgstr "Prénom"
 
 #: recordtransfer/forms/user_forms.py:61
 msgid "Last name"
-msgstr ""
+msgstr "Nom de famille"
 
 #: recordtransfer/forms/user_forms.py:77
 msgid "Name must contain only letters and may include these symbols: ' - . \n"
 msgstr ""
+"Le nom doit contenir uniquement des lettres et peut inclure les symboles "
+"suivants : ' - . \n"
 
 #: recordtransfer/forms/user_forms.py:83
 msgid "First Name"
-msgstr ""
+msgstr "Prénom"
 
 #: recordtransfer/forms/user_forms.py:92
 msgid "Last Name"
-msgstr ""
+msgstr "Nom de famille"
 
 #: recordtransfer/forms/user_forms.py:100
 #: recordtransfer/templates/includes/account_info_form.html:60
 msgid "Receive notification emails?"
-msgstr ""
+msgstr "Recevoir des courriels de notification?"
 
 #: recordtransfer/models.py:46
 msgid "Preferred language for the website and email notifications"
 msgstr ""
+"Langue de préférence pour le site Web et les notifications par courriel"
 
 #: recordtransfer/models.py:47
 #: recordtransfer/templates/includes/language_form.html:5
 msgid "Preferred Language"
-msgstr ""
+msgstr "Langue de préférence"
 
 #: recordtransfer/models.py:55
 msgid "Phone number in format: +1 (999) 999-9999"
-msgstr ""
+msgstr "Numéro de téléphone au format : +1 (999) 999-9999"
 
 #: recordtransfer/models.py:61
 msgid "Street and street number"
-msgstr ""
+msgstr "Rue et numéro de rue"
 
 #: recordtransfer/models.py:67
 msgid "Unit number, RPO, PO BOX (optional)"
-msgstr ""
+msgstr "Numéro d'unité, comptoir postal, boîte postale (facultatif)"
 
 #: recordtransfer/models.py:85
 msgid "Other province or state if not listed"
-msgstr ""
+msgstr "Autre province ou État si non listé"
 
 #: recordtransfer/models.py:91
 msgid "Postal code (Canada) or zip code (US)"
-msgstr ""
+msgstr "Code postal (Canada) ou autre code d'identification postal"
 
 #: recordtransfer/models.py:97
 msgid "Country code"
-msgstr ""
+msgstr "Code de pays"
 
 #: recordtransfer/models.py:342
 msgid "Setting Key"
-msgstr ""
+msgstr "Touche de Réglage"
 
 #: recordtransfer/models.py:345
 msgid "Setting Value"
-msgstr ""
+msgstr "Valeur Paramétrée"
 
 #: recordtransfer/models.py:353
 msgid "Setting value type"
-msgstr ""
+msgstr "Type de valeur paramétrée"
 
 #: recordtransfer/models.py:359
 msgid "Change date"
-msgstr ""
+msgstr "Modifier la date"
 
 #: recordtransfer/models.py:366
 msgid "Changed by"
-msgstr ""
+msgstr "Modifié par"
 
 #: recordtransfer/models.py:804
 msgid "Not Started"
-msgstr ""
+msgstr "Pas commencé"
 
 #: recordtransfer/models.py:805
 msgid "In Progress"
-msgstr ""
+msgstr "En cours"
 
 #: recordtransfer/models.py:806
 msgid "Complete"
-msgstr ""
+msgstr "Terminé"
 
 #: recordtransfer/models.py:807
 msgid "Failed"
-msgstr ""
+msgstr "Échoué"
 
 #: recordtransfer/templates/admin/base_site.html:38
 msgid "NCTR Secure Record Transfer App Administration"
 msgstr ""
+"Administration de l'application de transfert sécurisé des dossiers du CNVR"
 
 #: recordtransfer/templates/admin/sitesetting_change_form.html:5
 #: recordtransfer/templates/includes/account_info_form.html:80
@@ -1553,16 +1910,17 @@ msgstr ""
 #: recordtransfer/templates/includes/submission_group_edit_form.html:12
 #: recordtransfer/templates/recordtransfer/submission_form_base.html:79
 msgid "Save"
-msgstr ""
+msgstr "Enregistrer"
 
 #: recordtransfer/templates/admin/sitesetting_change_form.html:7
 msgid "Save and continue editing"
-msgstr ""
+msgstr "Enregistrer et continuer la modification"
 
 #: recordtransfer/templates/admin/sitesetting_change_form.html:10
 #, python-format
 msgid "Reset to default (default: %(setting_default_value)s)"
 msgstr ""
+"Réinitialiser par défaut (valeur par défaut : %(setting_default_value)s)"
 
 #: recordtransfer/templates/admin/sitesetting_change_form.html:13
 #, python-format
@@ -1570,70 +1928,76 @@ msgid ""
 "Are you sure you want to reset this setting to its default value "
 "(%(setting_default_value)s)?"
 msgstr ""
+"Êtes-vous sûr de vouloir réinitialiser ce paramètre à sa valeur par défaut "
+"(%(setting_default_value)s) ?"
 
 #: recordtransfer/templates/admin/submission_change_form.html:19
 msgid "Click to view submission report"
-msgstr ""
+msgstr "Cliquez pour voir le rapport de soumission"
 
 #: recordtransfer/templates/admin/submission_change_form.html:20
 msgid "Click to download CSV export"
-msgstr ""
+msgstr "Cliquez pour télécharger le fichier CSV exporté"
 
 #: recordtransfer/templates/admin/submission_change_form.html:21
 msgid "Click to create a downloadable bag"
-msgstr ""
+msgstr "Cliquez pour créer un sac téléchargeable"
 
 #: recordtransfer/templates/includes/accepted_file_formats.html:4
 msgid ""
 "The following are the types of files that donors can submit using this "
 "application."
 msgstr ""
+"Voici les types de fichiers que les donateurs peuvent soumettre à l'aide de "
+"cette application."
 
 #: recordtransfer/templates/includes/accepted_file_formats.html:11
 #, python-format
 msgid "%(group)s Files"
-msgstr ""
+msgstr "%(group)s Fichiers"
 
 #: recordtransfer/templates/includes/account_info_form.html:25
 #: recordtransfer/templates/registration/password_change_form.html:4
 #: recordtransfer/templates/registration/password_change_form.html:10
 msgid "Change Password"
-msgstr ""
+msgstr "Modifier le mot de passe"
 
 #: recordtransfer/templates/includes/account_info_form.html:52
 msgid "Notification options"
-msgstr ""
+msgstr "Options de notification"
 
 #: recordtransfer/templates/includes/assign_submission_group_modal.html:6
 #, python-format
 msgid "Change submission group for submission \"%(submission_title)s\""
 msgstr ""
+"Modifier le groupe de soumission pour la soumission \"%(submission_title)s\""
 
 #: recordtransfer/templates/includes/assign_submission_group_modal.html:8
 #, python-format
 msgid "Assign submission group for submission \"%(submission_title)s\""
 msgstr ""
+"Attribuer un groupe de soumission pour la soumission \"%(submission_title)s\""
 
 #: recordtransfer/templates/includes/assign_submission_group_modal.html:15
 msgid "Submission groups"
-msgstr ""
+msgstr "Groupes de soumission"
 
 #: recordtransfer/templates/includes/assign_submission_group_modal.html:18
 msgid "Select a group to see its description"
-msgstr ""
+msgstr "Sélectionnez un groupe pour voir sa description"
 
 #: recordtransfer/templates/includes/assign_submission_group_modal.html:20
 msgid "Choose a group"
-msgstr ""
+msgstr "Choisissez un groupe"
 
 #: recordtransfer/templates/includes/assign_submission_group_modal.html:23
 msgid "No description available"
-msgstr ""
+msgstr "Aucune description disponible"
 
 #: recordtransfer/templates/includes/assign_submission_group_modal.html:26
 #, python-format
 msgid "%(group_name)s (current)"
-msgstr ""
+msgstr "%(group_name)s (actuel)"
 
 #: recordtransfer/templates/includes/assign_submission_group_modal.html:40
 #: recordtransfer/templates/includes/delete_in_progress_submission_modal.html:18
@@ -1641,85 +2005,85 @@ msgstr ""
 #: recordtransfer/templates/includes/new_submission_group_modal.html:13
 #: recordtransfer/templates/includes/unsaved_changes_modal.html:17
 msgid "Cancel"
-msgstr ""
+msgstr "Annuler"
 
 #: recordtransfer/templates/includes/assign_submission_group_modal.html:45
 msgid "Unassign Group"
-msgstr ""
+msgstr "Désaffecter le groupe"
 
 #: recordtransfer/templates/includes/assign_submission_group_modal.html:49
 msgid "Change Group"
-msgstr ""
+msgstr "Modifier le groupe"
 
 #: recordtransfer/templates/includes/assign_submission_group_modal.html:51
 msgid "Assign Group"
-msgstr ""
+msgstr "Attribuer un groupe"
 
 #: recordtransfer/templates/includes/base_table.html:8
 msgid "Sort field:"
-msgstr ""
+msgstr "Champ de tri:"
 
 #: recordtransfer/templates/includes/base_table.html:13
 msgid "Sort direction:"
-msgstr ""
+msgstr "Sens de tri:"
 
 #: recordtransfer/templates/includes/base_table.html:15
 #: recordtransfer/templates/includes/base_table.html:56
 msgid "Descending"
-msgstr ""
+msgstr "Descendant"
 
 #: recordtransfer/templates/includes/base_table.html:17
 #: recordtransfer/templates/includes/base_table.html:55
 msgid "Ascending"
-msgstr ""
+msgstr "Ascendant"
 
 #: recordtransfer/templates/includes/base_table.html:27
 msgid "Sort"
-msgstr ""
+msgstr "Trier"
 
 #: recordtransfer/templates/includes/base_table.html:35
 msgid "Sort by:"
-msgstr ""
+msgstr "Trier par:"
 
 #: recordtransfer/templates/includes/base_table.html:39
 msgid "Sort by"
-msgstr ""
+msgstr "Trier par"
 
 #: recordtransfer/templates/includes/base_table.html:47
 msgid "Direction:"
-msgstr ""
+msgstr "Direction:"
 
 #: recordtransfer/templates/includes/base_table.html:51
 msgid "Direction"
-msgstr ""
+msgstr "Direction"
 
 #: recordtransfer/templates/includes/contact_info_form.html:18
 msgid "Enter phone number"
-msgstr ""
+msgstr "Entrez votre numéro de téléphone"
 
 #: recordtransfer/templates/includes/contact_info_form.html:37
 msgid "Enter street address"
-msgstr ""
+msgstr "Entrez l'adresse postale"
 
 #: recordtransfer/templates/includes/contact_info_form.html:50
 msgid "Apartment, suite, etc."
-msgstr ""
+msgstr "Appartement, suite, etc."
 
 #: recordtransfer/templates/includes/contact_info_form.html:62
 msgid "Enter city"
-msgstr ""
+msgstr "Entrez la ville"
 
 #: recordtransfer/templates/includes/contact_info_form.html:93
 msgid "Enter state/province if not listed above"
-msgstr ""
+msgstr "Indiquez l'état/la province s'il n'est pas mentionné ci-dessus"
 
 #: recordtransfer/templates/includes/contact_info_form.html:105
 msgid "Enter postal/zip code"
-msgstr ""
+msgstr "Entrez le code postal"
 
 #: recordtransfer/templates/includes/delete_in_progress_submission_modal.html:4
 msgid "Are you sure you want to delete this in-progress submission?"
-msgstr ""
+msgstr "Êtes-vous sûr de vouloir supprimer cette soumission en cours ?"
 
 #: recordtransfer/templates/includes/delete_in_progress_submission_modal.html:7
 #, python-format
@@ -1729,6 +2093,10 @@ msgid ""
 "%(date)s titled \"%(title)s\"?\n"
 "            "
 msgstr ""
+"\n"
+"                Souhaitez-vous supprimer la soumission en cours de %(date)s "
+"intitulé \"%(title)s\"?\n"
+"             "
 
 #: recordtransfer/templates/includes/delete_in_progress_submission_modal.html:11
 #, python-format
@@ -1738,10 +2106,14 @@ msgid ""
 "%(date)s?\n"
 "            "
 msgstr ""
+"\n"
+"                Souhaitez-vous supprimer la soumission en cours de "
+"%(date)s?\n"
+"            "
 
 #: recordtransfer/templates/includes/delete_submission_group_modal.html:4
 msgid "Are you sure you want to delete this submission group?"
-msgstr ""
+msgstr "Êtes-vous sûr de vouloir supprimer ce groupe de soumission?"
 
 #: recordtransfer/templates/includes/delete_submission_group_modal.html:6
 #, python-format
@@ -1751,128 +2123,137 @@ msgid ""
 "%(submission_count)s submissions.\n"
 "        "
 msgstr ""
+"\n"
+"        Cela supprimera le groupe de soumissions <i>%(name)s</i>, qui compte "
+"%(submission_count)s soumissions.\n"
+"        "
 
 #: recordtransfer/templates/includes/delete_submission_group_modal.html:12
 msgid ""
 "Submissions under this group will NOT be deleted. However, this group will "
 "be unassigned from all submissions and will no longer be available for use."
 msgstr ""
+"Les soumissions effectuées dans ce groupe ne seront PAS supprimées. "
+"Cependant, ce groupe sera désactivé pour toutes les soumissions et ne sera "
+"plus disponible à l'utilisation."
 
 #: recordtransfer/templates/includes/in_progress_submission_table.html:4
 #: recordtransfer/views/profile.py:224 recordtransfer/views/profile.py:244
 msgid "Last Updated"
-msgstr ""
+msgstr "Dernière mise à jour"
 
 #: recordtransfer/templates/includes/in_progress_submission_table.html:5
 #: recordtransfer/views/profile.py:226
 msgid "Expires At"
-msgstr ""
+msgstr "Expire à"
 
 #: recordtransfer/templates/includes/in_progress_submission_table.html:6
 #: recordtransfer/templates/includes/submission_table.html:5
 #: recordtransfer/views/profile.py:225 recordtransfer/views/profile.py:245
 #: recordtransfer/views/profile.py:292
 msgid "Submission Title"
-msgstr ""
+msgstr "Titre de la soumission"
 
 #: recordtransfer/templates/includes/in_progress_submission_table.html:7
 #: recordtransfer/templates/includes/open_session_table.html:11
 #: recordtransfer/templates/includes/submission_group_table.html:7
 #: recordtransfer/templates/includes/submission_table.html:10
 msgid "Actions"
-msgstr ""
+msgstr "Actions"
 
 #: recordtransfer/templates/includes/in_progress_submission_table.html:21
 msgid "Submission has expired"
-msgstr ""
+msgstr "La soumission a expiré"
 
 #: recordtransfer/templates/includes/in_progress_submission_table.html:25
 msgid "Submission is expiring soon"
-msgstr ""
+msgstr "La soumission expire bientôt"
 
 #: recordtransfer/templates/includes/in_progress_submission_table.html:40
 msgid "Resume"
-msgstr ""
+msgstr "Reprendre"
 
 #: recordtransfer/templates/includes/in_progress_submission_table.html:51
 #: recordtransfer/templates/includes/submission_group_table.html:35
 msgid "Delete"
-msgstr ""
+msgstr "Supprimer"
 
 #: recordtransfer/templates/includes/in_progress_submission_table.html:61
 msgid "You have no submissions that are in progress."
-msgstr ""
+msgstr "Vous n'avez aucune soumission en cours."
 
 #: recordtransfer/templates/includes/new_submission_group_modal.html:4
 msgid "Create a new submission group"
-msgstr ""
+msgstr "Créer un nouveau groupe de soumission"
 
 #: recordtransfer/templates/includes/new_submission_group_modal.html:14
 msgid "Create"
-msgstr ""
+msgstr "Créer"
 
 #: recordtransfer/templates/includes/open_session_table.html:5
 msgid "Started"
-msgstr ""
+msgstr "Commencé"
 
 #: recordtransfer/templates/includes/open_session_table.html:6
 msgid "Last Changed"
-msgstr ""
+msgstr "Dernière modification"
 
 #: recordtransfer/templates/includes/open_session_table.html:7
 msgid "Files"
-msgstr ""
+msgstr "Fichiers"
 
 #: recordtransfer/templates/includes/open_session_table.html:8
 msgid "Total Size"
-msgstr ""
+msgstr "Taille totale"
 
 #: recordtransfer/templates/includes/open_session_table.html:10
 msgid "Expires"
-msgstr ""
+msgstr "Expire"
 
 #: recordtransfer/templates/includes/open_session_table.html:25
 msgid "Expired"
-msgstr ""
+msgstr "Expiré"
 
 #: recordtransfer/templates/includes/open_session_table.html:27
 msgid "Expires Soon"
-msgstr ""
+msgstr "Expire bientôt"
 
 #: recordtransfer/templates/includes/open_session_table.html:30
 #: recordtransfer/templates/includes/submission_table.html:24
 #: upload/admin.py:50 upload/admin.py:257 upload/admin.py:267
 msgid "N/A"
-msgstr ""
+msgstr "Sans objet"
 
 #: recordtransfer/templates/includes/open_session_table.html:39
 msgid "Resume submission"
-msgstr ""
+msgstr "Reprendre la soumission"
 
 #: recordtransfer/templates/includes/open_session_table.html:50
 msgid "Delete submission"
-msgstr ""
+msgstr "Supprimer la soumission"
 
 #: recordtransfer/templates/includes/open_session_table.html:55
 msgid "No actions available"
-msgstr ""
+msgstr "Aucune action disponible"
 
 #: recordtransfer/templates/includes/open_session_table.html:62
 msgid "No open sessions found."
-msgstr ""
+msgstr "Aucune session ouverte trouvée."
 
 #: recordtransfer/templates/includes/open_session_table.html:71
 #, python-format
 msgid "Session Usage: <b>%(total_open_sessions)s / %(max_open_sessions)s</b>"
 msgstr ""
+"Utilisation de la session : <b>%(total_open_sessions)s / "
+"%(max_open_sessions)s</b>"
 
 #: recordtransfer/templates/includes/open_session_table.html:78
 msgid "Maximum sessions reached"
-msgstr ""
+msgstr "Nombre maximal de sessions atteint"
 
 #: recordtransfer/templates/includes/open_session_table.html:83
 msgid "Almost at limit"
-msgstr ""
+msgstr "Presque à la limite"
 
 #: recordtransfer/templates/includes/open_session_table.html:89
 #, python-format
@@ -1885,145 +2266,162 @@ msgid_plural ""
 "                                %(count)s sessions remaining\n"
 "                            "
 msgstr[0] ""
+"\n"
+"                                1 session restante\n"
+"                            "
 msgstr[1] ""
+"\n"
+"                                %(count)s sessions restantes\n"
+"                            "
 
 #: recordtransfer/templates/includes/pagination.html:13
 #, python-format
 msgid "Page %(curr_page)s of %(total_pages)s"
-msgstr ""
+msgstr "Page %(curr_page)s de %(total_pages)s"
 
 #: recordtransfer/templates/includes/profile_forms.html:3
 msgid "Profile Settings"
-msgstr ""
+msgstr "Paramètres du profil"
 
 #: recordtransfer/templates/includes/profile_forms.html:9
 msgid "Account"
-msgstr ""
+msgstr "Compte"
 
 #: recordtransfer/templates/includes/profile_forms.html:26
 msgid "Language"
-msgstr ""
+msgstr "Langue"
 
 #: recordtransfer/templates/includes/save_contact_info_modal.html:9
-#: recordtransfer/views/pre_submission.py:589
+#: recordtransfer/views/pre_submission.py:587
 msgid "Would you like to save your contact information to your profile?"
-msgstr ""
+msgstr "Souhaitez-vous enregistrer vos coordonnées dans votre profil ?"
 
 #: recordtransfer/templates/includes/save_contact_info_modal.html:14
 msgid "Phone:"
-msgstr ""
+msgstr "Téléphone:"
 
 #: recordtransfer/templates/includes/save_contact_info_modal.html:20
 msgid "Address:"
-msgstr ""
+msgstr "Adresse:"
 
 #: recordtransfer/templates/includes/save_contact_info_modal.html:28
 msgid "City:"
-msgstr ""
+msgstr "Ville:"
 
 #: recordtransfer/templates/includes/save_contact_info_modal.html:32
 msgid "Province/State:"
-msgstr ""
+msgstr "Province/État:"
 
 #: recordtransfer/templates/includes/save_contact_info_modal.html:36
 msgid "Postal/Zip:"
-msgstr ""
+msgstr "Code postal:"
 
 #: recordtransfer/templates/includes/save_contact_info_modal.html:40
 msgid "Country:"
-msgstr ""
+msgstr "Pays:"
 
 #: recordtransfer/templates/includes/save_contact_info_modal.html:47
 msgid ""
 "Saving your contact information will make future submissions easier by pre-"
 "populating these fields in this step."
 msgstr ""
+"En enregistrant vos coordonnées, vous faciliterez vos prochaines "
+"soumissions, car ces champs seront préremplis lors de cette étape."
 
 #: recordtransfer/templates/includes/save_contact_info_modal.html:50
 msgid "Continue without saving"
-msgstr ""
+msgstr "Continuer sans enregistrer"
 
 #: recordtransfer/templates/includes/save_contact_info_modal.html:51
 msgid "Save and continue"
-msgstr ""
+msgstr "Enregistrer et continuer"
+
+#: recordtransfer/templates/includes/submission_form_field.html:30
+#: recordtransfer/templates/recordtransfer/header.html:44
+#: recordtransfer/templates/recordtransfer/help.html:4
+#: recordtransfer/templates/recordtransfer/signup_form.html:123
+msgid "Help"
+msgstr "Aide"
 
 #: recordtransfer/templates/includes/submission_group_form_fields.html:20
 msgid "Optional"
-msgstr ""
+msgstr "Facultatif"
 
 #: recordtransfer/templates/includes/submission_group_table.html:6
 #: recordtransfer/templates/recordtransfer/submission_group_detail.html:42
 #: recordtransfer/views/profile.py:175
 msgid "Submissions in Group"
-msgstr ""
+msgstr "Soumissions dans le le Groupe"
 
 #: recordtransfer/templates/includes/submission_group_table.html:19
 msgid "View group"
-msgstr ""
+msgstr "Afficher le groupe"
 
 #: recordtransfer/templates/includes/submission_group_table.html:25
 #: recordtransfer/templates/recordtransfer/submission_group_detail.html:46
 msgid "Export Submissions as CSV"
-msgstr ""
+msgstr "Exporter les soumissions au format CSV"
 
 #: recordtransfer/templates/includes/submission_group_table.html:44
 #: recordtransfer/tests/unit/views/test_profile.py:570
 msgid "You have not made any submission groups."
-msgstr ""
+msgstr "Vous n'avez créé aucun groupe de soumission."
 
 #: recordtransfer/templates/includes/submission_table.html:4
 #: recordtransfer/views/profile.py:291
 msgid "Date Submitted"
-msgstr ""
+msgstr "Date de soumission"
 
 #: recordtransfer/templates/includes/submission_table.html:7
 #: recordtransfer/views/profile.py:293
 msgid "Submission Group"
-msgstr ""
+msgstr "Groupe de soumission"
 
 #: recordtransfer/templates/includes/submission_table.html:9
 msgid "Files Submitted"
-msgstr ""
+msgstr "Fichiers soumis"
 
 #: recordtransfer/templates/includes/submission_table.html:33
 msgid "View Report"
-msgstr ""
+msgstr "Voir le rapport"
 
 #: recordtransfer/templates/includes/submission_table.html:44
 msgid "Change/assign group"
-msgstr ""
+msgstr "Modifier/attribuer un groupe"
 
 #: recordtransfer/templates/includes/submission_table.html:50
 msgid "Export CSV"
-msgstr ""
+msgstr "Exporter CSV"
 
 #: recordtransfer/templates/includes/submission_table.html:61
 msgid "You have not made any submissions in this group."
-msgstr ""
+msgstr "Vous n'avez fait aucune soumission dans ce groupe."
 
 #: recordtransfer/templates/includes/submission_table.html:63
 msgid "You have not made any submissions."
-msgstr ""
+msgstr "Vous n'avez fait aucune soumission."
 
 #: recordtransfer/templates/includes/unsaved_changes_modal.html:9
 msgid "Are you sure you want to leave?"
-msgstr ""
+msgstr "Êtes-vous sûr de vouloir quitter?"
 
 #: recordtransfer/templates/includes/unsaved_changes_modal.html:11
 msgid "You have unsaved data!"
-msgstr ""
+msgstr "Vous avez des données non enregistrées!"
 
 #: recordtransfer/templates/includes/unsaved_changes_modal.html:12
 msgid "If you would like to save your submission for later, click this link:"
 msgstr ""
+"Si vous souhaitez enregistrer votre soumission pour plus tard, cliquez sur "
+"ce lien:"
 
 #: recordtransfer/templates/includes/unsaved_changes_modal.html:14
 msgid "Save form and resume later"
-msgstr ""
+msgstr "Enregistrer le formulaire et reprendre plus tard"
 
 #: recordtransfer/templates/includes/unsaved_changes_modal.html:16
 msgid "Leave without saving"
-msgstr ""
+msgstr "Quitter sans enregistrer"
 
 #: recordtransfer/templates/recordtransfer/about.html:4
 #: recordtransfer/templates/recordtransfer/about.html:8
@@ -2043,10 +2441,19 @@ msgid ""
 "Archives.\n"
 "                    "
 msgstr ""
+"\n"
+"                    L'Application sécurisée de transfert de dossiers du CNVR "
+"permet aux gens d'envoyer des dossiers aux Archives du Centre national pour "
+"la vérité \n"
+"                    et la reconciliation en toute sécurité par Internet. "
+"Pour les petits volumes de documents, il s'agit de la\n"
+"                    méthode privilégiée pour envoyer des documents aux "
+"archives du CNVR.\n"
+"                    "
 
 #: recordtransfer/templates/recordtransfer/about.html:21
 msgid "Maximum Submission Size"
-msgstr ""
+msgstr "Taille maximale des soumissions"
 
 #: recordtransfer/templates/recordtransfer/about.html:25
 #, python-format
@@ -2066,26 +2473,43 @@ msgid ""
 "submissions are related.\n"
 "                    "
 msgstr ""
+"\n"
+"                    Les soumissions effectuées via cette application sont "
+"soumises à une taille maximale.\n"
+"                    Vous pouvez télécharger un <b>maximum de "
+"%(MAX_TOTAL_UPLOAD_COUNT)s files</b>, et <b>au maximum\n"
+"                    %(MAX_TOTAL_UPLOAD_SIZE_MB)s Mo de fichiers</b>. Aucun "
+"<b>fichier ne peut dépasser\n"
+"                    %(MAX_SINGLE_UPLOAD_SIZE_MB)s Mo</b>. Si vous souhaitez "
+"soumettre <i>plus</i> que cela\n"
+"                     montant, veuillez diviser votre soumission en plusieurs "
+"parties et utiliser le formulaire de groupe pour regrouper les soumissions "
+"similaires.\n"
+"                    ensemble afin que nos archivistes sachent qu'elles sont "
+"liées.\n"
+"                    "
 
 #: recordtransfer/templates/recordtransfer/about.html:35
 #: recordtransfer/templates/recordtransfer/submission_form_uploadfiles.html:35
 msgid "Accepted File Types"
-msgstr ""
+msgstr "Types de fichiers acceptés"
 
 #: recordtransfer/templates/recordtransfer/activation_complete.html:4
 #: recordtransfer/templates/recordtransfer/activation_complete.html:20
 msgid "Account Activated"
-msgstr ""
+msgstr "Compte activé"
 
 #: recordtransfer/templates/recordtransfer/activation_complete.html:23
 msgid ""
 "Your account has been activated, and you should now be logged in. You may "
 "now submit records to the NCTR!"
 msgstr ""
+"Votre compte a été activé et vous devriez maintenant être connecté. Vous "
+"pouvez désormais soumettre des dossiers au CNVR!"
 
 #: recordtransfer/templates/recordtransfer/activation_complete.html:36
 msgid "Start a Submission"
-msgstr ""
+msgstr "Commencer une soumission"
 
 #: recordtransfer/templates/recordtransfer/activation_complete.html:44
 #: recordtransfer/templates/recordtransfer/activation_invalid.html:31
@@ -2095,36 +2519,40 @@ msgstr ""
 #: recordtransfer/templates/registration/password_reset_done.html:33
 #: templates/base_error.html:30
 msgid "Return to Home"
-msgstr ""
+msgstr "Retour à la page d'accueil"
 
 #: recordtransfer/templates/recordtransfer/activation_invalid.html:4
 msgid "Could not Activate"
-msgstr ""
+msgstr "Impossible d'activer"
 
 #: recordtransfer/templates/recordtransfer/activation_invalid.html:21
 msgid "Account Could not be Activated"
-msgstr ""
+msgstr "Compte n'a pas pu être activé"
 
 #: recordtransfer/templates/recordtransfer/activation_invalid.html:24
 msgid ""
 "This may be because your account has already been activated, or that the "
 "activation link has expired."
 msgstr ""
+"Cela peut être dû au fait que votre compte a déjà été activé ou que le lien "
+"d'activation a expiré."
 
 #: recordtransfer/templates/recordtransfer/activation_sent.html:4
 #: recordtransfer/templates/registration/password_reset_done.html:4
 msgid "Email Sent"
-msgstr ""
+msgstr "Courriel envoyé"
 
 #: recordtransfer/templates/recordtransfer/activation_sent.html:20
 msgid "Activation Email Sent"
-msgstr ""
+msgstr "Courriel d'activation envoyé"
 
 #: recordtransfer/templates/recordtransfer/activation_sent.html:23
 msgid ""
 "Thank you for creating a new account. You should receive an email shortly "
 "with an account activation link."
 msgstr ""
+"Merci d'avoir créé un nouveau compte. Vous devriez recevoir sous peu un e-"
+"mail contenant un lien d'activation du compte."
 
 #: recordtransfer/templates/recordtransfer/banner.html:4
 msgid "The National Residential School Crisis Line"
@@ -2136,14 +2564,16 @@ msgid ""
 "Your %(changed_item)s for the NCTR Secure Record Transfer App has been "
 "%(changed_status)s."
 msgstr ""
+"Vos %(changed_item)s pour l'application sécurisée de transfert de dossiers "
+"du CNVR a été %(changed_status)s."
 
 #: recordtransfer/templates/recordtransfer/email/account_updated.html:10
 msgid "The following changes have been made to your account:"
-msgstr ""
+msgstr "Les modifications suivantes ont été apportées à votre compte:"
 
 #: recordtransfer/templates/recordtransfer/email/account_updated.html:18
 msgid "Log In to Your Account"
-msgstr ""
+msgstr "Connectez-vous à votre compte"
 
 #: recordtransfer/templates/recordtransfer/email/account_updated.html:21
 #: recordtransfer/templates/recordtransfer/email/activate_account.html:21
@@ -2153,10 +2583,12 @@ msgstr ""
 #: recordtransfer/templates/recordtransfer/email/submission_success.html:26
 msgid "If the button doesn’t work, copy and paste this link into your browser:"
 msgstr ""
+"Si le bouton ne fonctionne pas, copiez et collez ce lien dans votre "
+"navigateur :"
 
 #: recordtransfer/templates/recordtransfer/email/activate_account.html:5
 msgid "Activate Your New Account"
-msgstr ""
+msgstr "Activez votre nouveau compte"
 
 #: recordtransfer/templates/recordtransfer/email/activate_account.html:9
 msgid ""
@@ -2166,43 +2598,52 @@ msgid ""
 "            To activate your account, click the button below.\n"
 "        "
 msgstr ""
+"\n"
+"            Un compte a été créé pour l'application sécurisée de transfert "
+"de dossiers du CNVR .\n"
+"            Pour activer votre compte, cliquez sur le bouton ci-dessous..\n"
+"        "
 
 #: recordtransfer/templates/recordtransfer/email/activate_account.html:17
 msgid "Activate Account"
-msgstr ""
+msgstr "Activer le compte"
 
 #: recordtransfer/templates/recordtransfer/email/email_base.html:7
 msgid ""
 "Email communication from the National Centre for Truth and Reconciliation."
 msgstr ""
+"Communication par courriel du Centre national pour la vérité et la "
+"réconciliation."
 
 #: recordtransfer/templates/recordtransfer/email/email_base.html:136
 #: recordtransfer/templates/recordtransfer/header.html:12
 msgid "NCTR Logo"
-msgstr ""
+msgstr "Logo du CNVR"
 
 #: recordtransfer/templates/recordtransfer/email/email_base.html:143
 msgid "Header Image"
-msgstr ""
+msgstr "Image d'en-tête"
 
 #: recordtransfer/templates/recordtransfer/email/email_base.html:171
 msgid ""
 "NATIONAL CENTRE FOR TRUTH AND RECONCILIATION, 177 DYSART RD, WINNIPEG, MB "
 "R3T 2M8"
 msgstr ""
+"CENTRE NATIONAL POUR LA VÉRITÉ ET LA RÉCONCILIATION, 177 RUE DYSART, "
+"WINNIPEG, MB R3T 2M8"
 
 #: recordtransfer/templates/recordtransfer/email/email_base.html:173
 msgid "Don't like these emails?"
-msgstr ""
+msgstr "Vous n'aimez pas ces courriels ?"
 
 #: recordtransfer/templates/recordtransfer/email/email_base.html:175
 msgid "Unsubscribe in your profile"
-msgstr ""
+msgstr "Désabonner-vous dans votre profil"
 
 #: recordtransfer/templates/recordtransfer/email/in_progress_submission_expiring.html:9
 #, python-format
 msgid "Dear %(full_name)s (%(username)s),"
-msgstr ""
+msgstr "Cher/Chère %(full_name)s (%(username)s),"
 
 #: recordtransfer/templates/recordtransfer/email/in_progress_submission_expiring.html:11
 #, python-format
@@ -2210,26 +2651,33 @@ msgid ""
 "You have an in-progress submission titled \"%(in_progress_title)s\" that is "
 "set to expire on %(in_progress_expiration_date)s."
 msgstr ""
+"Vous avez une soumission en cours intitulée  \"%(in_progress_title)s\" qui "
+"expire le %(in_progress_expiration_date)s."
 
 #: recordtransfer/templates/recordtransfer/email/in_progress_submission_expiring.html:14
 msgid ""
 "Please make sure to complete your submission before the expiration date. You "
 "can resume your submission by clicking the button below:"
 msgstr ""
+"Veuillez vous assurer de terminer votre soumission avant la date "
+"d'expiration. Vous pouvez reprendre votre soumission en cliquant sur le "
+"bouton ci-dessous :"
 
 #: recordtransfer/templates/recordtransfer/email/in_progress_submission_expiring.html:19
 msgid "Resume Your Submission"
-msgstr ""
+msgstr "Reprendre votre soumission"
 
 #: recordtransfer/templates/recordtransfer/email/in_progress_submission_expiring.html:27
 msgid ""
 "If you have any questions or need assistance, please contact our support "
 "team."
 msgstr ""
+"Si vous avez des questions ou avez besoin d'aide, veuillez contacter notre "
+"équipe d'assistance."
 
 #: recordtransfer/templates/recordtransfer/email/submission_failure.html:5
 msgid "Your Submission Could not be Completed"
-msgstr ""
+msgstr "Votre soumission n'a pas pu être effectuée"
 
 #: recordtransfer/templates/recordtransfer/email/submission_failure.html:9
 msgid ""
@@ -2241,15 +2689,23 @@ msgid ""
 "            an NCTR archivist about your submission at this email address:\n"
 "        "
 msgstr ""
+"\n"
+"            Les documents que vous avez tenté de soumettre via l'application "
+"sécurisée de transfert de dossiers du CNVR\n"
+"n'ont pas été transmis correctement. Vous pouvez essayer de les soumettre à "
+"nouveau ou contacter\n"
+"un archiviste du CNVR à propos de votre soumission à l'adresse courriel "
+"suivante :\n"
+"        "
 
 #: recordtransfer/templates/recordtransfer/email/submission_failure.html:16
 msgid "Contact NCTR Archivist"
-msgstr ""
+msgstr "Contacter un archiviste du CNVR"
 
 #: recordtransfer/templates/recordtransfer/email/submission_submit_failure.html:5
 #, python-format
 msgid "Submission Made by %(username)s Failed"
-msgstr ""
+msgstr "Soumission effectuée par %(username)s a échoué"
 
 #: recordtransfer/templates/recordtransfer/email/submission_submit_failure.html:9
 #, python-format
@@ -2261,11 +2717,17 @@ msgid ""
 "            but an error occurred.\n"
 "        "
 msgstr ""
+"\n"
+"            %(first_name)s %(last_name)s (%(username)s) a essayé d'\n"
+"effectuer une soumission le %(action_date)s à l'aide de l'application "
+"sécurisée de transfert de dossiers du CNVR,\n"
+"mais une erreur s'est produite.\n"
+"      "
 
 #: recordtransfer/templates/recordtransfer/email/submission_submit_success.html:5
 #, python-format
 msgid "New Submission Made by %(username)s"
-msgstr ""
+msgstr "Nouvelle soumission effectuée par %(username)s"
 
 #: recordtransfer/templates/recordtransfer/email/submission_submit_success.html:9
 #, python-format
@@ -2277,14 +2739,22 @@ msgid ""
 "            view their new submission, click the button below.\n"
 "        "
 msgstr ""
+"\n"
+"            %(first_name)s %(last_name)s (%(username)s) a effectué une "
+"nouvelle\n"
+"            soumission le %(action_date)s à l'aide de  l'application "
+"sécurisée de transfert de dossiers du CNVR. Pour\n"
+"            consulter cette nouvelle soumission, cliquez sur le bouton ci-"
+"dessous.\n"
+"        "
 
 #: recordtransfer/templates/recordtransfer/email/submission_submit_success.html:16
 msgid "View New Submission"
-msgstr ""
+msgstr "Afficher la nouvelle soumission"
 
 #: recordtransfer/templates/recordtransfer/email/submission_success.html:5
 msgid "Thank You for Your Submission"
-msgstr ""
+msgstr "Merci pour votre soumission"
 
 #: recordtransfer/templates/recordtransfer/email/submission_success.html:9
 msgid ""
@@ -2296,6 +2766,13 @@ msgid ""
 "        opportunity to view them.\n"
 "        "
 msgstr ""
+"\n"
+"        Merci d'avoir envoyé vos documents à l'aide de l'application "
+"sécurisée de transfert de dossiers du CNVR. Les\n"
+"        fichiers que vous avez envoyés sont conservés en toute sécurité sur "
+"nos serveurs jusqu'à ce qu'un archiviste ait l'\n"
+"        occasion de les consulter.\n"
+"      "
 
 #: recordtransfer/templates/recordtransfer/email/submission_success.html:16
 msgid ""
@@ -2304,14 +2781,18 @@ msgid ""
 "below:\n"
 "        "
 msgstr ""
+"\n"
+"            Vous pouvez consulter vos soumissions précédentes en cliquant "
+"sur le bouton ci-dessous :\n"
+"      "
 
 #: recordtransfer/templates/recordtransfer/email/submission_success.html:23
 msgid "View Your Past Submissions"
-msgstr ""
+msgstr "Afficher vos soumissions précédentes"
 
 #: recordtransfer/templates/recordtransfer/email/submission_success.html:35
 msgid " Submission Agreement "
-msgstr ""
+msgstr " Accord de soumission "
 
 #: recordtransfer/templates/recordtransfer/email/submission_success.html:37
 msgid ""
@@ -2329,6 +2810,19 @@ msgid ""
 "                NCTR.\n"
 "            "
 msgstr ""
+"\n"
+"                Merci d'avoir soumis des documents à l'aide de l'application "
+"sécurisée de transfert de dossiers du CNVR . En remplissant\n"
+"                et en soumettant le formulaire, vous acceptez par la "
+"présente de confier au Centre national pour la vérité et la\n"
+"                réconciliation (« CNVR ») la garde légale et physique, le "
+"contrôle et la responsabilité\n"
+"                des documents que vous avez soumis afin de permettre aux "
+"archives du CNVR\n"
+"                d'inspecter, d'étudier et d'évaluer ces documents en vue "
+"d'un éventuel don au\n"
+"                CNVR \n"
+"            "
 
 #: recordtransfer/templates/recordtransfer/email/submission_success.html:47
 msgid ""
@@ -2340,18 +2834,25 @@ msgid ""
 "                materials for potential donation.\n"
 "            "
 msgstr ""
+"\n"
+"                Le CNVR assume l'entière responsabilité de l'état physique "
+"des documents que vous\n"
+"                avez soumis pendant la période au cours de laquelle le "
+"personnel des archives du CNVR examinera les\n"
+"                documents en vue d'un éventuel don.\n"
+"            "
 
 #: recordtransfer/templates/recordtransfer/footer.html:8
 msgid "white NCTR logo"
-msgstr ""
+msgstr "logo blanc du CNVR"
 
 #: recordtransfer/templates/recordtransfer/footer.html:13
 msgid "UNESCO and NCTR logo"
-msgstr ""
+msgstr "Logo de l'UNESCO et du CNVR"
 
 #: recordtransfer/templates/recordtransfer/footer.html:18
 msgid "More from the NCTR"
-msgstr ""
+msgstr "En savoir plus sur le CNVR"
 
 #: recordtransfer/templates/recordtransfer/footer.html:24
 msgid "Your records"
@@ -2384,16 +2885,16 @@ msgstr "Contactez-nous"
 
 #: recordtransfer/templates/recordtransfer/footer.html:51
 msgid "Chancellor's Hall, 177 Dysart Road,"
-msgstr "Chancellor’s Hall, 177, chemin Dysart"
+msgstr "Chancellor’s Hall, 177, chemin Dysart,"
 
 #: recordtransfer/templates/recordtransfer/footer.html:53
 msgid "University of Manitoba, Winnipeg"
-msgstr "Université du Manitoba, Winnipeg "
+msgstr "Université du Manitoba, Winnipeg"
 
 #: recordtransfer/templates/recordtransfer/footer.html:70
 #: recordtransfer/templates/recordtransfer/footer.html:82
 msgid "Connect with us"
-msgstr ""
+msgstr "Entrez en contact avec nous"
 
 #: recordtransfer/templates/recordtransfer/footer.html:94
 msgid "© 2025 National Centre for Truth and Reconciliation"
@@ -2401,73 +2902,69 @@ msgstr "© 2025 Centre national pour la vérité et la réconciliation"
 
 #: recordtransfer/templates/recordtransfer/header.html:18
 msgid "Secure Record Transfer"
-msgstr ""
+msgstr "Transfert sécurisé des dossiers"
 
 #: recordtransfer/templates/recordtransfer/header.html:32
 msgid "Home"
-msgstr ""
-
-#: recordtransfer/templates/recordtransfer/header.html:44
-#: recordtransfer/templates/recordtransfer/help.html:4
-#: recordtransfer/templates/recordtransfer/signup_form.html:123
-msgid "Help"
-msgstr ""
+msgstr "Accueil"
 
 #: recordtransfer/templates/recordtransfer/header.html:51
 msgid "Admin"
-msgstr ""
+msgstr "Administrateur"
 
 #: recordtransfer/templates/recordtransfer/header.html:59
 #: recordtransfer/templates/recordtransfer/submission_group_detail.html:19
 msgid "Profile"
-msgstr ""
+msgstr "Profil"
 
 #: recordtransfer/templates/recordtransfer/header.html:65
 #: recordtransfer/templates/recordtransfer/submission_form_base.html:99
 msgid "Submit"
-msgstr ""
+msgstr "Soumettre"
 
 #: recordtransfer/templates/recordtransfer/header.html:73
 msgid "Logout"
-msgstr ""
+msgstr "Déconnexion"
 
 #: recordtransfer/templates/recordtransfer/header.html:80
 #: recordtransfer/templates/recordtransfer/signup_form.html:132
 #: recordtransfer/templates/registration/login.html:80
 msgid "Sign Up"
-msgstr ""
+msgstr "S'inscrire"
 
 #: recordtransfer/templates/recordtransfer/header.html:88
 #: recordtransfer/templates/recordtransfer/home.html:25
 #: recordtransfer/templates/recordtransfer/signup_form.html:140
 msgid "Log In"
-msgstr ""
+msgstr "Se connecter"
 
 #: recordtransfer/templates/recordtransfer/help.html:8
 msgid "Form Help"
-msgstr ""
+msgstr "Aide au formulaire"
 
 #: recordtransfer/templates/recordtransfer/help.html:12
 msgid ""
 "Refer to the following section if you come across a part of the form that "
 "you need assistance with."
 msgstr ""
+"Si vous avez besoin d'aide pour remplir une partie du formulaire, veuillez "
+"vous reporter à la section suivante."
 
 #: recordtransfer/templates/recordtransfer/help.html:16
 msgid "Frequently Asked Questions"
-msgstr ""
+msgstr "Foire aux questions"
 
 #: recordtransfer/templates/recordtransfer/help.html:21
 msgid "Why would I want to make a submission group?"
-msgstr ""
+msgstr "Pourquoi voudrais-je créer un groupe de soumission?"
 
 #: recordtransfer/templates/recordtransfer/help.html:24
 msgid "Submission groups are useful when:"
-msgstr ""
+msgstr "Les groupes de soumission sont utiles lorsque:"
 
 #: recordtransfer/templates/recordtransfer/help.html:27
 msgid "You have large collections"
-msgstr ""
+msgstr "Vous possédez de grandes collections"
 
 #: recordtransfer/templates/recordtransfer/help.html:28
 #, python-format
@@ -2479,39 +2976,50 @@ msgid ""
 "                            within the same group.\n"
 "                            "
 msgstr ""
+"Si vous avez trop de fichiers pour un seul envoi (plus de "
+"%(MAX_TOTAL_UPLOAD_COUNT)s\n"
+"                        fichiers ou %(MAX_TOTAL_UPLOAD_SIZE_MB)s Mo), vous "
+"pouvez les diviser en plusieurs envois\n"
+"                        au sein du même groupe."
 
 #: recordtransfer/templates/recordtransfer/help.html:34
 msgid "You want logical organization"
-msgstr ""
+msgstr "Vous voulez une organisation logique"
 
 #: recordtransfer/templates/recordtransfer/help.html:35
 msgid ""
 "You can organize related records by theme, time period, or project, even if "
 "they're submitted at different times."
 msgstr ""
+"Vous pouvez organiser les enregistrements connexes par thème, période ou "
+"projet, même s'ils ont été soumis à des moments différents."
 
 #: recordtransfer/templates/recordtransfer/help.html:38
 msgid "You need easier tracking"
-msgstr ""
+msgstr "Vous avez besoin d'un suivi plus facile"
 
 #: recordtransfer/templates/recordtransfer/help.html:39
 msgid ""
 "Grouping helps you and archivists track related submissions through the "
 "processing workflow."
 msgstr ""
+"Le regroupement vous aide et les archivistes à suivre les soumissions "
+"connexes tout au long du processus de traitement."
 
 #: recordtransfer/templates/recordtransfer/help.html:42
 msgid "You want consistent metadata"
-msgstr ""
+msgstr "Vous voulez des métadonnées cohérentes"
 
 #: recordtransfer/templates/recordtransfer/help.html:43
 msgid ""
 "Groups ensure related submissions are cataloged with consistent metadata."
 msgstr ""
+"Les groupes veillent à ce que les soumissions connexes soient cataloguées "
+"avec des métadonnées cohérentes."
 
 #: recordtransfer/templates/recordtransfer/help.html:47
 msgid "Pro Tip:"
-msgstr ""
+msgstr "Conseil de pro :"
 
 #: recordtransfer/templates/recordtransfer/help.html:49
 msgid ""
@@ -2522,10 +3030,17 @@ msgid ""
 "identify it for future submissions.\n"
 "                            "
 msgstr ""
+"\n"
+"                        Lorsque vous créez un nouveau groupe, utilisez une "
+"convention de nommage descriptive (par exemple, « Projet de recherche Smith "
+"2025 »\n"
+"ou « Documents financiers 2020-2025 ») afin de pouvoir l'identifier "
+"facilement pour les soumissions futures.\n"
+"                        "
 
 #: recordtransfer/templates/recordtransfer/help.html:59
 msgid "Source Types (Step 3 of Submission Form)"
-msgstr ""
+msgstr "Types de source (Étape 3 du formulaire de soumission)"
 
 #: recordtransfer/templates/recordtransfer/help.html:62
 msgid ""
@@ -2537,18 +3052,26 @@ msgid ""
 "                    source types dropdown and enter your own type.\n"
 "                    "
 msgstr ""
+"\n"
+"                    Le <i>type de source</i> décrit le type d'entité dont "
+"proviennent les enregistrements. Si aucune des\n"
+"                    options proposées ne décrit correctement l'entité "
+"source, sélectionnez <b>Autre</b> dans la\n"
+"                    liste déroulante des types de source et saisissez votre "
+"propre type.\n"
+"                    "
 
 #: recordtransfer/templates/recordtransfer/help.html:72
 msgid "Show source type details"
-msgstr ""
+msgstr "Afficher les détails du type de source"
 
 #: recordtransfer/templates/recordtransfer/help.html:75
 msgid "The following is a description of each source type:"
-msgstr ""
+msgstr "Voici une description de chaque type de source:"
 
 #: recordtransfer/templates/recordtransfer/help.html:90
 msgid "Source Roles (Step 3 of Submission Form)"
-msgstr ""
+msgstr "Types de rôle (Étape 3 du formulaire de soumission)"
 
 #: recordtransfer/templates/recordtransfer/help.html:93
 msgid ""
@@ -2561,18 +3084,26 @@ msgid ""
 "own type.\n"
 "                    "
 msgstr ""
+"\n"
+"                    Le <i>rôle source</i> décrit la relation entre l'entité "
+"et les enregistrements. Si aucune des\n"
+"                    options proposées ne décrit correctement la relation "
+"entre la source et les enregistrements, sélectionnez\n"
+"                    <b>Autre</b> dans le menu déroulant des rôles source et "
+"saisissez votre propre type.\n"
+"                    "
 
 #: recordtransfer/templates/recordtransfer/help.html:103
 msgid "Show source role details"
-msgstr ""
+msgstr "Afficher les détails du rôle source"
 
 #: recordtransfer/templates/recordtransfer/help.html:106
 msgid "The following is a description of each source role:"
-msgstr ""
+msgstr "Voici une description de chaque role de la source:"
 
 #: recordtransfer/templates/recordtransfer/help.html:121
 msgid "Rights Types (Step 5 of Submission Form)"
-msgstr ""
+msgstr "Types de droits (Étape 5 du formulaire de soumission)"
 
 #: recordtransfer/templates/recordtransfer/help.html:124
 msgid ""
@@ -2586,35 +3117,44 @@ msgid ""
 "                    the rights dropdown.\n"
 "                    "
 msgstr ""
+"\n"
+"                    Selon les documents que vous soumettez, certains droits "
+"spécifiques peuvent régir\n"
+"                    l'accès à vos documents. Vous trouverez ci-dessous une "
+"brève description des types de\n"
+"                    droits disponibles. Si aucun ne correspond à vos "
+"besoins, sélectionnez <b>Autre</b> dans\n"
+"                    le menu déroulant des droits.\n"
+"                    "
 
 #: recordtransfer/templates/recordtransfer/help.html:135
 msgid "Show rights type details"
-msgstr ""
+msgstr "Afficher les détails du type de droits"
 
 #: recordtransfer/templates/recordtransfer/help.html:138
 msgid "The following is a description of each rights type:"
-msgstr ""
+msgstr "Voici une description de chaque type de droit:"
 
 #: recordtransfer/templates/recordtransfer/home.html:5
 msgid "NCTR Secure Record Transfer App"
-msgstr ""
+msgstr "L'application sécurisée de transfert de dossiers du CNVR"
 
 #: recordtransfer/templates/recordtransfer/home.html:18
 msgid "Securely Send Your Records to the NCTR"
-msgstr ""
+msgstr "Envoyez vos dossiers en toute sécurité au NCTR"
 
 #: recordtransfer/templates/recordtransfer/home.html:20
 #: recordtransfer/templates/recordtransfer/home.html:87
 msgid "Submit Your Records"
-msgstr ""
+msgstr "Soumettre vos documents"
 
 #: recordtransfer/templates/recordtransfer/home.html:23
 msgid "Sign up Now"
-msgstr ""
+msgstr "Inscrivez-vous dès maintenant"
 
 #: recordtransfer/templates/recordtransfer/home.html:37
 msgid "Preserve History, Share Truth"
-msgstr ""
+msgstr "Préserver l'histoire, partager la vérité"
 
 #: recordtransfer/templates/recordtransfer/home.html:39
 msgid ""
@@ -2625,10 +3165,16 @@ msgid ""
 "this important collection.\n"
 "            "
 msgstr ""
+"\n"
+"            Rejoignez-nous pour créer des archives numériques complètes qui "
+"honorent et préservent des documents historiques essentiels.\n"
+"Notre application de transfert sécurisé facilite la contribution à cette "
+"importante collection.\n"
+"        "
 
 #: recordtransfer/templates/recordtransfer/home.html:47
 msgid "Simple &amp; Secure"
-msgstr ""
+msgstr "Simple &amp; sécurisé"
 
 #: recordtransfer/templates/recordtransfer/home.html:49
 msgid ""
@@ -2638,10 +3184,14 @@ msgid ""
 "                    platform.\n"
 "                    "
 msgstr ""
+"\n"
+"                    Téléchargez vos dossiers numériques en toute confiance "
+"grâce à notre plateforme cryptée et conviviale.\n"
+"               "
 
 #: recordtransfer/templates/recordtransfer/home.html:57
 msgid "Standards-Based"
-msgstr ""
+msgstr "Fondée sur des normes"
 
 #: recordtransfer/templates/recordtransfer/home.html:59
 msgid ""
@@ -2652,10 +3202,16 @@ msgid ""
 "and value.\n"
 "                    "
 msgstr ""
+"\n"
+"                    Vos contributions sont conservées conformément à la "
+"NCIAA (Norme canadienne d’information pour l’acquisition d’archive,\n"
+"                     ce qui garantit leur accessibilité et leur valeur à "
+"long terme.\n"
+"            "
 
 #: recordtransfer/templates/recordtransfer/home.html:67
 msgid "Make an Impact"
-msgstr ""
+msgstr "Ayez un impact"
 
 #: recordtransfer/templates/recordtransfer/home.html:69
 msgid ""
@@ -2665,10 +3221,15 @@ msgid ""
 "                    generations.\n"
 "                    "
 msgstr ""
+"\n"
+"                    Chaque document partagé contribue à construire un récit "
+"historique plus complet pour les générations futures.\n"
+"                    .\n"
+"                    "
 
 #: recordtransfer/templates/recordtransfer/home.html:78
 msgid "Ready to Contribute?"
-msgstr ""
+msgstr "Prêt à contribuer?"
 
 #: recordtransfer/templates/recordtransfer/home.html:80
 msgid ""
@@ -2678,42 +3239,50 @@ msgid ""
 "                physical records, please get in contact with us.\n"
 "                "
 msgstr ""
+"\n"
+"                Nous acceptons les contributions individuelles et "
+"organisationnelles. Pour les dons à grande échelle ou les\n"
+"                archives physiques, veuillez nous contacter.\n"
+"          "
 
 #: recordtransfer/templates/recordtransfer/home.html:90
 msgid "Sign Up Now"
-msgstr ""
+msgstr "Inscrivez-vous dès maintenant"
 
 #: recordtransfer/templates/recordtransfer/home.html:99
 msgid "More NCTR Resources"
-msgstr ""
+msgstr "Plus de ressources CNVR"
 
 #: recordtransfer/templates/recordtransfer/home.html:102
 msgid "View Your Records"
-msgstr ""
+msgstr "Consultez vos documents"
 
 #: recordtransfer/templates/recordtransfer/home.html:103
 msgid "Access your personal or family records held in the NCTR archives"
 msgstr ""
+"Accédez à vos documents personnels ou familiaux conservés dans les archives "
+"du CNVR"
 
 #: recordtransfer/templates/recordtransfer/home.html:106
 msgid "About NCTR"
-msgstr ""
+msgstr "À propos du CNVR"
 
 #: recordtransfer/templates/recordtransfer/home.html:107
 msgid "Learn about our mission, mandate and the work we do"
 msgstr ""
+"Découvrez notre mission, notre mandat et le travail que nous accomplissons"
 
 #: recordtransfer/templates/recordtransfer/home.html:110
 msgid "Public Records"
-msgstr ""
+msgstr "Archives publiques"
 
 #: recordtransfer/templates/recordtransfer/home.html:111
 msgid "Browse our public collection of records"
-msgstr ""
+msgstr "Parcourez notre collection publique d'archives"
 
 #: recordtransfer/templates/recordtransfer/home.html:125
 msgid "Fully Open Source"
-msgstr ""
+msgstr "Source Entièrement Ouverte"
 
 #: recordtransfer/templates/recordtransfer/home.html:128
 msgid ""
@@ -2726,18 +3295,26 @@ msgid ""
 "organization's needs.\n"
 "                            "
 msgstr ""
+"\n"
+"                            Ce projet est open source, ce qui démontre notre "
+"engagement en faveur de la transparence et de la\n"
+"                            collaboration. Rejoignez notre communauté sur "
+"GitHub pour explorer le code, apporter des\n"
+"                            améliorations ou l'adapter aux besoins de votre "
+"organisation.\n"
+"                        "
 
 #: recordtransfer/templates/recordtransfer/home.html:137
 msgid "View on GitHub"
-msgstr ""
+msgstr "Voir sur GitHub"
 
 #: recordtransfer/templates/recordtransfer/in_progress_submission_expired.html:4
 msgid "In-Progress Submission Expired"
-msgstr ""
+msgstr "Soumission en cours expirée"
 
 #: recordtransfer/templates/recordtransfer/in_progress_submission_expired.html:9
 msgid "In-progress submission has expired"
-msgstr ""
+msgstr "La soumission en cours a expiré"
 
 #: recordtransfer/templates/recordtransfer/in_progress_submission_expired.html:21
 msgid ""
@@ -2747,25 +3324,30 @@ msgid ""
 "                    please start a new submission.\n"
 "                    "
 msgstr ""
+"\n"
+"                    Cette soumission en cours a expiré et n'est plus "
+"accessible. Si vous souhaitez soumettre à nouveau vos fichiers,\n"
+"veuillez créer une nouvelle soumission.\n"
+"                 "
 
 #: recordtransfer/templates/recordtransfer/in_progress_submission_expired.html:29
 #: recordtransfer/templates/recordtransfer/submission_sent.html:40
 msgid "Quick Links"
-msgstr ""
+msgstr "Liens rapides"
 
 #: recordtransfer/templates/recordtransfer/in_progress_submission_expired.html:39
 #: recordtransfer/templates/recordtransfer/submission_sent.html:50
 msgid "Make Another Submission"
-msgstr ""
+msgstr "Faire une autre soumission"
 
 #: recordtransfer/templates/recordtransfer/in_progress_submission_expired.html:44
 msgid "Go to Homepage"
-msgstr ""
+msgstr "Aller à la page d'accueil"
 
 #: recordtransfer/templates/recordtransfer/in_progress_submission_expired.html:54
 #: recordtransfer/templates/recordtransfer/submission_sent.html:65
 msgid "View your Profile"
-msgstr ""
+msgstr "Consultez votre profil"
 
 #: recordtransfer/templates/recordtransfer/open_sessions.html:6
 #, python-format
@@ -2774,15 +3356,19 @@ msgid ""
 "            %(total_open_sessions)s / %(max_open_sessions)s Sessions Used\n"
 "        "
 msgstr ""
+"\n"
+"            %(total_open_sessions)s / %(max_open_sessions)s Sessions "
+"utilisées\n"
+"        "
 
 #: recordtransfer/templates/recordtransfer/open_sessions.html:10
 msgid "Unlimited Sessions Allowed"
-msgstr ""
+msgstr "Sessions illimitées autorisées"
 
 #: recordtransfer/templates/recordtransfer/open_sessions.html:12
 #: recordtransfer/templates/recordtransfer/open_sessions.html:23
 msgid "Session Limit Reached"
-msgstr ""
+msgstr "Limite de sessions atteinte"
 
 #: recordtransfer/templates/recordtransfer/open_sessions.html:27
 msgid ""
@@ -2790,14 +3376,18 @@ msgid ""
 "To start a new submission, you'll need to either delete or complete any of "
 "your in-progress submissions."
 msgstr ""
+"<b>Vous avez atteint le nombre maximal de sessions simultanées autorisées !</"
+"b> Pour commencer une nouvelle soumission, vous devez soit supprimer, soit "
+"terminer l'une de vos soumissions en cours."
 
 #: recordtransfer/templates/recordtransfer/open_sessions.html:32
 msgid "You are Within the Session Limit"
-msgstr ""
+msgstr "Vous avez atteint la limite de sessions"
 
 #: recordtransfer/templates/recordtransfer/open_sessions.html:37
 msgid "You are allowed to have as many concurrent sessions as you would like."
 msgstr ""
+"Vous pouvez avoir autant de sessions simultanées que vous le souhaitez."
 
 #: recordtransfer/templates/recordtransfer/open_sessions.html:41
 #, python-format
@@ -2807,16 +3397,20 @@ msgid ""
 "limit of %(max_open_sessions)s.\n"
 "                            "
 msgstr ""
+"\n"
+"                                Vous avez atteint la limite totale de "
+"sessions simultanées de %(max_open_sessions)s.\n"
+"       "
 
 #: recordtransfer/templates/recordtransfer/open_sessions.html:55
 #: recordtransfer/templates/recordtransfer/profile.html:41
 #: recordtransfer/templates/recordtransfer/submission_group_detail.html:60
 msgid "New submission"
-msgstr ""
+msgstr "Nouvelle soumission"
 
 #: recordtransfer/templates/recordtransfer/open_sessions.html:61
 msgid "Your Current Sessions"
-msgstr ""
+msgstr "Vos sessions en cours"
 
 #: recordtransfer/templates/recordtransfer/open_sessions.html:63
 msgid ""
@@ -2832,6 +3426,18 @@ msgid ""
 "            below to resume or delete a saved submission.\n"
 "            "
 msgstr ""
+"\n"
+"            Vous trouverez ci-dessous vos sessions actives et expirées. Les "
+"sessions expirent automatiquement\n"
+"            après une période d'inactivité. Les sessions expirées qui ne "
+"font pas partie d'une soumission enregistrée\n"
+"            sont automatiquement supprimées selon un calendrier défini. Pour "
+"libérer de l'espace, vous pouvez\n"
+"            supprimer ou terminer les soumissions que vous avez "
+"enregistrées. Consultez la colonne <b>Actions</b>\n"
+"            ci-dessous pour reprendre ou supprimer une soumission "
+"enregistrée.\n"
+"            "
 
 #: recordtransfer/templates/recordtransfer/open_sessions.html:80
 msgid ""
@@ -2843,43 +3449,50 @@ msgid ""
 "                the max.\n"
 "                "
 msgstr ""
+"\n"
+"                Notez que certaines de vos soumissions en cours enregistrées "
+"peuvent ne pas figurer ici ! Seules les\n"
+"                soumissions pour lesquelles vous avez commencé à télécharger "
+"des fichiers ont une session qui compte dans le\n"
+"                maximum.\n"
+"             "
 
 #: recordtransfer/templates/recordtransfer/profile.html:5
 msgid "Your Profile"
-msgstr ""
+msgstr "Votre profil"
 
 #: recordtransfer/templates/recordtransfer/profile.html:26
 msgid "Past Submissions"
-msgstr ""
+msgstr "Soumissions antérieures"
 
 #: recordtransfer/templates/recordtransfer/profile.html:49
 msgid "In-Progress"
-msgstr ""
+msgstr "En cours"
 
 #: recordtransfer/templates/recordtransfer/profile.html:64
 msgid "Submission Groups"
-msgstr ""
+msgstr "Groupes de soumission"
 
 #: recordtransfer/templates/recordtransfer/profile.html:82
 #: recordtransfer/templates/recordtransfer/submission_form_groupsubmission.html:24
 msgid "New submission group"
-msgstr ""
+msgstr "Nouveau groupe de soumission"
 
 #: recordtransfer/templates/recordtransfer/signup.html:5
 msgid "Create Account"
-msgstr ""
+msgstr "Créer un compte"
 
 #: recordtransfer/templates/recordtransfer/signup_form.html:6
 msgid "Create a New Account"
-msgstr ""
+msgstr "Créer un nouveau compte"
 
 #: recordtransfer/templates/recordtransfer/signup_form.html:16
 msgid "The form was not valid."
-msgstr ""
+msgstr "Le formulaire n'était pas valide."
 
 #: recordtransfer/templates/recordtransfer/signup_form.html:138
 msgid "Already have an account?"
-msgstr ""
+msgstr "Vous avez déjà un compte?"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:8
 #: recordtransfer/templates/recordtransfer/submission_detail.html:19
@@ -2889,6 +3502,9 @@ msgid ""
 "            Submission Report for %(title)s\n"
 "            "
 msgstr ""
+"\n"
+"            Rapport de soumission pour %(title)s\n"
+"            "
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:25
 #, python-format
@@ -2899,34 +3515,40 @@ msgid ""
 "                %(username)s (%(email)s) at %(date)s, titled \"%(title)s.\"\n"
 "                "
 msgstr ""
+"\n"
+"                Ce qui suit est un rapport généré automatiquement pour la "
+"soumission effectuée par\n"
+"                %(username)s (%(email)s) le %(date)s, intitulée "
+"« %(title)s ».\n"
+"          "
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:33
 msgid "Submission Context"
-msgstr ""
+msgstr "Contexte de la soumission"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:38
 msgid "Submission Date"
-msgstr ""
+msgstr "Date de la soumission"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:44
 msgid "Submitted By"
-msgstr ""
+msgstr "Soumis par"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:50
 msgid "Report Generation Date"
-msgstr ""
+msgstr "Date de génération du rapport"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:56
 msgid "Submission UUID"
-msgstr ""
+msgstr "UUID de soumission"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:61
 msgid "1. Identity Information Section"
-msgstr ""
+msgstr "1. Section relative aux informations d'identité"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:63
 msgid "1.1 Repository"
-msgstr ""
+msgstr "1.1 Établissement"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:68
 #: recordtransfer/templates/recordtransfer/submission_detail.html:108
@@ -2936,11 +3558,11 @@ msgstr ""
 #: recordtransfer/templates/recordtransfer/submission_detail.html:549
 #: recordtransfer/templates/recordtransfer/submission_detail.html:594
 msgid "(Not specified)"
-msgstr ""
+msgstr "(Non spécifié)"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:71
 msgid "1.2 Identifiers"
-msgstr ""
+msgstr "1.2 Identifiants"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:77
 #, python-format
@@ -2949,18 +3571,21 @@ msgid ""
 "                                    Identifier %(num)s of %(total)s\n"
 "                                    "
 msgstr ""
+"\n"
+"                                    Identifiant %(num)s sur %(total)s\n"
+"                  "
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:84
 msgid "1.2.1 Identifier Type:"
-msgstr ""
+msgstr "1.2.1 Type d'identifiant:"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:88
 msgid "1.2.1 Identifier Value:"
-msgstr ""
+msgstr "1.2.1 Valeur de l'identifiant:"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:92
 msgid "1.2.1 Identifier Note:"
-msgstr ""
+msgstr "1.2.1 Note sur l'identifiant:"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:100
 #: recordtransfer/templates/recordtransfer/submission_detail.html:120
@@ -2979,35 +3604,35 @@ msgstr ""
 #: recordtransfer/templates/recordtransfer/submission_detail.html:538
 #: recordtransfer/templates/recordtransfer/submission_detail.html:586
 msgid "(None specified)"
-msgstr ""
+msgstr "(Aucun spécifié)"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:103
 msgid "1.3 Accession Title"
-msgstr ""
+msgstr "1.3 Titre de l’acquisition"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:111
 msgid "1.4 Archival Unit"
-msgstr ""
+msgstr "1.4 Unité archivistique"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:123
 msgid "1.5 Acquisition Method"
-msgstr ""
+msgstr "1.5 Méthode d’acquisition"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:131
 msgid "1.6 Disposition Authority"
-msgstr ""
+msgstr "1.6 Autorisation de disposition"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:143
 msgid "1.7 Status"
-msgstr ""
+msgstr "1.7 Statut"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:152
 msgid "2. Source Information Section"
-msgstr ""
+msgstr "2. Zone d’information sur la source"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:154
 msgid "2.1 Source of Materials"
-msgstr ""
+msgstr "2.1 Source du document"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:160
 #, python-format
@@ -3016,18 +3641,22 @@ msgid ""
 "                                    Source of Material %(num)s of %(total)s\n"
 "                                    "
 msgstr ""
+"\n"
+"                                    Source du matériel %(num)s sur "
+"%(total)s\n"
+"                                 "
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:167
 msgid "2.1.1 Source Type:"
-msgstr ""
+msgstr "2.1.1 Type de source:"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:171
 msgid "2.1.2 Source Name:"
-msgstr ""
+msgstr "2.1.2 Nom de la source:"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:175
 msgid "2.1.3 Source Contact Information:"
-msgstr ""
+msgstr "2.1.3 Coordonnées de la source:"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:179
 #, python-format
@@ -3036,6 +3665,9 @@ msgid ""
 "                                                Contact Name: %(name)s\n"
 "                                                "
 msgstr ""
+"\n"
+"                                                Nom du contact : %(name)s\n"
+"           "
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:184
 #, python-format
@@ -3044,6 +3676,10 @@ msgid ""
 "                                                Job Title: %(title)s\n"
 "                                                "
 msgstr ""
+"\n"
+"                                                Intitulé du poste : "
+"%(title)s\n"
+"                                                "
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:189
 #, python-format
@@ -3053,6 +3689,10 @@ msgid ""
 "%(organization)s\n"
 "                                                "
 msgstr ""
+"\n"
+"                                                Organisation : "
+"%(organization)s\n"
+"                                                "
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:194
 #, python-format
@@ -3061,6 +3701,10 @@ msgid ""
 "                                                Phone Number: %(phone)s\n"
 "                                                "
 msgstr ""
+"\n"
+"                                                Numéro de téléphone : "
+"%(phone)s\n"
+"                                                "
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:199
 #, python-format
@@ -3069,6 +3713,9 @@ msgid ""
 "                                                Email: %(email)s\n"
 "                                                "
 msgstr ""
+"\n"
+"                                                Courriel : %(email)s\n"
+"                                                "
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:204
 #, python-format
@@ -3078,6 +3725,10 @@ msgid ""
 "%(address_line)s\n"
 "                                                "
 msgstr ""
+"\n"
+"                                                Adresse Ligne 1: "
+"%(address_line)s\n"
+"                                                "
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:209
 #, python-format
@@ -3087,6 +3738,10 @@ msgid ""
 "%(address_line)s\n"
 "                                                "
 msgstr ""
+"\n"
+"                                                Adresse Ligne 2: "
+"%(address_line)s\n"
+"                                                "
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:214
 #, python-format
@@ -3095,6 +3750,9 @@ msgid ""
 "                                                City: %(city)s\n"
 "                                                "
 msgstr ""
+"\n"
+"                                                Ville: %(city)s\n"
+"                                                "
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:219
 #, python-format
@@ -3103,6 +3761,9 @@ msgid ""
 "                                                Region: %(region)s\n"
 "                                                "
 msgstr ""
+"\n"
+"                                                Région : %(region)s\n"
+"                                                "
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:224
 #, python-format
@@ -3112,6 +3773,10 @@ msgid ""
 "%(postal_or_zip_code)s\n"
 "                                                "
 msgstr ""
+"\n"
+"                                                Code postal : "
+"%(postal_or_zip_code)s\n"
+"                                                "
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:229
 #, python-format
@@ -3120,34 +3785,37 @@ msgid ""
 "                                                Country: %(country)s\n"
 "                                                "
 msgstr ""
+"\n"
+"                                                Pays : %(country)s\n"
+"                                                "
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:237
 msgid "2.1.4 Source Role:"
-msgstr ""
+msgstr "2.1.4 Rôle de la source:"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:241
 msgid "2.1.5 Source Note:"
-msgstr ""
+msgstr "2.1.4 Rôle de la source:"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:245
 msgid "2.1.6 Source Confidentiality:"
-msgstr ""
+msgstr "2.1.6 Confidentialité de la source:"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:256
 msgid "2.2 Preliminary Custodial History"
-msgstr ""
+msgstr "2.2 Historique préliminaire de la conservation"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:269
 msgid "3. Materials Information Section"
-msgstr ""
+msgstr "3. Zone d’information sur les documents"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:271
 msgid "3.1 Date of Materials"
-msgstr ""
+msgstr "3.1 Date des documents"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:279
 msgid "3.2 Extent Statement"
-msgstr ""
+msgstr "3.2 Énoncé d’étendue"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:285
 #, python-format
@@ -3156,46 +3824,49 @@ msgid ""
 "                                    Extent Statement %(num)s of %(total)s\n"
 "                                    "
 msgstr ""
+"\n"
+"                                     Énoncé d’étendue %(num)s de %(total)s\n"
+"                                    "
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:292
 msgid "3.2.1 Extent Type:"
-msgstr ""
+msgstr "3.2.1 Type d’étendue:"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:296
 msgid "3.2.2 Quantity and Unit of Measure:"
-msgstr ""
+msgstr "3.2.2 Quantité et unité de mesure:"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:300
 msgid "3.2.3 Content Type:"
-msgstr ""
+msgstr "3.2.3 Type de contenu:"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:304
 msgid "3.2.4 Carrier Type:"
-msgstr ""
+msgstr "3.2.4 Type de support:"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:308
 msgid "3.2.5 Extent Note:"
-msgstr ""
+msgstr "3.2.5 Note sur l’étendue:"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:319
 msgid "3.3 Preliminary Scope and Content"
-msgstr ""
+msgstr "3.3 Portée et contenu préliminaires"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:331
 msgid "3.4 Language of Material"
-msgstr ""
+msgstr "3.4 Langue des documents"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:344
 msgid "4. Management Information Section"
-msgstr ""
+msgstr "4. Zone d’information de gestion"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:346
 msgid "4.1 Storage Location"
-msgstr ""
+msgstr "4.1 Lieu d’entreposage"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:358
 msgid "4.2 Rights"
-msgstr ""
+msgstr "4.2 Droits"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:364
 #, python-format
@@ -3204,22 +3875,25 @@ msgid ""
 "                                    Rights %(num)s of %(total)s\n"
 "                                    "
 msgstr ""
+"\n"
+"                                    Droits %(num)s de %(total)s\n"
+"                                    "
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:371
 msgid "4.2.1 Rights Type:"
-msgstr ""
+msgstr "4.2.1 Type de droits:"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:375
 msgid "4.2.2 Rights Value:"
-msgstr ""
+msgstr "4.2.2 Valeur des droits:"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:379
 msgid "4.2.3 Rights Note:"
-msgstr ""
+msgstr "4.2.3 Note sur les droits:"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:390
 msgid "4.3 Preservation Requirements"
-msgstr ""
+msgstr "4.3 Exigences de préservation"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:396
 #, python-format
@@ -3229,22 +3903,26 @@ msgid ""
 "%(total)s\n"
 "                                    "
 msgstr ""
+"\n"
+"                                    Exigences de préservations %(num)s de "
+"%(total)s\n"
+"                                    "
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:403
-msgid "4.2.1 Preservation Requirements Type:"
-msgstr ""
+msgid "4.3.1 Preservation Requirements Type:"
+msgstr "4.3.1 Type d’exigence de conservation:"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:407
-msgid "4.2.2 Preservation Requirements Value:"
-msgstr ""
+msgid "4.3.2 Preservation Requirements Value:"
+msgstr "4.3.2 Valeur de l’exigence de conservation:"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:411
-msgid "4.2.3 Preservation Requirements Note:"
-msgstr ""
+msgid "4.3.3 Preservation Requirements Note:"
+msgstr "4.3.3 Note sur l’exigence de conservation:"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:422
 msgid "4.4 Appraisal"
-msgstr ""
+msgstr "4.4 Évaluation"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:428
 #, python-format
@@ -3253,22 +3931,25 @@ msgid ""
 "                                    Appraisal %(num)s of %(total)s\n"
 "                                    "
 msgstr ""
+"\n"
+"                                    Évaluation %(num)s de %(total)s\n"
+"                                    "
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:435
 msgid "4.4.1 Appraisal Type:"
-msgstr ""
+msgstr "4.4.1 Type d’évaluation:"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:439
 msgid "4.4.2 Appraisal Value:"
-msgstr ""
+msgstr "4.4.2 Valeur d’évaluation:"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:443
 msgid "4.4.3 Appraisal Note:"
-msgstr ""
+msgstr "4.4.3 Note sur l’évaluation:"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:454
 msgid "4.5 Associated Documentation"
-msgstr ""
+msgstr "4.5 Documentation apparentée"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:460
 #, python-format
@@ -3278,26 +3959,30 @@ msgid ""
 "%(total)s\n"
 "                                    "
 msgstr ""
+"\n"
+"                                    Documentation apparentée %(num)s de "
+"%(total)s\n"
+"                                    "
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:467
 msgid "4.5.1 Associated Documentation Type:"
-msgstr ""
+msgstr "4.5.1 Type de documentation apparentée:"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:471
 msgid "4.5.2 Associated Documentation Title:"
-msgstr ""
+msgstr "4.5.2 Titre des documents apparentés:"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:475
 msgid "4.5.3 Associated Documentation Note:"
-msgstr ""
+msgstr "4.5.3 Note sur les documents apparentés:"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:487
 msgid "5. Event Information Section"
-msgstr ""
+msgstr "5. Zone d’information sur les événements"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:489
 msgid "5.1 Events"
-msgstr ""
+msgstr "5.1 Événements"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:496
 #, python-format
@@ -3306,42 +3991,45 @@ msgid ""
 "                                    Event %(num)s of %(total)s\n"
 "                                    "
 msgstr ""
+"\n"
+"                                    Événement %(num)s de %(total)s\n"
+"                                    "
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:503
 msgid "5.1.1 Event Type:"
-msgstr ""
+msgstr "5.1.1 Type d’événement:"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:507
 msgid "5.1.1 Event Date:"
-msgstr ""
+msgstr "5.1.2 Date de l’événement:"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:511
 msgid "5.1.3 Event Agent:"
-msgstr ""
+msgstr "5.1.3 Agent de l’événement:"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:515
 msgid "5.1.4 Event Note:"
-msgstr ""
+msgstr "5.1.4 Note sur l’événement:"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:527
 msgid "6. General Information Section"
-msgstr ""
+msgstr "6. Zone d’information générale"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:529
 msgid "6.1 General Note"
-msgstr ""
+msgstr "6.1 Note générale"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:542
 msgid "7. Control Information Section"
-msgstr ""
+msgstr "7. Zone d’information de contrôle"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:544
 msgid "7.1 Rules or Conventions"
-msgstr ""
+msgstr "7.1 Règles ou conventions"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:552
 msgid "7.2 Date of Creation or Revision"
-msgstr ""
+msgstr "7.2 Date de création ou de révision"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:559
 #, python-format
@@ -3351,26 +4039,30 @@ msgid ""
 "%(total)s\n"
 "                                    "
 msgstr ""
+"\n"
+"                                    Date de création ou de révision %(num)s "
+"de %(total)s\n"
+"                                    "
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:566
 msgid "7.2.1 Creation or Revision Type:"
-msgstr ""
+msgstr "7.2.1 Type de création ou de revision:"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:570
 msgid "7.2.2 Creation or Revision Date:"
-msgstr ""
+msgstr "7.2.2 Date de création ou de revision:"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:574
 msgid "7.2.3 Creation or Revision Agent:"
-msgstr ""
+msgstr "7.2.3 Agent de création ou de revision:"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:578
 msgid "7.2.4 Creation or Revision Note:"
-msgstr ""
+msgstr "7.2.4 Note sur la création ou la revision:"
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:589
 msgid "7.3 Language of Accession Record"
-msgstr ""
+msgstr "7.3 Langue de la notice d’acquisition"
 
 #: recordtransfer/templates/recordtransfer/submission_form_base.html:6
 #, python-format
@@ -3379,47 +4071,50 @@ msgid ""
 "        Submission Step %(currentstep)s (of %(totalsteps)s)\n"
 "    "
 msgstr ""
+"\n"
+"        Étape de soumission %(currentstep)s (sur %(totalsteps)s)\n"
+"    "
 
 #: recordtransfer/templates/recordtransfer/submission_form_base.html:27
 msgid "Progress"
-msgstr ""
+msgstr "Progrès"
 
 #: recordtransfer/templates/recordtransfer/submission_form_base.html:46
 msgid "Overview"
-msgstr ""
+msgstr "Aperçu"
 
 #: recordtransfer/templates/recordtransfer/submission_form_base.html:89
 msgid "Previous"
-msgstr ""
+msgstr "Précédent"
 
 #: recordtransfer/templates/recordtransfer/submission_form_base.html:101
 msgid "Next"
-msgstr ""
+msgstr "Suivant"
 
 #: recordtransfer/templates/recordtransfer/submission_form_base.html:112
-#: recordtransfer/views/pre_submission.py:271
+#: recordtransfer/views/pre_submission.py:269
 msgid "Review"
-msgstr ""
+msgstr "Révision"
 
 #: recordtransfer/templates/recordtransfer/submission_form_formset.html:21
 msgid "More"
-msgstr ""
+msgstr "Plus"
 
 #: recordtransfer/templates/recordtransfer/submission_form_formset.html:24
 msgid "Remove"
-msgstr ""
+msgstr "Supprimer"
 
 #: recordtransfer/templates/recordtransfer/submission_form_groupsubmission.html:34
 msgid "Describe the group and its purpose."
-msgstr ""
+msgstr "Décrivez le groupe et son objectif."
 
 #: recordtransfer/templates/recordtransfer/submission_form_groupsubmission.html:44
 msgid "Why would I want to make a group?"
-msgstr ""
+msgstr "Pourquoi voudrais-je créer un groupe?"
 
 #: recordtransfer/templates/recordtransfer/submission_form_legal.html:5
 msgid "Terms of Submission"
-msgstr ""
+msgstr "Conditions de soumission"
 
 #: recordtransfer/templates/recordtransfer/submission_form_legal.html:8
 msgid ""
@@ -3434,6 +4129,16 @@ msgid ""
 "donation to the NCTR.\n"
 "            "
 msgstr ""
+"\n"
+"            En remplissant et en soumettant ce formulaire, vous acceptez par "
+"la présente de confier au Centre national pour la\n"
+"            vérité et la réconciliation (« CNVR ») la garde légale et "
+"physique, le contrôle et la responsabilité\n"
+"            des documents que vous avez soumis afin de permettre aux "
+"archives du CNVR d'\n"
+"            inspecter, d'étudier et d'évaluer ces documents en vue d'un "
+"éventuel don au CNVR.\n"
+"            "
 
 #: recordtransfer/templates/recordtransfer/submission_form_legal.html:16
 msgid ""
@@ -3445,6 +4150,13 @@ msgid ""
 "            potential donation.\n"
 "            "
 msgstr ""
+"\n"
+"            Le CNVR assume l'entière responsabilité de l'état physique des "
+"documents que vous avez\n"
+"soumis pendant la période au cours de laquelle le personnel des archives du "
+"CNVR examinera les documents en vue d'un\n"
+"don potentiel.\n"
+"            "
 
 #: recordtransfer/templates/recordtransfer/submission_form_legal.html:23
 #, python-format
@@ -3454,19 +4166,23 @@ msgid ""
 "back%(link_end)s.\n"
 "            "
 msgstr ""
+"\n"
+"            Si vous ne souhaitez pas continuer, vous pouvez "
+"%(link_start)srevenir en arrière%(link_end)s.\n"
+"            "
 
 #: recordtransfer/templates/recordtransfer/submission_form_review.html:19
 msgid "Go to step"
-msgstr ""
+msgstr "Allez à l'étape"
 
 #: recordtransfer/templates/recordtransfer/submission_form_review.html:46
 msgid "more"
-msgstr ""
+msgstr "plus"
 
 #: recordtransfer/templates/recordtransfer/submission_form_review.html:68
 #: recordtransfer/templates/recordtransfer/submission_form_review.html:88
 msgid "Not provided"
-msgstr ""
+msgstr "Pas fourni"
 
 #: recordtransfer/templates/recordtransfer/submission_form_sourceinfo.html:23
 #, python-format
@@ -3476,6 +4192,10 @@ msgid ""
 "explanation of the different types of source types.\n"
 "                        "
 msgstr ""
+"\n"
+"                        %(link_start)sCliquez ici%(link_end)s pour obtenir "
+"une explication des différents types de sources.\n"
+"                        "
 
 #: recordtransfer/templates/recordtransfer/submission_form_sourceinfo.html:34
 #, python-format
@@ -3485,10 +4205,14 @@ msgid ""
 "explanation of the different types of source roles.\n"
 "                        "
 msgstr ""
+"\n"
+"                        %(link_start)sCliquez ici%(link_end)s pour obtenir "
+"une explication des différents types de rôles de la source.\n"
+"                        "
 
 #: recordtransfer/templates/recordtransfer/submission_form_uploadfiles.html:9
 msgid "Upload your files"
-msgstr ""
+msgstr "Téléchargez vos fichiers"
 
 #: recordtransfer/templates/recordtransfer/submission_form_uploadfiles.html:13
 #, python-format
@@ -3504,61 +4228,71 @@ msgid ""
 "are being uploaded.\n"
 "            "
 msgstr ""
+"\n"
+"            Vous pouvez télécharger un <b>maximum de "
+"%(MAX_TOTAL_UPLOAD_COUNT)s fichiers</b>, et <b>au maximum\n"
+"            %(MAX_TOTAL_UPLOAD_SIZE_MB)sMo de fichiers</b>. Un <b>fichier ne "
+"peut dépasser\n"
+"            %(MAX_SINGLE_UPLOAD_SIZE_MB)s Mo</b>. Veuillez noter que les "
+"envois volumineux peuvent prendre quelques\n"
+"            minutes. Veuillez donc ne pas recharger la page Web pendant le "
+"téléchargement de vos fichiers.\n"
+"            "
 
 #: recordtransfer/templates/recordtransfer/submission_form_uploadfiles.html:25
 msgid "Toggle accepted file types"
-msgstr ""
+msgstr "Basculer les types de fichiers acceptés"
 
 #: recordtransfer/templates/recordtransfer/submission_form_uploadfiles.html:47
 msgid "Total size of transfer:"
-msgstr ""
+msgstr "Taille totale du transfert:"
 
 #: recordtransfer/templates/recordtransfer/submission_form_uploadfiles.html:50
 #: recordtransfer/templates/recordtransfer/submission_form_uploadfiles.html:57
 msgid "MB"
-msgstr ""
+msgstr "Mo"
 
 #: recordtransfer/templates/recordtransfer/submission_form_uploadfiles.html:54
 msgid "Remaining size allowed:"
-msgstr ""
+msgstr "Taille restante autorisée:"
 
 #: recordtransfer/templates/recordtransfer/submission_form_uploadfiles.html:61
 msgid "Files added:"
-msgstr ""
+msgstr "Fichiers ajoutés:"
 
 #: recordtransfer/templates/recordtransfer/submission_form_uploadfiles.html:64
 #: recordtransfer/templates/recordtransfer/submission_form_uploadfiles.html:71
 msgid "files"
-msgstr ""
+msgstr "fichiers"
 
 #: recordtransfer/templates/recordtransfer/submission_form_uploadfiles.html:68
 msgid "Files remaining:"
-msgstr ""
+msgstr "Fichiers restants:"
 
 #: recordtransfer/templates/recordtransfer/submission_group_detail.html:12
 #, python-format
 msgid "Submission Group: %(name)s"
-msgstr ""
+msgstr "Groupe de soumission : %(name)s"
 
 #: recordtransfer/templates/recordtransfer/submission_group_detail.html:22
 msgid "Submission Group: "
-msgstr ""
+msgstr "Groupe de Soumission: "
 
 #: recordtransfer/templates/recordtransfer/submission_group_detail.html:29
 msgid "Delete group"
-msgstr ""
+msgstr "Supprimer le groupe"
 
 #: recordtransfer/templates/recordtransfer/submission_group_detail.html:36
 msgid "Edit Group"
-msgstr ""
+msgstr "Modifier le Groupe"
 
 #: recordtransfer/templates/recordtransfer/submission_sent.html:4
 msgid "Submission Complete!"
-msgstr ""
+msgstr "Soumission terminée!"
 
 #: recordtransfer/templates/recordtransfer/submission_sent.html:11
 msgid "Thank you for your Submission"
-msgstr ""
+msgstr "Merci pour votre Soumission"
 
 #: recordtransfer/templates/recordtransfer/submission_sent.html:24
 #, python-format
@@ -3572,6 +4306,14 @@ msgid ""
 "%(link_start)syour profile page%(link_end)s.\n"
 "                    "
 msgstr ""
+"\n"
+"                    Vos dossiers sont conservés au NCTR jusqu'à ce qu'un "
+"archiviste les examine. Vous pourriez être contacté par\n"
+"                    un archiviste à l'aide des coordonnées que vous avez "
+"fournies dans le formulaire que vous avez soumis. Vous pouvez consulter\n"
+"                    l'état actuel de vos soumissions en consultant "
+"%(link_start)svotre page de profil%(link_end)s.\n"
+"                    "
 
 #: recordtransfer/templates/recordtransfer/submission_sent.html:31
 #, python-format
@@ -3583,65 +4325,73 @@ msgid ""
 "agreed to when creating your submission.\n"
 "                    "
 msgstr ""
+"\n"
+"                    Un courriel vous sera envoyé à l'adresse %(email)s pour "
+"confirmer la réception de votre soumission.\n"
+"                    Ce courriel contiendra également les conditions que vous "
+"avez acceptées lors de la création de votre soumission.\n"
+"                    "
 
 #: recordtransfer/templates/recordtransfer/submission_sent.html:55
 msgid "Go Back Home"
-msgstr ""
+msgstr "Retour à la page d'accueil"
 
 #: recordtransfer/templates/registration/logged_out.html:4
 #: recordtransfer/templates/registration/logged_out.html:17
 msgid "Logged Out"
-msgstr ""
+msgstr "Déconnecté"
 
 #: recordtransfer/templates/registration/logged_out.html:20
 msgid "You have been successfully logged out."
-msgstr ""
+msgstr "Vous vous êtes déconnecté avec succès."
 
 #: recordtransfer/templates/registration/logged_out.html:25
 msgid "Log Back In"
-msgstr ""
+msgstr "Se reconnecter"
 
 #: recordtransfer/templates/registration/login.html:4
 #: recordtransfer/templates/registration/login.html:64
 #: recordtransfer/templates/registration/password_reset_complete.html:36
 msgid "Login"
-msgstr ""
+msgstr "Connexion"
 
 #: recordtransfer/templates/registration/login.html:10
 msgid "Login to your Account"
-msgstr ""
+msgstr "Connectez-vous à votre compte"
 
 #: recordtransfer/templates/registration/login.html:73
 msgid "Forgot your password?"
-msgstr ""
+msgstr "Mot de passe oublié?"
 
 #: recordtransfer/templates/registration/login.html:78
 msgid "Don't have an account?"
-msgstr ""
+msgstr "Vous n'avez pas de compte?"
 
 #: recordtransfer/templates/registration/password_change_done.html:4
 msgid "Password Changed"
-msgstr ""
+msgstr "Mot de passe modifié"
 
 #: recordtransfer/templates/registration/password_change_done.html:22
 msgid "Password Changed Successfully"
-msgstr ""
+msgstr "Mot de passe modifié avec succès"
 
 #: recordtransfer/templates/registration/password_change_done.html:25
 msgid ""
 "Your password has been changed successfully. You can now use your new "
 "password to log in."
 msgstr ""
+"Votre mot de passe a été modifié avec succès. Vous pouvez désormais utiliser "
+"votre nouveau mot de passe pour vous connecter."
 
 #: recordtransfer/templates/registration/password_change_done.html:31
 #: recordtransfer/templates/registration/password_change_form.html:116
 msgid "Back to Admin"
-msgstr ""
+msgstr "Retour à l'administration"
 
 #: recordtransfer/templates/registration/password_change_done.html:34
 #: recordtransfer/templates/registration/password_change_form.html:119
 msgid "Back to Profile"
-msgstr ""
+msgstr "Retour au profil"
 
 #: recordtransfer/templates/registration/password_change_form.html:21
 msgid ""
@@ -3657,123 +4407,143 @@ msgstr[1] ""
 
 #: recordtransfer/templates/registration/password_change_form.html:110
 msgid "Change my password"
-msgstr ""
+msgstr "Modifier mon mot de passe"
 
 #: recordtransfer/templates/registration/password_reset_complete.html:4
 msgid "Password Reset"
-msgstr ""
+msgstr "Réinitialisation du mot de passe"
 
 #: recordtransfer/templates/registration/password_reset_complete.html:20
 msgid "Password Reset Successfully"
-msgstr ""
+msgstr "Le mot de passe a été réinitialisé avec succès"
 
 #: recordtransfer/templates/registration/password_reset_complete.html:23
 msgid ""
 "Your password was successfully changed. Log into your account with your new "
 "password."
 msgstr ""
+"Votre mot de passe a été modifié avec succès. Connectez-vous à votre compte "
+"avec votre nouveau mot de passe."
 
 #: recordtransfer/templates/registration/password_reset_confirm.html:5
 #: recordtransfer/templates/registration/password_reset_confirm.html:16
 msgid "Create a new Password"
-msgstr ""
+msgstr "Créer un nouveau mot de passe"
 
 #: recordtransfer/templates/registration/password_reset_confirm.html:7
 #: recordtransfer/templates/registration/password_reset_confirm.html:65
 msgid "Password Reset Failed"
-msgstr ""
+msgstr "Réinitialisation du mot de passe a échoué"
 
 #: recordtransfer/templates/registration/password_reset_confirm.html:17
 msgid "Please enter a new password for your account"
-msgstr ""
+msgstr "Veuillez saisir un nouveau mot de passe pour votre compte"
 
 #: recordtransfer/templates/registration/password_reset_confirm.html:46
 #: recordtransfer/templates/registration/password_reset_email.html:13
 msgid "Reset Password"
-msgstr ""
+msgstr "Réinitialiser le mot de passe"
 
 #: recordtransfer/templates/registration/password_reset_confirm.html:68
 msgid ""
 "The password reset link was invalid, possibly because it has already been "
 "used. Please request a new password reset."
 msgstr ""
+"Le lien de réinitialisation du mot de passe n'était pas valide, probablement "
+"parce qu'il a déjà été utilisé. Veuillez demander une nouvelle "
+"réinitialisation du mot de passe."
 
 #: recordtransfer/templates/registration/password_reset_confirm.html:80
 msgid "Request New Password Reset"
-msgstr ""
+msgstr "Demander une réinitialisation du mot de passe"
 
 #: recordtransfer/templates/registration/password_reset_done.html:22
 msgid "Password Reset Email Sent"
-msgstr ""
+msgstr "Courriel de réinitialisation du mot de passe envoyé"
 
 #: recordtransfer/templates/registration/password_reset_done.html:25
 msgid ""
 "If the email you provided is associated with a user account, you should "
 "receive an email shortly to reset your password."
 msgstr ""
+"Si l'adresse courriel que vous avez fournie est associée à un compte "
+"utilisateur, vous devriez recevoir un courriel sous peu vous permettant de "
+"réinitialiser votre mot de passe."
 
 #: recordtransfer/templates/registration/password_reset_email.html:5
 msgid "Reset Your Password"
-msgstr ""
+msgstr "Réinitialisez votre mot de passe"
 
 #: recordtransfer/templates/registration/password_reset_email.html:9
 msgid ""
 "Someone asked for a password reset for the NCTR Secure Record Transfer App. "
 "To reset your password, click the button below."
 msgstr ""
+"Quelqu'un a demandé une réinitialisation du mot de passe pour l'application "
+"sécurisée de transfert de dossiers du CNVR. Pour réinitialiser votre mot de "
+"passe, cliquez sur le bouton ci-dessous."
 
 #: recordtransfer/templates/registration/password_reset_email.html:16
 msgid "If the button doesn't work, copy and paste this link into your browser:"
 msgstr ""
+"Si le bouton ne fonctionne pas, copiez et collez ce lien dans votre "
+"navigateur:"
 
 #: recordtransfer/templates/registration/password_reset_email.html:24
 msgid "This email address is not monitored, do not reply to this message."
 msgstr ""
+"Cette adresse courriel n'est pas surveillée, ne répondez pas à ce message."
 
 #: recordtransfer/templates/registration/password_reset_form.html:4
 msgid "Reset your Password"
-msgstr ""
+msgstr "Réinitialisez votre mot de passe"
 
 #: recordtransfer/templates/registration/password_reset_form.html:11
 msgid "Reset your password"
-msgstr ""
+msgstr "Réinitialisez votre mot de passe"
 
 #: recordtransfer/templates/registration/password_reset_form.html:13
 msgid ""
 "Enter the email associated with your account and we'll send you a link to "
 "reset your password."
 msgstr ""
+"Entrez l'adresse courriel associée à votre compte et nous vous enverrons un "
+"lien pour réinitialiser votre mot de passe."
 
 #: recordtransfer/templates/registration/password_reset_form.html:90
 msgid "Send Reset Link"
-msgstr ""
+msgstr "Envoyer le lien de réinitialisation"
 
 #: recordtransfer/templates/registration/password_reset_form.html:99
 msgid "Back to Login"
-msgstr ""
+msgstr "Retour à la connexion"
 
 #: recordtransfer/tests/unit/views/test_profile.py:146
 #: recordtransfer/tests/unit/views/test_profile.py:241
-#: recordtransfer/views/pre_submission.py:530
+#: recordtransfer/views/pre_submission.py:528
 #: recordtransfer/views/profile.py:115
 msgid "Please correct the errors below."
-msgstr ""
+msgstr "Veuillez corriger les erreurs ci-dessous."
 
 #: recordtransfer/validators.py:27
 #, python-format
 msgid ""
 "This password is too short. It must contain at least %(num)s characters."
 msgstr ""
+"Ce mot de passe est trop court. Il doit contenir au moins %(num)s caractères."
 
 #: recordtransfer/validators.py:33
 #, python-format
 msgid "This password is too long. It must contain at most %(num)s characters."
 msgstr ""
+"Ce mot de passe est trop long. Il doit contenir au maximum %(num)s "
+"caractères."
 
 #: recordtransfer/validators.py:40
 #, python-format
 msgid "Your password must be between %(num)s and %(num2)s characters long."
 msgstr ""
+"Votre mot de passe doit comporter entre %(num)s et %(num2)s caractères."
 
 #: recordtransfer/validators.py:73 recordtransfer/validators.py:87
 #, python-brace-format
@@ -3797,6 +4567,8 @@ msgstr[1] ""
 #: recordtransfer/validators.py:163 recordtransfer/validators.py:169
 msgid "Your password cannot contain your first name, last name, or username."
 msgstr ""
+"Votre mot de passe ne peut pas contenir votre prénom, votre nom ou votre nom "
+"d'utilisateur."
 
 #: recordtransfer/views/account.py:261
 #, python-format
@@ -3812,90 +4584,98 @@ msgid ""
 "You have been locked out due to too many failed login attempts. Please try "
 "again later."
 msgstr ""
+"Vous ne pouvez plus accéder à votre compte en raison de nombreuses "
+"tentatives infructueuses de connexion. Veuillez réessayer plus tard."
 
 #: recordtransfer/views/account.py:365
 msgid "Password reset successful"
-msgstr ""
+msgstr "Réinitialisation du mot de passe réussie"
 
 #: recordtransfer/views/account.py:367
 msgid "reset"
-msgstr ""
+msgstr "réinitialisation"
 
 #: recordtransfer/views/media.py:30
 msgid "The requested resource could not be found"
-msgstr ""
+msgstr "La ressource demandée est introuvable"
 
 #: recordtransfer/views/media.py:35
 msgid "File not found for this job"
-msgstr ""
+msgstr "Fichier introuvable pour cette tâche"
 
 #: recordtransfer/views/post_submission.py:80
 msgid "Submission not found"
-msgstr ""
+msgstr "Soumission introuvable"
 
 #: recordtransfer/views/post_submission.py:110
 msgid "Submission group not found"
-msgstr ""
+msgstr "Groupe de soumission introuvable"
 
 #: recordtransfer/views/post_submission.py:132
 msgid "This submission group has no submissions associated with it to export."
 msgstr ""
+"Ce groupe de soumissions ne comporte aucune soumission associée à exporter."
 
 #: recordtransfer/views/post_submission.py:199
 msgid "Group updated"
-msgstr ""
+msgstr "Groupe mis à jour"
 
 #: recordtransfer/views/post_submission.py:210
 msgid "There was an error updating the group"
-msgstr ""
+msgstr "Une erreur s'est produite lors de la mise à jour du groupe"
 
 #: recordtransfer/views/post_submission.py:219
 msgid "Direct access is not allowed."
-msgstr ""
+msgstr "L'accès direct n'est pas autorisé."
 
 #: recordtransfer/views/pre_submission.py:99
 msgid "Date Last Changed"
-msgstr ""
+msgstr "Date de la dernière modification"
 
 #: recordtransfer/views/pre_submission.py:100
 msgid "Date Started"
-msgstr ""
+msgstr "Date de début"
 
 #: recordtransfer/views/pre_submission.py:101
 msgid "Files Uploaded"
-msgstr ""
+msgstr "Fichiers téléchargés"
 
 #: recordtransfer/views/pre_submission.py:176
 msgid "Legal Agreement"
-msgstr ""
+msgstr "Accord juridique"
 
 #: recordtransfer/views/pre_submission.py:184
 msgid ""
 "Enter your contact information in case you need to be contacted by one of "
 "our archivists regarding your submission"
 msgstr ""
+"Veuillez saisir vos coordonnées au cas où l'un de nos archivistes aurait "
+"besoin de vous contacter au sujet de votre soumission"
 
 #: recordtransfer/views/pre_submission.py:190
 msgid "Record Source Information (Optional)"
-msgstr ""
+msgstr "Informations sur la source de l'enregistrement (facultatif)"
 
 #: recordtransfer/views/pre_submission.py:193
 msgid ""
 "Are you submitting records on behalf of another person or organization? "
 "Select Yes to enter information about them."
 msgstr ""
+"Souhaitez-vous soumettre des documents au nom d'une autre personne ou "
+"organisation? Sélectionnez Oui pour saisir les informations à leur sujet."
 
 #: recordtransfer/views/pre_submission.py:198
 msgid "Record Description"
-msgstr ""
+msgstr "Description des documents d'archives"
 
 #: recordtransfer/views/pre_submission.py:202
 msgid "Provide a brief description of the records you're submitting"
 msgstr ""
+"Fournissez une brève description des documents d'archives que vous soumettez"
 
 #: recordtransfer/views/pre_submission.py:206
 msgid "Record Rights and Restrictions (Optional)"
-msgstr ""
+msgstr "Droits et restrictions relatifs aux documents d'archives (facultatif)"
 
 #: recordtransfer/views/pre_submission.py:210
 #, python-format
@@ -3905,10 +4685,14 @@ msgid ""
 "rights types? %(link_start)sView our guide%(link_end)s for detailed "
 "explanations."
 msgstr ""
+"Selon les documents que vous soumettez, certains droits spécifiques peuvent "
+"régir l'accès à vos documents. <br> <br>Vous avez besoin d'aide pour "
+"comprendre les différents types de droits ? %(link_start)sConsultez notre "
+"guide%(link_end)s pour obtenir des explications détaillées."
 
 #: recordtransfer/views/pre_submission.py:225
 msgid "Identifiers (Optional)"
-msgstr ""
+msgstr "Identifiants (facultatif)"
 
 #: recordtransfer/views/pre_submission.py:232
 msgid ""
@@ -3917,10 +4701,15 @@ msgid ""
 "is optional</b>. If you do not have any identifiers associated with the "
 "records, you may proceed to the next step."
 msgstr ""
+"Si vous disposez d'identifiants associés à ces documents d'archives, tels "
+"que des numéros de référence, des codes ou d'autres identifiants uniques, "
+"vous pouvez les saisir ici. <b>Cette étape est facultative</b>. Si vous ne "
+"disposez d'aucun identifiant associé aux documents d'archives, vous pouvez "
+"passer à l'étape suivante."
 
 #: recordtransfer/views/pre_submission.py:238
 msgid "Assign Submission to Group (Optional)"
-msgstr ""
+msgstr "Attribuer la soumission à un groupe (facultatif)"
 
 #: recordtransfer/views/pre_submission.py:241
 msgid ""
@@ -3928,219 +4717,239 @@ msgid ""
 "<b>This step is optional</b>. If you do not wish to assign a group, you can "
 "proceed to the next step."
 msgstr ""
+"Vous pouvez attribuer cette soumission à un groupe afin d'organiser vos "
+"documents d'archives. <b>Cette étape est facultative</b>. Si vous ne "
+"souhaitez pas attribuer de groupe, vous pouvez passer à l'étape suivante."
 
 #: recordtransfer/views/pre_submission.py:250
 msgid "Upload Files"
-msgstr ""
+msgstr "Télécharger des fichiers"
 
 #: recordtransfer/views/pre_submission.py:253
 msgid "Add any final notes you would like to add, and upload your files"
 msgstr ""
+"Ajoutez les dernières notes que vous souhaitez ajouter, puis téléchargez vos "
+"fichiers"
 
 #: recordtransfer/views/pre_submission.py:261
 msgid "Final Notes"
-msgstr ""
+msgstr "Notes finales"
 
-#: recordtransfer/views/pre_submission.py:264
+#: recordtransfer/views/pre_submission.py:263
 msgid "Add any final notes that may not have fit in previous steps"
 msgstr ""
+"Ajoutez toute note finale qui n'aurait pas pu être intégrée aux étapes "
+"précédentes"
 
-#: recordtransfer/views/pre_submission.py:273
+#: recordtransfer/views/pre_submission.py:271
 msgid "Review the information you've entered before submitting"
-msgstr ""
+msgstr "Vérifiez les informations que vous avez saisies avant de les envoyer"
 
-#: recordtransfer/views/pre_submission.py:295
+#: recordtransfer/views/pre_submission.py:293
 msgid "Invalid step name"
-msgstr ""
+msgstr "Nom de l'étape invalide"
 
-#: recordtransfer/views/pre_submission.py:342
+#: recordtransfer/views/pre_submission.py:340
 msgid ""
 "Can't load this in-progress submission because it will put you over the "
 "maximum concurrent session limit."
 msgstr ""
+"Impossible de charger cette soumission en cours, car cela dépasserait la "
+"limite maximale de sessions simultanées."
 
-#: recordtransfer/views/pre_submission.py:352
+#: recordtransfer/views/pre_submission.py:350
 msgid ""
 "Can't create a new submission because it will put you over the maximum "
 "concurrent session limit."
 msgstr ""
+"Impossible de créer une nouvelle soumission car cela dépasserait la limite "
+"maximale de sessions simultanées."
 
-#: recordtransfer/views/pre_submission.py:403
+#: recordtransfer/views/pre_submission.py:401
 #, python-format
 msgid ""
 "Your submission was saved, but you have reached your session limit. Go to "
 "%(link_start)syour profile%(link_end)s to see your saved submissions."
 msgstr ""
+"Votre soumission a été enregistrée, mais vous avez atteint la limite de "
+"votre session. Allez à %(link_start)svotre profil%(link_end)s pour voir vos "
+"soumissions enregistrées."
 
-#: recordtransfer/views/pre_submission.py:418
+#: recordtransfer/views/pre_submission.py:416
 msgid "Submission saved successfully."
-msgstr ""
+msgstr "Soumission enregistrée avec succès."
 
-#: recordtransfer/views/pre_submission.py:437
+#: recordtransfer/views/pre_submission.py:435
 #, python-format
 msgid ""
 "This submission will expire on %(date)s. Please be sure to complete your "
 "submission before then."
 msgstr ""
+"Cette soumission expirera le %(date)s. Veuillez vous assurer de terminer "
+"votre soumission avant cette date."
 
-#: recordtransfer/views/pre_submission.py:445
+#: recordtransfer/views/pre_submission.py:443
 msgid "There was an error saving the submission."
-msgstr ""
+msgstr "Une erreur s'est produite lors de l'enregistrement de la soumission."
 
-#: recordtransfer/views/pre_submission.py:986
+#: recordtransfer/views/pre_submission.py:984
 msgid ""
 "There was an error creating your submission. Please try again later or "
 "contact us for assistance."
 msgstr ""
+"Une erreur s'est produite lors de la création de votre soumission. Veuillez "
+"réessayer plus tard ou nous contacter pour obtenir de l'aide."
 
 #: recordtransfer/views/profile.py:78
 msgid "Updated successfully"
-msgstr ""
+msgstr "Mise à jour réussie"
 
 #: recordtransfer/views/profile.py:79
 msgid "Could not update"
-msgstr ""
+msgstr "Impossible de mettre à jour"
 
 #: recordtransfer/views/profile.py:84 recordtransfer/views/profile.py:353
 msgid "Page not found"
-msgstr ""
+msgstr "Page introuvable"
 
 #: recordtransfer/views/profile.py:124
 msgid "Account details updated."
-msgstr ""
+msgstr "Détails du compte mis à jour."
 
 #: recordtransfer/views/profile.py:125
 msgid "Failed to update account information."
-msgstr ""
+msgstr "Échec de la mise à jour des informations du compte."
 
 #: recordtransfer/views/profile.py:133
 msgid "Contact information updated."
-msgstr ""
+msgstr "Coordonnées mises à jour."
 
 #: recordtransfer/views/profile.py:134
 msgid "Failed to update contact information."
-msgstr ""
+msgstr "Échec de la mise à jour des coordonnées."
 
 #: recordtransfer/views/profile.py:156
 msgid "In-progress submission deleted."
-msgstr ""
+msgstr "Soumission en cours supprimée."
 
 #: recordtransfer/views/profile.py:161
 msgid "In-progress submission not found."
-msgstr ""
+msgstr "Soumission en cours introuvable."
 
 #: recordtransfer/views/profile.py:166
 msgid "Failed to delete in-progress submission."
-msgstr ""
+msgstr "Échec de la suppression de la soumission en cours."
 
 #: recordtransfer/views/profile.py:348
 msgid "Submission group created successfully."
-msgstr ""
+msgstr "Groupe de soumission créé avec succès."
 
 #: recordtransfer/views/profile.py:407
 #, python-format
 msgid "Submission group \"%(name)s\" deleted."
-msgstr ""
+msgstr "Groupe de soumission « %(name)s » supprimé."
 
 #: recordtransfer/views/profile.py:414
 msgid "Submission group not found."
-msgstr ""
+msgstr "Groupe de soumission introuvable."
 
 #: recordtransfer/views/profile.py:419
 msgid "Failed to delete submission group."
-msgstr ""
+msgstr "Échec de la suppression du groupe de soumission."
 
 #: recordtransfer/views/profile.py:472
 msgid "Submission or group not found"
-msgstr ""
+msgstr "Soumission ou groupe introuvable"
 
 #: recordtransfer/views/profile.py:490
 msgid "Failed to assign submission to group"
-msgstr ""
+msgstr "Échec de l'attribution d'une soumission au groupe"
 
 #: recordtransfer/views/profile.py:505
 #, python-format
 msgid "Submission \"%(title)s\" is not assigned to any group"
-msgstr ""
+msgstr "La soumission « %(title)s » n'est attribuée à aucun groupe"
 
 #: recordtransfer/views/profile.py:513
 #, python-format
 msgid "Submission \"%(title)s\" unassigned from group \"%(group_name)s\""
-msgstr ""
+msgstr "Soumission « %(title)s » non attribuée au groupe « %(group_name)s »"
 
 #: recordtransfer/views/profile.py:529
 #, python-format
 msgid "Submission \"%(title)s\" assigned to group \"%(group_name)s\""
-msgstr ""
+msgstr "Soumission « %(title)s » attribuée au groupe « %(group_name)s »"
 
 #: templates/400.html:4
 msgid "Bad Request"
-msgstr ""
+msgstr "Mauvaise Demande"
 
 #: templates/400.html:16
 msgid "400: Bad Request"
-msgstr ""
+msgstr "400: Mauvaise Demande"
 
 #: templates/400.html:19
 msgid "The received request was invalid."
-msgstr ""
+msgstr "La demande reçue n'était pas valide."
 
 #: templates/403.html:4
 msgid "Forbidden"
-msgstr ""
+msgstr "Interdit"
 
 #: templates/403.html:16
 msgid "403: Forbidden"
-msgstr ""
+msgstr "403: Interdit"
 
 #: templates/403.html:19
 msgid "You are not allowed to access the requested resource."
-msgstr ""
+msgstr "Vous n'êtes pas autorisé à accéder à la ressource demandée."
 
 #: templates/404.html:4
 msgid "Not Found"
-msgstr ""
+msgstr "Introuvable"
 
 #: templates/404.html:16
 msgid "404: Not Found"
-msgstr ""
+msgstr "404: Introuvable"
 
 #: templates/404.html:19
 msgid "The requested page does not exist."
-msgstr ""
+msgstr "La page demandée n'existe pas."
 
 #: templates/500.html:4 templates/500.html:16
 msgid "System Error"
-msgstr ""
+msgstr "Erreur de système"
 
 #: templates/500.html:19
 msgid "We're sorry, but this site is experiencing some issues."
 msgstr ""
+"Nous sommes désolés, mais ce site rencontre actuellement des difficultés."
 
 #: templates/500.html:22
 msgid ""
 "Please try again later. Contact us if you continue to experience issues."
 msgstr ""
+"Veuillez réessayer plus tard. Contactez-nous si les difficultés persistent."
 
 #: upload/admin.py:46 upload/admin.py:260
 msgid "Upload Size"
-msgstr ""
+msgstr "Taille du téléchargement"
 
 #: upload/admin.py:57
 msgid "File was removed"
-msgstr ""
+msgstr "Le fichier a été supprimé"
 
 #: upload/admin.py:270
 msgid "Last upload at"
-msgstr ""
+msgstr "Dernier téléchargement à"
 
 #: upload/check.py:59
 msgid "Invalid filename or size"
-msgstr ""
+msgstr "Nom ou taille du fichier invalide"
 
 #: upload/check.py:95
 msgid "You can not upload anymore files."
-msgstr ""
+msgstr "Vous ne pouvez plus télécharger de fichiers."
 
 #: upload/check.py:97
 #, python-format
@@ -4148,11 +4957,13 @@ msgid ""
 "The file \"%(filename)s\" would push the total file count past the maximum "
 "number of files (%(max_count)s)"
 msgstr ""
+"Le fichier « %(filename)s » ferait passer le nombre total de fichiers au-"
+"delà du nombre maximal de fichiers (%(max_count)s)"
 
 #: upload/check.py:112
 #, python-format
 msgid "Maximum total upload size (%(max_size)s MB) exceeded"
-msgstr ""
+msgstr "Taille totale maximale de téléchargement (%(max_size)s Mo) dépassée"
 
 #: upload/check.py:115
 #, python-format
@@ -4160,106 +4971,117 @@ msgid ""
 "The file \"%(filename)s\" would push the total transfer size past the "
 "%(max_size)sMB max"
 msgstr ""
+"Le fichier « %(filename)s » ferait passer la taille totale du transfert au-"
+"delà de la taille maximale de %(max_size)sMo"
 
 #: upload/check.py:125
 msgid "A file with the same name has already been uploaded."
-msgstr ""
+msgstr "Un fichier portant le même nom a déjà été téléchargé."
 
 #: upload/check.py:127
 #, python-format
 msgid "A file with the name \"%(filename)s\" has already been uploaded"
-msgstr ""
+msgstr "Un fichier nommé « %(filename)s » a déjà été téléchargé"
 
 #: upload/check.py:141
 msgid "Filename cannot be empty"
-msgstr ""
+msgstr "Le nom du fichier ne peut pas être vide"
 
 #: upload/check.py:147
 msgid "Filename is too long"
-msgstr ""
+msgstr "Le nom du fichier est trop long"
 
 #: upload/check.py:149
 #, python-format
 msgid ""
 "Filename is too long (%(num_chars)s characters, max %(max_chars)s is allowed)"
 msgstr ""
+"Le nom du fichier est trop long (%(num_chars)s caractères, le maximum "
+"autorisé est %(max_chars)s)"
 
 #: upload/check.py:165
 msgid "Filename contains invalid characters"
-msgstr ""
+msgstr "Le nom du fichier contient des caractères invalides"
 
 #: upload/check.py:176 upload/check.py:183
 msgid "Absolute paths are not allowed"
-msgstr ""
+msgstr "Les chemins absolus ne sont pas autorisés"
 
 #: upload/check.py:177
 #, python-format
 msgid "Filename \"%(filename)s\" begins with \"/\""
-msgstr ""
+msgstr "Le nom de fichier « %(filename)s » commence par « / »"
 
 #: upload/check.py:184
 #, python-format
 msgid "Filename \"%(filename)s\" begins with \"%(drive_letter)s:\""
-msgstr ""
+msgstr "Le nom de fichier « %(filename)s » commence par « %(drive_letter)s: »"
 
 #: upload/check.py:220
 msgid "Filename contains invalid path characters"
-msgstr ""
+msgstr "Le nom du fichier contient des caractères de chemin d'accès invalides"
 
 #: upload/check.py:222
 #, python-format
 msgid ""
 "Filename \"%(filename)s\" contains invalid character pattern: \"%(pattern)s\""
 msgstr ""
+"Le nom de fichier « %(filename)s » contient un motif de caractères non "
+"valide : « %(pattern)s »"
 
 #: upload/check.py:236
 msgid "Filename uses reserved system name"
-msgstr ""
+msgstr "Le nom de fichier utilise un nom système réservé"
 
 #: upload/check.py:238
 #, python-format
 msgid ""
 "Filename \"%(filename)s\" includes Windows reserved filename \"%(reserved)s\""
 msgstr ""
+"Le nom de fichier « %(filename)s » comprend le nom de fichier réservé "
+"Windows « %(reserved)s »"
 
 #: upload/check.py:256
 msgid "File is missing an extension."
-msgstr ""
+msgstr "L'extension du fichier est manquante."
 
 #: upload/check.py:257
 #, python-format
 msgid "The file \"%(filename)s\" does not have a file extension"
-msgstr ""
+msgstr "Le fichier « %(filename)s » n'a pas d'extension"
 
 #: upload/check.py:270
 #, python-format
 msgid "Files with \"%(extension)s\" extension are not allowed."
-msgstr ""
+msgstr "Les fichiers avec l'extension « %(extension)s » ne sont pas autorisés."
 
 #: upload/check.py:273
 #, python-format
 msgid "The file \"%(filename)s\" has an invalid extension (.%(extension)s)"
-msgstr ""
+msgstr "Le fichier \"%(filename)s\" a une extension invalide (.%(extension)s)"
 
 #: upload/check.py:297
 msgid "File type is not supported"
-msgstr ""
+msgstr "Le type de fichier n'est pas soutenu"
 
 #: upload/check.py:299
 #, python-format
 msgid ""
 "The file \"%(filename)s\" has an unsupported extension \"%(extension)s\""
 msgstr ""
+"Le fichier \"%(filename)s\" a une extension non reconnue \"%(extension)s\""
 
 #: upload/check.py:310
 msgid "File type could not be determined"
-msgstr ""
+msgstr "Le type de fichier n'a pas pu être déterminé"
 
 #: upload/check.py:312
 #, python-format
 msgid ""
 "The file \"%(filename)s\" could not be analyzed for MIME type validation"
 msgstr ""
+"Le fichier « %(filename)s » n'a pas pu être analysé pour la validation du "
+"type MIME"
 
 #: upload/check.py:322
 #, python-format
@@ -4284,26 +5106,28 @@ msgstr[1] ""
 
 #: upload/check.py:350
 msgid "File size is invalid."
-msgstr ""
+msgstr "La taille du fichier est invalide."
 
 #: upload/check.py:351
 #, python-format
 msgid "The file \"%(filename)s\" has an invalid size (%(size)s)"
-msgstr ""
+msgstr "Le fichier «%(filename)s» a une taille invalide (%(size)s)"
 
 #: upload/check.py:357
 msgid "File is empty."
-msgstr ""
+msgstr "Le fichier est vide."
 
 #: upload/check.py:358
 #, python-format
 msgid "The file \"%(filename)s\" is empty"
-msgstr ""
+msgstr "Le fichier «%(filename)s» est vide"
 
 #: upload/check.py:371
 #, python-format
 msgid "File is too big (%(size_mb).2fMB). Max filesize: %(max_size_mb)sMB"
 msgstr ""
+"Fichier est trop volumineux (%(size_mb).2fMo). Taille maximale des fichiers: "
+"%(max_size_mb)sMo"
 
 #: upload/check.py:374
 #, python-format
@@ -4311,39 +5135,41 @@ msgid ""
 "The file \"%(filename)s\" is too big (%(size_mb).2fMB). Max filesize: "
 "%(max_size_mb)sMB"
 msgstr ""
+"Le fichier \"%(filename)s\" est trop volumineux (%(size_mb).2fMo). Taille "
+"maximale des fichiers: %(max_size_mb)sMo"
 
 #: upload/models.py:58
 msgid "Session Created"
-msgstr ""
+msgstr "Session créée"
 
 #: upload/models.py:59
 msgid "Session Expired"
-msgstr ""
+msgstr "Session expirée"
 
 #: upload/models.py:60
 msgid "Uploading Files"
-msgstr ""
+msgstr "Téléchargement de fichiers"
 
 #: upload/models.py:61
 msgid "File Copy in Progress"
-msgstr ""
+msgstr "Copie du fichier en cours"
 
 #: upload/models.py:62
 msgid "All Files in Permanent Storage"
-msgstr ""
+msgstr "Tous les fichiers dans l'entreposage permanent"
 
 #: upload/models.py:63
 msgid "Copying Failed"
-msgstr ""
+msgstr "Échec de la copie"
 
 #: upload/models.py:64
 msgid "File Removal in Progress"
-msgstr ""
+msgstr "Suppression de fichier en cours"
 
 #: upload/models.py:517
 #, python-format
 msgid "%(file_count)s, totalling %(total_size)s"
-msgstr ""
+msgstr "%(file_count)s, totalisant %(total_size)s"
 
 #: upload/models.py:530
 #, python-format
@@ -4355,62 +5181,66 @@ msgstr[1] ""
 #: upload/models.py:541
 #, python-format
 msgid "%(token)s (started at %(date)s)"
-msgstr ""
+msgstr "%(token)s (commencé à %(date)s)"
 
 #: upload/models.py:613
 #, python-format
 msgid "%(name)s Removed! | %(session)s"
-msgstr ""
+msgstr "%(name)s Supprimé! | %(session)s"
 
 #: upload/tests/unit/test_views.py:436 upload/views.py:225
 msgid "Invalid filename or upload session token"
-msgstr ""
+msgstr "Nom de fichier ou identifiant de session de téléchargement invalide"
 
 #: upload/views.py:50
 msgid "Invalid upload session token"
-msgstr ""
+msgstr "Identifiant de session de téléchargement invalide"
 
 #: upload/views.py:64
 msgid "There was an internal server error. Please try again."
-msgstr ""
+msgstr "Une erreur interne du serveur s'est produite. Veuillez réessayer."
 
 #: upload/views.py:84
 msgid "No file was uploaded"
-msgstr ""
+msgstr "Aucun fichier n'a été téléchargé"
 
 #: upload/views.py:112
 #, python-format
 msgid "Malware was detected in the file \"%(name)s\""
-msgstr ""
+msgstr "Un logiciel malveillant a été détecté dans le fichier «%(name)s»"
 
 #: upload/views.py:124
 #, python-format
 msgid "File \"%(name)s\" is too large to scan for malware"
 msgstr ""
+"Fichier \"%(name)s\" est trop volumineux pour être analysé à la recherche de "
+"logiciels malveillants"
 
 #: upload/views.py:136
 msgid "Unable to scan file for malware due to scanner error"
 msgstr ""
+"Impossible d'analyser le fichier à la recherche de logiciels malveillants en "
+"raison d'une erreur de lecture"
 
 #: upload/views.py:150
 msgid "There was an error uploading the file"
-msgstr ""
+msgstr "Une erreur s'est produite lors du téléchargement du fichier"
 
 #: upload/views.py:233
 msgid "File not found in upload session"
-msgstr ""
+msgstr "Fichier introuvable dans la session de téléchargement"
 
 #: upload/views.py:238
 msgid "Cannot remove file from upload session"
-msgstr ""
+msgstr "Impossible de supprimer le fichier de la session de téléchargement"
 
 #: upload/views.py:246
 msgid "The uploaded file could not be found"
-msgstr ""
+msgstr "Le fichier téléchargé est introuvable"
 
 #: utility/files.py:49 utility/files.py:68
 msgid "No file types could be identified"
-msgstr ""
+msgstr "Aucun type de fichier n'a pu être identifié"
 
 #: utility/files.py:57
 #, python-format
@@ -4423,7 +5253,7 @@ msgstr[1] ""
 #, python-format
 msgctxt "file_count_1 and _2 are both counts like: '1 PDF file'"
 msgid "%(file_count_1)s and %(file_count_2)s"
-msgstr ""
+msgstr "%(file_count_1)s et %(file_count_2)s"
 
 #: utility/files.py:84
 #, python-format
@@ -4431,4 +5261,12 @@ msgctxt ""
 "file_count_1 is a list like '1 PDF file, 2 Image files' and file_count_2 is "
 "a count like: '5 Video files'"
 msgid "%(file_count_1)s, and %(file_count_2)s"
-msgstr ""
+msgstr "%(file_count_1)s, et %(file_count_2)s"
+
+#, python-format
+#~ msgid "[CAAIS %(section)s]"
+#~ msgstr "[NCIAA %(section)s]"
+
+#, python-format
+#~ msgid "[<a href=\"%(url)s\" target=\"_blank\">CAAIS</a> %(section)s]"
+#~ msgstr "[<a href=\"%(url)s\" target=\"_blank\">NCIAA</a> %(section)s]"

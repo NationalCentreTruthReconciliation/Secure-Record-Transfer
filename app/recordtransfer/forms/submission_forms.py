@@ -470,7 +470,7 @@ class RecordDescriptionForm(SubmissionForm):
         min_length=4,
         max_length=2000,
         widget=forms.Textarea(
-            attrs={"rows": "6", "placeholder": "e.g., These files contain images from ..."}
+            attrs={"rows": "6", "placeholder": _("e.g., These files contain images from ...")}
         ),
         label=_("Description of contents"),
         help_text=_(
@@ -705,7 +705,7 @@ class GroupSubmissionForm(SubmissionForm):
         self.user = kwargs.pop("user", None)
         super().__init__(*args, **kwargs)
         user_submission_groups = SubmissionGroup.objects.filter(created_by=self.user)
-        choices = [(None, "Select a group")] + [
+        choices = [(None, _("Select a group"))] + [
             (group.uuid, group.name) for group in user_submission_groups
         ]
         self.fields["group_uuid"].choices = choices

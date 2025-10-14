@@ -173,40 +173,40 @@ class SubmissionFormWizard(SessionWizardView):
     _TEMPLATES: ClassVar[dict[SubmissionStep, SubmissionStepMeta]] = {
         SubmissionStep.ACCEPT_LEGAL: SubmissionStepMeta(
             template="recordtransfer/submission_form_legal.html",
-            title=gettext("Legal Agreement"),
+            title=_("Legal Agreement"),
             form=forms.AcceptLegal,
         ),
         SubmissionStep.CONTACT_INFO: SubmissionStepMeta(
             template="recordtransfer/submission_form_standard.html",
-            title=gettext("Contact Information"),
+            title=_("Contact Information"),
             form=forms.ContactInfoForm,
-            info_message=gettext(
+            info_message=_(
                 "Enter your contact information in case you need to be contacted by one of our "
                 "archivists regarding your submission"
             ),
         ),
         SubmissionStep.SOURCE_INFO: SubmissionStepMeta(
             template="recordtransfer/submission_form_sourceinfo.html",
-            title=gettext("Record Source Information (Optional)"),
+            title=_("Record Source Information (Optional)"),
             form=forms.SourceInfoForm,
-            info_message=gettext(
+            info_message=_(
                 "Are you submitting records on behalf of another person or organization? Select Yes to enter information about them."
             ),
         ),
         SubmissionStep.RECORD_DESCRIPTION: SubmissionStepMeta(
             template="recordtransfer/submission_form_standard.html",
-            title=gettext("Record Description"),
+            title=_("Record Description"),
             form=forms.RecordDescriptionForm
             if settings.FILE_UPLOAD_ENABLED
             else forms.ExtendedRecordDescriptionForm,
-            info_message=gettext("Provide a brief description of the records you're submitting"),
+            info_message=_("Provide a brief description of the records you're submitting"),
         ),
         SubmissionStep.RIGHTS: SubmissionStepMeta(
             template="recordtransfer/submission_form_formset.html",
-            title=gettext("Record Rights and Restrictions (Optional)"),
+            title=_("Record Rights and Restrictions (Optional)"),
             form=formset_factory(forms.RightsForm, formset=forms.RightsFormSet, extra=1),
             info_message=mark_safe(
-                gettext(
+                _(
                     "Depending on the records you are submitting, there may be specific rights that govern "
                     "the access of your records. <br> <br>"
                     "Need help understanding rights types? %(link_start)sView our guide%(link_end)s for "
@@ -222,22 +222,22 @@ class SubmissionFormWizard(SessionWizardView):
         ),
         SubmissionStep.OTHER_IDENTIFIERS: SubmissionStepMeta(
             template="recordtransfer/submission_form_formset.html",
-            title=gettext("Identifiers (Optional)"),
+            title=_("Identifiers (Optional)"),
             form=formset_factory(
                 forms.OtherIdentifiersForm,
                 formset=forms.OtherIdentifiersFormSet,
                 extra=1,
             ),
-            info_message=gettext(
+            info_message=_(
                 "If you have any identifiers associated with these records, such as reference numbers, codes, or other unique IDs, you may enter them here. "
                 "<b> This step is optional</b>. If you do not have any identifiers associated with the records, you may proceed to the next step."
             ),
         ),
         SubmissionStep.GROUP_SUBMISSION: SubmissionStepMeta(
             template="recordtransfer/submission_form_groupsubmission.html",
-            title=gettext("Assign Submission to Group (Optional)"),
+            title=_("Assign Submission to Group (Optional)"),
             form=forms.GroupSubmissionForm,
-            info_message=gettext(
+            info_message=_(
                 "You may assign this submission to a group to keep your records organized. "
                 "<b>This step is optional</b>. If you do not wish to assign a group, you can "
                 "proceed to the next step."
@@ -247,9 +247,9 @@ class SubmissionFormWizard(SessionWizardView):
             {
                 SubmissionStep.UPLOAD_FILES: SubmissionStepMeta(
                     template="recordtransfer/submission_form_uploadfiles.html",
-                    title=gettext("Upload Files"),
+                    title=_("Upload Files"),
                     form=forms.UploadFilesForm,
-                    info_message=gettext(
+                    info_message=_(
                         "Add any final notes you would like to add, and upload your files"
                     ),
                 )
@@ -258,19 +258,17 @@ class SubmissionFormWizard(SessionWizardView):
             else {
                 SubmissionStep.FINAL_NOTES: SubmissionStepMeta(
                     template="recordtransfer/submission_form_standard.html",
-                    title=gettext("Final Notes"),
+                    title=_("Final Notes"),
                     form=forms.FinalStepFormNoUpload,
-                    info_message=gettext(
-                        "Add any final notes that may not have fit in previous steps"
-                    ),
+                    info_message=_("Add any final notes that may not have fit in previous steps"),
                 )
             }
         ),
         SubmissionStep.REVIEW: SubmissionStepMeta(
             template="recordtransfer/submission_form_review.html",
-            title=gettext("Review"),
+            title=_("Review"),
             form=(forms.ReviewFormReCaptcha if is_deployed_environment() else forms.ReviewForm),
-            info_message=gettext("Review the information you've entered before submitting"),
+            info_message=_("Review the information you've entered before submitting"),
         ),
     }
 
