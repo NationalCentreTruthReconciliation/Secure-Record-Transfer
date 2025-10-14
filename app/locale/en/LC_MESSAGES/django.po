@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-14 10:00-0500\n"
+"POT-Creation-Date: 2025-10-14 11:09-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -3270,15 +3270,15 @@ msgid ""
 msgstr ""
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:403
-msgid "4.2.1 Preservation Requirements Type:"
+msgid "4.3.1 Preservation Requirements Type:"
 msgstr ""
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:407
-msgid "4.2.2 Preservation Requirements Value:"
+msgid "4.3.2 Preservation Requirements Value:"
 msgstr ""
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:411
-msgid "4.2.3 Preservation Requirements Note:"
+msgid "4.3.3 Preservation Requirements Note:"
 msgstr ""
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:422
