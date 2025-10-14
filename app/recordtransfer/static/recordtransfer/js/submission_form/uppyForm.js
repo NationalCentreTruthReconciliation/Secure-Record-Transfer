@@ -3,6 +3,9 @@ import "@uppy/dashboard/css/style.css";
 
 import Uppy from "@uppy/core";
 import Dashboard from "@uppy/dashboard";
+import English from "@uppy/locales/lib/en_US";
+import French from "@uppy/locales/lib/fr_FR";
+import Hindi from "@uppy/locales/lib/hi_IN";
 import XHR from "@uppy/xhr-upload";
 import FileValidationPlugin from "./customUppyPlugin";
 import {
@@ -12,6 +15,14 @@ import {
     sendDeleteRequestForFile,
     updateCapacityDisplay,
 } from "./utils";
+
+const UPPY_DEFAULT_LANGUAGE = "en";
+
+const UPPY_LOCALE_MAP = {
+    "en": English,
+    "fr": French,
+    "hi": Hindi,
+};
 
 /**
  * Sets up the Uppy widget for uploading files.
@@ -39,9 +50,17 @@ export async function setupUppy(context) {
         );
     };
 
+    const language = document.documentElement.lang ?? UPPY_DEFAULT_LANGUAGE;
+    let localeObject = UPPY_LOCALE_MAP[UPPY_DEFAULT_LANGUAGE];
+
+    if (language in UPPY_LOCALE_MAP) {
+        localeObject = UPPY_LOCALE_MAP[language];
+    }
+
     const uppy = new Uppy(
         {
             autoProceed: true,
+            locale: localeObject,
             restrictions: {
                 maxFileSize: context["MAX_SINGLE_UPLOAD_SIZE_MB"] * 1000 * 1000,
                 minFileSize: 0,

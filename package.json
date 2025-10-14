@@ -12,6 +12,7 @@
         "@tailwindcss/postcss": "^4.1.7",
         "@uppy/core": "^5.0.0",
         "@uppy/dashboard": "^5.0.0",
+        "@uppy/locales": "^5.0.1",
         "@uppy/xhr-upload": "^5.0.0",
         "air-datepicker": "^3.5.3",
         "css-loader": "^7.1.2",

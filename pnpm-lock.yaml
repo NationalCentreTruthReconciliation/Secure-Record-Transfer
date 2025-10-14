@@ -20,6 +20,9 @@ importers:
       '@uppy/dashboard':
         specifier: ^5.0.0
         version: 5.0.0(@uppy/core@5.0.0)
+      '@uppy/locales':
+        specifier: ^5.0.1
+        version: 5.0.1
       '@uppy/xhr-upload':
         specifier: ^5.0.0
         version: 5.0.0(@uppy/core@5.0.0)
@@ -491,6 +494,9 @@ packages:
     peerDependencies:
       '@uppy/core': ^5.0.0
 
+  '@uppy/locales@5.0.1':
+    resolution: {integrity: sha512-6VpRGdo4DvGeSINeUtJhwxhK2JsHEn0el+Rgg1JKWFlvm3E6PluZ5nDcIxjOMQODj0iE/0n+ghKdNHbxCVrC/Q==}
+
   '@uppy/provider-views@5.0.0':
     resolution: {integrity: sha512-HHr8ttRpxrDSYn8VP+JbfWntbd4swPFeM0Zt9II6oKzUiwwomG5rIN/gDEp3CsmAwQxJFN2a5Is6uj+pPX72Eg==}
     peerDependencies:
@@ -506,6 +512,9 @@ packages:
 
   '@uppy/utils@7.0.0':
     resolution: {integrity: sha512-SJjFZ6PoxekfjXjsf9aPvMkinAkNmnpXELwYUlKglI0GYmLQwWmNtrjoBLHOmzS1UcI2Jeq0MOw0GaeipVppEA==}
+
+  '@uppy/utils@7.1.0':
+    resolution: {integrity: sha512-yVM1j082QeIh8jB4XvBWDbIRgpvktozwK1vmo9Xe1F4N+7doIDYFyBQmrmmxKJwSUJwAKNDrLmu8uqb+7mMCqQ==}
 
   '@uppy/xhr-upload@5.0.0':
     resolution: {integrity: sha512-ry/tDULv7xPEkm7VNl6GXV46JYb5lR/BUDo0Nl+S6n3I0EEMRO/sD30yA5BQZo80oZDUEyUGLoJ8HseD0nm4tA==}
@@ -2752,6 +2761,10 @@ snapshots:
       preact: 10.27.1
       shallow-equal: 3.1.0
 
+  '@uppy/locales@5.0.1':
+    dependencies:
+      '@uppy/utils': 7.1.0
+
   '@uppy/provider-views@5.0.0(@uppy/core@5.0.0)':
     dependencies:
       '@uppy/core': 5.0.0
@@ -2770,6 +2783,11 @@ snapshots:
       exifr: 7.1.3
 
   '@uppy/utils@7.0.0':
+    dependencies:
+      lodash: 4.17.21
+      preact: 10.27.1
+
+  '@uppy/utils@7.1.0':
     dependencies:
       lodash: 4.17.21
       preact: 10.27.1
