@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-01 09:18-0500\n"
+"POT-Creation-Date: 2025-10-14 10:00-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1264,6 +1264,10 @@ msgid ""
 "Check this box if the date is approximate, or if you are unsure of the date."
 msgstr ""
 
+#: recordtransfer/forms/submission_forms.py:473
+msgid "e.g., These files contain images from ..."
+msgstr ""
+
 #: recordtransfer/forms/submission_forms.py:475
 msgid "Description of contents"
 msgstr ""
@@ -1388,6 +1392,10 @@ msgstr ""
 
 #: recordtransfer/forms/submission_forms.py:683
 msgid "Notes for identifier"
+msgstr ""
+
+#: recordtransfer/forms/submission_forms.py:708
+msgid "Select a group"
 msgstr ""
 
 #: recordtransfer/forms/submission_forms.py:735
@@ -1935,7 +1943,7 @@ msgid "Language"
 msgstr ""
 
 #: recordtransfer/templates/includes/save_contact_info_modal.html:9
-#: recordtransfer/views/pre_submission.py:589
+#: recordtransfer/views/pre_submission.py:587
 msgid "Would you like to save your contact information to your profile?"
 msgstr ""
 
@@ -3428,7 +3436,7 @@ msgid "Next"
 msgstr ""
 
 #: recordtransfer/templates/recordtransfer/submission_form_base.html:112
-#: recordtransfer/views/pre_submission.py:271
+#: recordtransfer/views/pre_submission.py:269
 msgid "Review"
 msgstr ""
 
@@ -3785,7 +3793,7 @@ msgstr ""
 
 #: recordtransfer/tests/unit/views/test_profile.py:146
 #: recordtransfer/tests/unit/views/test_profile.py:241
-#: recordtransfer/views/pre_submission.py:530
+#: recordtransfer/views/pre_submission.py:528
 #: recordtransfer/views/profile.py:115
 msgid "Please correct the errors below."
 msgstr ""
@@ -3972,53 +3980,53 @@ msgstr ""
 msgid "Final Notes"
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:264
+#: recordtransfer/views/pre_submission.py:263
 msgid "Add any final notes that may not have fit in previous steps"
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:273
+#: recordtransfer/views/pre_submission.py:271
 msgid "Review the information you've entered before submitting"
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:295
+#: recordtransfer/views/pre_submission.py:293
 msgid "Invalid step name"
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:342
+#: recordtransfer/views/pre_submission.py:340
 msgid ""
 "Can't load this in-progress submission because it will put you over the "
 "maximum concurrent session limit."
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:352
+#: recordtransfer/views/pre_submission.py:350
 msgid ""
 "Can't create a new submission because it will put you over the maximum "
 "concurrent session limit."
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:403
+#: recordtransfer/views/pre_submission.py:401
 #, python-format
 msgid ""
 "Your submission was saved, but you have reached your session limit. Go to "
 "%(link_start)syour profile%(link_end)s to see your saved submissions."
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:418
+#: recordtransfer/views/pre_submission.py:416
 msgid "Submission saved successfully."
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:437
+#: recordtransfer/views/pre_submission.py:435
 #, python-format
 msgid ""
 "This submission will expire on %(date)s. Please be sure to complete your "
 "submission before then."
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:445
+#: recordtransfer/views/pre_submission.py:443
 msgid "There was an error saving the submission."
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:986
+#: recordtransfer/views/pre_submission.py:984
 msgid ""
 "There was an error creating your submission. Please try again later or "
 "contact us for assistance."
