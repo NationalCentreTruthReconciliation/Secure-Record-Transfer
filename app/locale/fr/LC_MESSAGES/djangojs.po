@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-03 14:46-0500\n"
+"POT-Creation-Date: 2025-10-14 20:23-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: French Team <fr@example.com>\n"
@@ -27,10 +27,10 @@ msgstr "Impossible d’ajouter le fichier en double '%s', il existe déjà"
 msgid "No description available"
 msgstr "Aucune description disponible"
 
-#: recordtransfer/static/recordtransfer/js/submission_form/uppyForm.js:138
+#: recordtransfer/static/recordtransfer/js/submission_form/uppyForm.js:157
 msgid "You must upload at least one file."
 msgstr "Vous devez télécharger au moins un fichier."
 
-#: recordtransfer/static/recordtransfer/js/submission_form/uppyForm.js:147
+#: recordtransfer/static/recordtransfer/js/submission_form/uppyForm.js:166
 msgid "Remove the files with issues to proceed."
 msgstr "Supprimez les fichiers présentant des problèmes pour continuer."
