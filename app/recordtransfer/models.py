@@ -941,7 +941,16 @@ def update_upon_save(
 ) -> None:
     """Update the last upload interaction time of the associated upload session when the
     InProgressSubmission is saved, and reset the reminder email flag, if an upload session exists.
+
+    If only the reminder_email_sent field is being updated, skip touching the upload session
+    to avoid resetting the expiry time.
     """
+    update_fields = kwargs.get("update_fields")
+
+    # If only reminder_email_sent is being updated, don't touch the session or reset the flag
+    if update_fields is not None and set(update_fields) == {"reminder_email_sent"}:
+        return
+
     if instance.upload_session:
         instance.upload_session.touch()
         instance.reset_reminder_email_sent()

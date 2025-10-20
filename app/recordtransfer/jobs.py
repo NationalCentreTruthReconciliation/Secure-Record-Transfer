@@ -225,7 +225,7 @@ def check_expiring_in_progress_submissions() -> None:
         for in_progress in expiring:
             send_user_in_progress_submission_expiring.delay(in_progress)
             in_progress.reminder_email_sent = True
-            in_progress.save()
+            in_progress.save(update_fields=["reminder_email_sent"])
 
         LOGGER.info(
             "Sent reminders for %d in-progress submissions that are about to expire",
