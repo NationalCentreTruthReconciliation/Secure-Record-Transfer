@@ -14,7 +14,7 @@ from recordtransfer.jobs import (
     create_downloadable_bag,
     move_uploads_and_send_emails,
 )
-from recordtransfer.models import Job, Submission, UploadSession, User
+from recordtransfer.models import InProgressSubmission, Job, Submission, UploadSession, User
 
 
 class TestCreateDownloadableBag(TestCase):
@@ -469,6 +469,36 @@ class TestCheckExpiringInProgressSubmissions(TestCase):
         mock_send_email.delay.assert_called_once_with(mock_in_progress)
         mock_in_progress.save.assert_called_once()
         self.assertTrue(mock_in_progress.reminder_email_sent)
+
+    @patch("recordtransfer.jobs.send_user_in_progress_submission_expiring")
+    @patch("recordtransfer.models.InProgressSubmission.objects.get_expiring_without_reminder")
+    def test_expiring_submission_does_not_reset_expiry(
+        self, mock_get_expiring: MagicMock, mock_send_email: MagicMock
+    ) -> None:
+        """Test that sending a reminder email does not reset the upload session expiry time."""
+        user = User.objects.create_user(username="testuser", password="testpass123")
+        upload_session = UploadSession.new_session(user=user)
+        in_progress = InProgressSubmission.objects.create(
+            user=user, current_step="source_info", upload_session=upload_session
+        )
+
+        original_expiry = upload_session.expires_at
+
+        mock_queryset = MagicMock()
+        mock_queryset.__iter__.return_value = [in_progress]
+        mock_queryset.count.return_value = 1
+        mock_get_expiring.return_value.all.return_value = mock_queryset
+
+        check_expiring_in_progress_submissions()
+
+        upload_session.refresh_from_db()
+        in_progress.refresh_from_db()
+
+        # Verify the reminder flag was set
+        self.assertTrue(in_progress.reminder_email_sent)
+        # Verify the expiry time was NOT changed
+        self.assertEqual(original_expiry, upload_session.expires_at)
+        mock_send_email.delay.assert_called_once_with(in_progress)
 
 
 class TestCleanupExpiredSessions(TestCase):
