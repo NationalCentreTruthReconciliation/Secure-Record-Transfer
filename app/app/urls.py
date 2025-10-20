@@ -21,7 +21,7 @@ from django.contrib import admin
 from django.urls import include, path
 from django.views.decorators.cache import cache_page
 from django.views.i18n import JavaScriptCatalog
-from nginx.errors import custom_404
+from nginx.errors import custom_404, custom_500
 from recordtransfer.views.account import (
     AsyncPasswordChangeView,
     AsyncPasswordResetConfirmView,
@@ -66,6 +66,7 @@ urlpatterns = [
         name="javascript-catalog",
     ),
     path("404/", custom_404, name="404-not-found"),
+    path("500/", custom_500, name="500-server-error"),
 ]
 
 if settings.DEBUG:
