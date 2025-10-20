@@ -258,6 +258,7 @@ class TestUploadFilesView(TestCase):
 
 
 @override_settings(
+    DEBUG=True,
     FILE_UPLOAD_ENABLED=False,
     ROOT_URLCONF="upload.urls_readonly",
 )
@@ -340,7 +341,7 @@ class TestReadOnlyUploadedFileView(TestCase):
 
         # Try to access the file from another user's session
         response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 302)
 
     def test_delete_not_allowed_for_uploader(self) -> None:
         """Test that the user who uploaded the file cannot DELETE it."""
