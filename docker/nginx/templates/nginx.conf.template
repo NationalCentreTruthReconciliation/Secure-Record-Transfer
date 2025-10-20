@@ -29,22 +29,4 @@ server {
         internal;
         alias ${MEDIA_ROOT};
     }
-
-    error_page 404 = /404;
-    location = /404 {
-        internal;
-        proxy_pass http://record_transfer_app;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header Host $host;
-        proxy_redirect off;
-    }
-
-    error_page 500 /500;
-    location = /500 {
-        internal;
-        proxy_pass http://record_transfer_app;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header Host $host;
-        proxy_redirect off;
-    }
 }

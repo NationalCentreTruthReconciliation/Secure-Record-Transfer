@@ -2,11 +2,11 @@ from django.http import HttpRequest, HttpResponse, HttpResponseNotFound, HttpRes
 from django.template.loader import render_to_string
 
 
-def custom_404(request: HttpRequest) -> HttpResponse:
+def custom_404(request: HttpRequest, exception: Exception | None = None) -> HttpResponse:
     """Return custom 404 page."""
     return HttpResponseNotFound(render_to_string("404.html"))
 
 
-def custom_500(request: HttpRequest) -> HttpResponse:
+def custom_500(request: HttpRequest, exception: Exception | None = None) -> HttpResponse:
     """Return custom 500 page."""
     return HttpResponseServerError(render_to_string("500.html"))

@@ -30,6 +30,9 @@ from recordtransfer.views.account import (
 )
 from utility import get_js_translation_version
 
+handler404 = custom_404
+handler500 = custom_500
+
 urlpatterns = [
     path("i18n/", include("django.conf.urls.i18n")),
     path("admin/django_rq/", include("django_rq.urls")),
@@ -65,8 +68,6 @@ urlpatterns = [
         ),
         name="javascript-catalog",
     ),
-    path("404/", custom_404, name="404-not-found"),
-    path("500/", custom_500, name="500-server-error"),
 ]
 
 if settings.DEBUG:
