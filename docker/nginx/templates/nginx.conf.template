@@ -30,15 +30,12 @@ server {
         alias ${MEDIA_ROOT};
     }
 
-    error_page 404 /404.html;
-    location = /404.html {
+    error_page 404 = /404;
+    location = /404 {
         internal;
-        alias /var/www/html/404.html;
-    }
-
-    error_page 500 /500.html;
-    location = /500.html {
-        internal;
-        alias /var/www/html/500.html;
+        proxy_pass http://record_transfer_app;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Host $host;
+        proxy_redirect off;
     }
 }
