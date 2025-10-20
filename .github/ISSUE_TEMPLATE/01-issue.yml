@@ -37,6 +37,14 @@ body:
     validations:
       required: true
 
+  - type: textarea
+    id: suggested_changes
+    attributes:
+      label: Suggested Changes
+      description: If you have any suggestions for how to fix this bug, please describe them here.
+    validations:
+      required: false
+
   - type: input
     id: version
     attributes:
