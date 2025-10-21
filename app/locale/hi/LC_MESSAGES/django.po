@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-14 11:09-0500\n"
+"POT-Creation-Date: 2025-10-21 12:32-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,15 +18,15 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: app/settings/base.py:143
+#: app/settings/base.py:144
 msgid "English"
 msgstr ""
 
-#: app/settings/base.py:144
+#: app/settings/base.py:145
 msgid "French"
 msgstr ""
 
-#: app/settings/base.py:145
+#: app/settings/base.py:146
 msgid "Hindi"
 msgstr ""
 
@@ -78,46 +78,46 @@ msgid ""
 msgstr ""
 "%(help_text)s. दिनांक YYYY-MM-DD या YYYY-MM-DD - YYYY-MM-DD प्रारूप में होना चाहिए"
 
-#: caais/forms.py:143
+#: caais/forms.py:142
 msgid "Record an identifier to uniquely identify this accession"
 msgstr ""
 
-#: caais/forms.py:172 caais/forms.py:209
+#: caais/forms.py:171 caais/forms.py:208
 #: recordtransfer/forms/submission_forms.py:365
 #: recordtransfer/forms/submission_forms.py:402
 msgid "Invalid date format"
 msgstr ""
 
-#: caais/forms.py:191 recordtransfer/forms/submission_forms.py:384
+#: caais/forms.py:190 recordtransfer/forms/submission_forms.py:384
 msgid "Date cannot be in the future"
 msgstr ""
 
-#: caais/forms.py:193 recordtransfer/forms/submission_forms.py:386
+#: caais/forms.py:192 recordtransfer/forms/submission_forms.py:386
 msgid "End date cannot be in the future"
 msgstr ""
 
-#: caais/forms.py:199 recordtransfer/forms/submission_forms.py:392
+#: caais/forms.py:198 recordtransfer/forms/submission_forms.py:392
 msgid "Date cannot be before 1800"
 msgstr ""
 
-#: caais/forms.py:201 recordtransfer/forms/submission_forms.py:394
+#: caais/forms.py:200 recordtransfer/forms/submission_forms.py:394
 msgid "End date cannot be before 1800"
 msgstr ""
 
-#: caais/forms.py:211 recordtransfer/forms/submission_forms.py:404
+#: caais/forms.py:210 recordtransfer/forms/submission_forms.py:404
 msgid "Invalid date format for end date"
 msgstr ""
 
-#: caais/forms.py:221 recordtransfer/forms/submission_forms.py:414
+#: caais/forms.py:220 recordtransfer/forms/submission_forms.py:414
 msgid "End date must be later than start date"
 msgstr ""
 
-#: caais/forms.py:286
+#: caais/forms.py:285
 #, python-format
 msgid "'%(id)s' is a reserved Identifier type - please use another type name"
 msgstr ""
 
-#: caais/forms.py:366 recordtransfer/forms/mixins.py:17
+#: caais/forms.py:365 recordtransfer/forms/mixins.py:17
 #: recordtransfer/forms/mixins.py:145
 #: recordtransfer/forms/submission_forms.py:186
 #: recordtransfer/forms/submission_forms.py:197
@@ -126,21 +126,21 @@ msgstr ""
 msgid "This field is required."
 msgstr "यह फ़ील्ड आवश्यक है."
 
-#: caais/forms.py:367 recordtransfer/forms/mixins.py:18
+#: caais/forms.py:366 recordtransfer/forms/mixins.py:18
 msgid "Phone number must look like \"+1 (999) 999-9999\""
 msgstr ""
 
-#: caais/forms.py:375 recordtransfer/forms/mixins.py:25
+#: caais/forms.py:374 caais/models.py:950 recordtransfer/forms/mixins.py:25
 msgid "Phone number"
 msgstr "फ़ोन नंबर"
 
-#: caais/forms.py:379 recordtransfer/forms/submission_forms.py:125
+#: caais/forms.py:378 recordtransfer/forms/submission_forms.py:125
 #: recordtransfer/forms/user_forms.py:36
 #: recordtransfer/templates/includes/account_info_form.html:13
 msgid "Email"
 msgstr "ईमेल"
 
-#: caais/forms.py:388
+#: caais/forms.py:387
 msgid "Select a Country"
 msgstr "कोई देश चुनें"
 
@@ -148,7 +148,7 @@ msgstr "कोई देश चुनें"
 msgid "Acquisition methods"
 msgstr ""
 
-#: caais/models.py:95
+#: caais/models.py:95 caais/models.py:288
 msgid "Acquisition method"
 msgstr ""
 
@@ -161,7 +161,7 @@ msgstr ""
 msgid "Statuses"
 msgstr ""
 
-#: caais/models.py:121
+#: caais/models.py:121 caais/models.py:295
 #: recordtransfer/templates/includes/open_session_table.html:9
 msgid "Status"
 msgstr ""
@@ -172,7 +172,12 @@ msgid ""
 "workflows and business processes using a controlled vocabulary"
 msgstr ""
 
-#: caais/models.py:238 caais/models.py:239
+#: caais/models.py:238 caais/models.py:239 caais/models.py:592
+#: caais/models.py:669 caais/models.py:719 caais/models.py:902
+#: caais/models.py:1063 caais/models.py:1212 caais/models.py:1303
+#: caais/models.py:1355 caais/models.py:1404 caais/models.py:1491
+#: caais/models.py:1599 caais/models.py:1706 caais/models.py:1814
+#: caais/models.py:1922 caais/models.py:1995 caais/models.py:2087
 msgid "CAAIS metadata"
 msgstr ""
 
@@ -182,157 +187,236 @@ msgid ""
 "with the repository's naming standard"
 msgstr ""
 
-#: caais/models.py:274
+#: caais/models.py:265
+msgid "Repository"
+msgstr ""
+
+#: caais/models.py:275
 msgid ""
 "Supply an accession title in accordance with the repository's descriptive "
 "standard, typically consisting of the creator's name(s) and the type of "
 "material"
 msgstr ""
 
-#: caais/models.py:293
+#: caais/models.py:281
+msgid "Accession title"
+msgstr ""
+
+#: caais/models.py:305
 msgid ""
 "Provide a preliminary estimate of the date range or explicitly indicate if "
 "not it has yet been determined"
 msgstr ""
 
-#: caais/models.py:311
+#: caais/models.py:309 recordtransfer/forms/submission_forms.py:452
+msgid "Date of materials"
+msgstr "सामग्री की तिथि"
+
+#: caais/models.py:315
+msgid "Date is approximate"
+msgstr ""
+
+#: caais/models.py:325
 msgid ""
 "Record information about the standards, rules or conventions that were "
 "followed when creating or maintaining the accession record."
 msgstr ""
 
-#: caais/models.py:324
+#: caais/models.py:330
+msgid "Rules or conventions"
+msgstr ""
+
+#: caais/models.py:339
 msgid ""
 "Record the language(s) and script(s) used to create the accession record."
 msgstr ""
 
-#: caais/models.py:566
-msgid "Identifiers"
-msgstr ""
-
-#: caais/models.py:567
-msgid "Identifier"
+#: caais/models.py:342
+msgid "Language of accession record"
 msgstr ""
 
 #: caais/models.py:582
+msgid "Identifiers"
+msgstr ""
+
+#: caais/models.py:583
+msgid "Identifier"
+msgstr ""
+
+#: caais/models.py:602
 msgid ""
 "Record the identifier type in accordance with a controlled vocabulary "
 "maintained by the repository"
 msgstr ""
 
-#: caais/models.py:594
+#: caais/models.py:607 caais/models.py:618
+msgid "Identifier type"
+msgstr ""
+
+#: caais/models.py:615
 msgid ""
 "Record the other identifier value as received or generated by the repository"
 msgstr ""
 
-#: caais/models.py:605
+#: caais/models.py:627
 msgid ""
 "Record any additional information that clarifies the purpose, use or "
 "generation of the identifier."
 msgstr ""
 
-#: caais/models.py:636
+#: caais/models.py:632
+msgid "Identifier note"
+msgstr ""
+
+#: caais/models.py:659
 msgid "Archival units"
 msgstr ""
 
-#: caais/models.py:637
+#: caais/models.py:660 caais/models.py:682
 msgid "Archival unit"
 msgstr ""
 
-#: caais/models.py:650
+#: caais/models.py:677
 msgid ""
 "Record the reference code and/or title of the archival unit to which the "
 "accession belongs"
 msgstr ""
 
-#: caais/models.py:681
+#: caais/models.py:709
 msgid "Disposition authorities"
 msgstr ""
 
-#: caais/models.py:682
+#: caais/models.py:710 caais/models.py:733
 msgid "Disposition authority"
 msgstr ""
 
-#: caais/models.py:695
+#: caais/models.py:727
 msgid ""
 "Record information about any legal instruments that apply to the accessioned "
 "material. Legal instruments include statutes, records schedules or "
 "disposition authorities, and donor agreements"
 msgstr ""
 
-#: caais/models.py:725
+#: caais/models.py:758
 msgid "Source types"
 msgstr "स्रोत प्रकार"
 
-#: caais/models.py:726 recordtransfer/forms/submission_forms.py:260
+#: caais/models.py:759 caais/models.py:910
+#: recordtransfer/forms/submission_forms.py:260
 msgid "Source type"
 msgstr "स्रोत प्रकार"
 
-#: caais/models.py:730
+#: caais/models.py:763
 msgid ""
 "Record the source in accordance with a controlled vocabulary maintained by "
 "the repository"
 msgstr ""
 
-#: caais/models.py:750
+#: caais/models.py:783
 msgid "Source roles"
 msgstr "स्रोत भूमिकाएँ"
 
-#: caais/models.py:751 recordtransfer/forms/submission_forms.py:297
+#: caais/models.py:784 caais/models.py:1002
+#: recordtransfer/forms/submission_forms.py:297
 msgid "Source role"
 msgstr "स्रोत भूमिका"
 
-#: caais/models.py:756
+#: caais/models.py:789
 msgid ""
 "Record the source role (when known) in accordance with a controlled "
 "vocabulary maintained by the repository"
 msgstr ""
 
-#: caais/models.py:779
+#: caais/models.py:812
 msgid "Source confidentialities"
 msgstr ""
 
-#: caais/models.py:780
+#: caais/models.py:813 caais/models.py:1025
 msgid "Source confidentiality"
 msgstr ""
 
-#: caais/models.py:785
+#: caais/models.py:818
 msgid ""
 "Record source statements or source information that is for internal use only "
 "by the repository. Repositories should develop a controlled vocabulary with "
 "terms that can be translated into clear rules for handling source information"
 msgstr ""
 
-#: caais/models.py:859
+#: caais/models.py:892
 msgid "Sources of material"
 msgstr ""
 
-#: caais/models.py:860
+#: caais/models.py:893
 msgid "Source of material"
 msgstr ""
 
-#: caais/models.py:878
+#: caais/models.py:919
 msgid ""
 "Record the source name in accordance with the repository's descriptive "
 "standard"
 msgstr ""
 
-#: caais/models.py:904
+#: caais/models.py:922 caais/models.py:1017
+msgid "Source name"
+msgstr ""
+
+#: caais/models.py:929 recordtransfer/forms/submission_forms.py:107
+msgid "Contact name"
+msgstr "संपर्क नाम"
+
+#: caais/models.py:936 recordtransfer/forms/submission_forms.py:114
+msgid "Job title"
+msgstr "पद का नाम"
+
+#: caais/models.py:943 recordtransfer/forms/submission_forms.py:121
+msgid "Organization"
+msgstr "संगठन"
+
+#: caais/models.py:957
+msgid "Email address"
+msgstr ""
+
+#: caais/models.py:964 recordtransfer/forms/mixins.py:32
+msgid "Address line 1"
+msgstr "पता पंक्ति 1"
+
+#: caais/models.py:971 recordtransfer/forms/mixins.py:39
+msgid "Address line 2"
+msgstr "पता पंक्ति 2"
+
+#: caais/models.py:978 recordtransfer/forms/mixins.py:45
+#: recordtransfer/models.py:73
+msgid "City"
+msgstr "शहर"
+
+#: caais/models.py:985
+msgid "Region"
+msgstr ""
+
+#: caais/models.py:992
+msgid "Postal or zip code"
+msgstr ""
+
+#: caais/models.py:995 recordtransfer/forms/mixins.py:161
+msgid "Country"
+msgstr "देश"
+
+#: caais/models.py:1010
 msgid ""
 "Record any other information about the source of the accessioned materials. "
 "If the source performed the role for only a specific period of time (e.g. "
 "was a custodian for several years), record the dates in this element"
 msgstr ""
 
-#: caais/models.py:945
+#: caais/models.py:1053
 msgid "Preliminary custodial histories"
 msgstr ""
 
-#: caais/models.py:946
+#: caais/models.py:1054 caais/models.py:1078
 msgid "Preliminary custodial history"
 msgstr ""
 
-#: caais/models.py:962
+#: caais/models.py:1071
 msgid ""
 "Provide relevant custodial history information in accordance with the "
 "repository's descriptive standard. Record the successive transfers of "
@@ -340,73 +424,81 @@ msgid ""
 "to its transfer to the repository"
 msgstr ""
 
-#: caais/models.py:993
+#: caais/models.py:1103
 msgid "Extent types"
 msgstr ""
 
-#: caais/models.py:994
+#: caais/models.py:1104 caais/models.py:1220
 msgid "Extent type"
 msgstr ""
 
-#: caais/models.py:999
+#: caais/models.py:1109
 msgid ""
 "Record the extent statement type in accordance with a controlled vocabulary "
 "maintained by the repository"
 msgstr ""
 
-#: caais/models.py:1022
+#: caais/models.py:1132
 msgid "Content types"
 msgstr ""
 
-#: caais/models.py:1023
+#: caais/models.py:1133 caais/models.py:1242
 msgid "Content type"
 msgstr ""
 
-#: caais/models.py:1028
+#: caais/models.py:1138
 msgid ""
 "Record the type of material contained in the units measured, i.e., the genre "
 "of the material"
 msgstr ""
 
-#: caais/models.py:1051
+#: caais/models.py:1161
 msgid "Carrier types"
 msgstr ""
 
-#: caais/models.py:1052
+#: caais/models.py:1162 caais/models.py:1250
 msgid "Carrier type"
 msgstr ""
 
-#: caais/models.py:1057
+#: caais/models.py:1167
 msgid ""
 "Record the physical format of an object that supports or carries archival "
 "materials using a controlled vocabulary maintained by the repository"
 msgstr ""
 
-#: caais/models.py:1092
+#: caais/models.py:1202
 msgid "Extent statement"
 msgstr ""
 
-#: caais/models.py:1093
+#: caais/models.py:1203
 msgid "Extent statements"
 msgstr ""
 
-#: caais/models.py:1111
+#: caais/models.py:1229
 msgid ""
 "Record the number and unit of measure expressing the quantity of the extent "
 "(e.g., 5 files, totalling 2.5MB)"
 msgstr ""
 
-#: caais/models.py:1132
+#: caais/models.py:1234
+msgid "Quantity and unit of measure"
+msgstr ""
+
+#: caais/models.py:1259
 msgid ""
 "Record additional information related to the number and type of units "
 "received, retained, or removed not otherwise recorded"
 msgstr ""
 
-#: caais/models.py:1165 caais/models.py:1166
+#: caais/models.py:1264
+msgid "Extent note"
+msgstr ""
+
+#: caais/models.py:1293 caais/models.py:1294 caais/models.py:1318
 msgid "Preliminary scope and content"
 msgstr ""
 
-#: caais/models.py:1182
+#: caais/models.py:1311
 msgid ""
 "Record a preliminary description that may include: functions and activities "
 "that resulted in the material's generation, dates, the geographic area to "
@@ -414,129 +506,281 @@ msgid ""
 "and documentary forms"
 msgstr ""
 
-#: caais/models.py:1215
+#: caais/models.py:1345
 msgid "Language of materials"
 msgstr ""
 
-#: caais/models.py:1216
+#: caais/models.py:1346 caais/models.py:1368
 msgid "Language of material"
 msgstr ""
 
-#: caais/models.py:1229
+#: caais/models.py:1363
 msgid ""
 "Record, at a minimum, the language that is predominantly found in the "
 "accessioned material"
 msgstr ""
 
-#: caais/models.py:1273
+#: caais/models.py:1394
+msgid "Storage locations"
+msgstr ""
+
+#: caais/models.py:1395 caais/models.py:1417
+msgid "Storage location"
+msgstr ""
+
+#: caais/models.py:1412
 msgid ""
 "Record the physical and/or digital location(s) within the repository in "
 "which the accessioned material is stored"
 msgstr ""
 
-#: caais/models.py:1308
+#: caais/models.py:1442
+msgid "Rights types"
+msgstr ""
+
+#: caais/models.py:1443 caais/models.py:1499
+msgid "Rights type"
+msgstr ""
+
+#: caais/models.py:1448
 msgid ""
 "Record the rights statement type in accordance with a controlled vocabulary "
 "maintained by the repository"
 msgstr ""
 
-#: caais/models.py:1359
+#: caais/models.py:1481
+msgid "Rights"
+msgstr ""
+
+#: caais/models.py:1482
+msgid "Rights statement"
+msgstr ""
+
+#: caais/models.py:1507
 msgid ""
 "Record the nature and duration of the permission granted or restriction "
 "imposed. Specify where the condition applies only to part of the accession"
 msgstr ""
 
-#: caais/models.py:1371
+#: caais/models.py:1513
+msgid "Rights value"
+msgstr ""
+
+#: caais/models.py:1520
 msgid ""
 "Record any other information relevant to describing the rights statement"
 msgstr ""
 
-#: caais/models.py:1405
+#: caais/models.py:1523
+msgid "Rights note"
+msgstr ""
+
+#: caais/models.py:1549
+msgid "Preservation requirements types"
+msgstr ""
+
+#: caais/models.py:1550 caais/models.py:1607
+msgid "Preservation requirements type"
+msgstr ""
+
+#: caais/models.py:1555
 msgid ""
 "Record the type of preservation requirement in accordance with a controlled "
 "vocabulary maintained by the repository."
 msgstr ""
 
-#: caais/models.py:1460
+#: caais/models.py:1589
+msgid "Preservation requirements"
+msgstr ""
+
+#: caais/models.py:1590
+msgid "Preservation requirement"
+msgstr ""
+
+#: caais/models.py:1615
 msgid ""
 "Record information about the assessment of the material with respect to its "
 "physical condition, dependencies, processing or access"
 msgstr ""
 
-#: caais/models.py:1473
+#: caais/models.py:1621
+msgid "Preservation requirements value"
+msgstr ""
+
+#: caais/models.py:1629
 msgid ""
 "Record any other information relevant to the long-term preservation of the "
 "material"
 msgstr ""
 
-#: caais/models.py:1508
+#: caais/models.py:1634
+msgid "Preservation requirements note"
+msgstr ""
+
+#: caais/models.py:1659
+msgid "Appraisal types"
+msgstr ""
+
+#: caais/models.py:1660 caais/models.py:1714
+msgid "Appraisal type"
+msgstr ""
+
+#: caais/models.py:1665
 msgid ""
 "Record the appraisal type in accordance with a controlled vocabulary "
 "maintained by the repository"
 msgstr ""
 
-#: caais/models.py:1558
+#: caais/models.py:1696
+msgid "Appraisals"
+msgstr ""
+
+#: caais/models.py:1697
+msgid "Appraisal"
+msgstr ""
+
+#: caais/models.py:1723
 msgid ""
 "Where the accession process includes appraisal activities, record the "
 "appraisal statement value."
 msgstr ""
 
-#: caais/models.py:1570
+#: caais/models.py:1728
+msgid "Appraisal value"
+msgstr ""
+
+#: caais/models.py:1736
 msgid ""
 "Record any other information relevant to describing the appraisal activities."
 msgstr ""
 
-#: caais/models.py:1603
+#: caais/models.py:1739
+msgid "Appraisal note"
+msgstr ""
+
+#: caais/models.py:1764
+msgid "Associated documentation types"
+msgstr ""
+
+#: caais/models.py:1765 caais/models.py:1822
+msgid "Associated documentation type"
+msgstr ""
+
+#: caais/models.py:1770
 msgid ""
 "Where the accession process generates associated documents, record the "
 "associated documentation type in accordance with a controlled vocabulary "
 "maintained by the repository."
 msgstr ""
 
-#: caais/models.py:1658
+#: caais/models.py:1804 caais/models.py:1805
+msgid "Associated documentation"
+msgstr ""
+
+#: caais/models.py:1830
 msgid "Record the title of the associated documentation"
 msgstr ""
 
-#: caais/models.py:1668
+#: caais/models.py:1832
+msgid "Associated documentation title"
+msgstr ""
+
+#: caais/models.py:1841
 msgid ""
 "Record any other information relevant to describing documentation associated "
 "to the accessioned material"
 msgstr ""
 
-#: caais/models.py:1704
+#: caais/models.py:1846
+msgid "Associated documentation note"
+msgstr ""
+
+#: caais/models.py:1872 caais/models.py:1930
+msgid "Event type"
+msgstr ""
+
+#: caais/models.py:1873
+msgid "Event types"
+msgstr ""
+
+#: caais/models.py:1878
 msgid ""
 "Record the event type in accordance with a controlled vocabulary maintained "
 "by the repository"
 msgstr ""
 
-#: caais/models.py:1759
+#: caais/models.py:1935
+msgid "Event date"
+msgstr ""
+
+#: caais/models.py:1944
 msgid ""
 "Record the name of the staff member or application responsible for the event"
 msgstr ""
 
-#: caais/models.py:1769
+#: caais/models.py:1947
+msgid "Event agent"
+msgstr ""
+
+#: caais/models.py:1955
 msgid "Record any other information relevant to describing the event."
 msgstr ""
 
-#: caais/models.py:1812
+#: caais/models.py:1958
+msgid "Event note"
+msgstr ""
+
+#: caais/models.py:1985 caais/models.py:2008
+msgid "General note"
+msgstr ""
+
+#: caais/models.py:1986
+msgid "General notes"
+msgstr ""
+
+#: caais/models.py:2003
 msgid ""
 "Record any other information relevant to the accession record or "
 "accessioning process"
 msgstr ""
 
-#: caais/models.py:1848
+#: caais/models.py:2034 caais/models.py:2095
+msgid "Creation or revision type"
+msgstr ""
+
+#: caais/models.py:2035
+msgid "Creation or revision types"
+msgstr ""
+
+#: caais/models.py:2040
 msgid ""
 "Record the action type in accordance with a controlled vocabulary maintained "
 "by the repository."
 msgstr ""
 
-#: caais/models.py:1913
+#: caais/models.py:2077
+msgid "Date of creation or revision"
+msgstr ""
+
+#: caais/models.py:2078
+msgid "Dates of creation or revision"
+msgstr ""
+
+#: caais/models.py:2100 caais/models.py:2126
+msgid "Creation or revision note"
+msgstr ""
+
+#: caais/models.py:2110
 msgid ""
 "Record the name of the staff member who performed the action (creation or "
 "revision) on the accession record"
 msgstr ""
 
-#: caais/models.py:1925
+#: caais/models.py:2115
+msgid "Creation or revision agent"
+msgstr ""
+
+#: caais/models.py:2123
 msgid ""
 "Record any information summarizing actions applied to the accession record."
 msgstr ""
@@ -1064,21 +1308,9 @@ msgstr ""
 msgid "Street, and street number"
 msgstr ""
 
-#: recordtransfer/forms/mixins.py:32
-msgid "Address line 1"
-msgstr "पता पंक्ति 1"
-
 #: recordtransfer/forms/mixins.py:38
 msgid "Unit Number, RPO, PO BOX... (optional)"
 msgstr "यूनिट संख्या, आरपीओ, पीओ बॉक्स... (वैकल्पिक)"
-
-#: recordtransfer/forms/mixins.py:39
-msgid "Address line 2"
-msgstr "पता पंक्ति 2"
-
-#: recordtransfer/forms/mixins.py:45 recordtransfer/models.py:73
-msgid "City"
-msgstr "शहर"
 
 #: recordtransfer/forms/mixins.py:56
 msgid "Select your province"
@@ -1106,10 +1338,6 @@ msgstr "डाक का / ज़िप कोड"
 msgid "Select your Country"
 msgstr "अपने देश का चयन करॊ"
 
-#: recordtransfer/forms/mixins.py:161
-msgid "Country"
-msgstr "देश"
-
 #: recordtransfer/forms/mixins.py:175
 msgid "Address line 1 is required if address line 2 is provided."
 msgstr ""
@@ -1131,18 +1359,6 @@ msgstr ""
 #: recordtransfer/forms/submission_forms.py:71
 msgid "I accept these terms"
 msgstr "मैं इन शर्तों को स्वीकार करता/करती हूँ"
-
-#: recordtransfer/forms/submission_forms.py:107
-msgid "Contact name"
-msgstr "संपर्क नाम"
-
-#: recordtransfer/forms/submission_forms.py:114
-msgid "Job title"
-msgstr "पद का नाम"
-
-#: recordtransfer/forms/submission_forms.py:121
-msgid "Organization"
-msgstr "संगठन"
 
 #: recordtransfer/forms/submission_forms.py:201
 msgid "If \"Source type\" is Other, enter your own source type"
@@ -1248,10 +1464,6 @@ msgstr "दिनांक YYYY-MM-DD या YYYY-MM-DD - YYYY-MM-DD प्र�
 #: recordtransfer/forms/submission_forms.py:447
 msgid "2000-03-14 - 2001-05-06"
 msgstr ""
-
-#: recordtransfer/forms/submission_forms.py:452
-msgid "Date of materials"
-msgstr "सामग्री की तिथि"
 
 #: recordtransfer/forms/submission_forms.py:454
 msgid ""
@@ -4409,7 +4621,7 @@ msgstr ""
 msgid "%(name)s Removed! | %(session)s"
 msgstr ""
 
-#: upload/tests/unit/test_views.py:436 upload/views.py:225
+#: upload/tests/unit/test_views.py:437 upload/views.py:225
 msgid "Invalid filename or upload session token"
 msgstr ""
 
