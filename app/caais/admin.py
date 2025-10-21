@@ -10,6 +10,7 @@ from django.contrib.admin.options import InlineModelAdmin
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse
 from django.template.response import TemplateResponse
+from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext_lazy
 
 from caais import settings as caais_settings
@@ -278,12 +279,14 @@ class MetadataAdmin(admin.ModelAdmin):
         "export_atom_2_1_csv",
     ]
 
+    @admin.display(description=_("Source name"))
     def source_name(self, obj: Metadata) -> Optional[str]:
         """Return a comma-separated list of source names."""
         return obj.source_of_materials.aggregate(
             names_joined=GroupConcat("source_name", separator=", ")
         )["names_joined"]
 
+    @admin.display(description=_("Last changed"))
     def last_changed(self, obj: Metadata) -> Optional[datetime]:
         """Return the date the metadata was last changed."""
         most_recent = obj.dates_of_creation_or_revision.order_by(

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-21 12:32-0500\n"
+"POT-Creation-Date: 2025-10-21 13:40-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -30,27 +30,35 @@ msgstr ""
 msgid "Hindi"
 msgstr ""
 
-#: caais/admin.py:336
+#: caais/admin.py:282 caais/models.py:922 caais/models.py:1017
+msgid "Source name"
+msgstr ""
+
+#: caais/admin.py:289
+msgid "Last changed"
+msgstr ""
+
+#: caais/admin.py:339
 msgctxt "\"Selected\" refers to one or more Metadata objects."
 msgid "Export CAAIS 1.0 CSV for Selected"
 msgstr ""
 
-#: caais/admin.py:346
+#: caais/admin.py:349
 msgctxt "\"Selected\" refers to one or more Metadata objects."
 msgid "Export AtoM 2.6 Accession CSV for Selected"
 msgstr ""
 
-#: caais/admin.py:358
+#: caais/admin.py:361
 msgctxt "\"Selected\" refers to one or more Metadata objects."
 msgid "Export AtoM 2.3 Accession CSV for Selected"
 msgstr ""
 
-#: caais/admin.py:370
+#: caais/admin.py:373
 msgctxt "\"Selected\" refers to one or more Metadata objects."
 msgid "Export AtoM 2.2 Accession CSV for Selected"
 msgstr ""
 
-#: caais/admin.py:382
+#: caais/admin.py:385
 msgctxt "\"Selected\" refers to one or more Metadata objects."
 msgid "Export AtoM 2.1 Accession CSV for Selected"
 msgstr ""
@@ -353,10 +361,6 @@ msgstr ""
 msgid ""
 "Record the source name in accordance with the repository's descriptive "
 "standard"
-msgstr ""
-
-#: caais/models.py:922 caais/models.py:1017
-msgid "Source name"
 msgstr ""
 
 #: caais/models.py:929 recordtransfer/forms/submission_forms.py:107
