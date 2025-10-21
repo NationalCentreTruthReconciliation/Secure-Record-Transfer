@@ -119,7 +119,6 @@ services:
       - static-volume:/opt/secure-record-transfer/static/
       - media-volume:/opt/secure-record-transfer/media/
       - ./docker/nginx/templates/nginx.conf.template:/etc/nginx/templates/nginx.conf.template:z
-      - ./app/templates/:/var/www/html/:z
     env_file:
       - .prod.env
     environment:

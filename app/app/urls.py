@@ -21,6 +21,7 @@ from django.contrib import admin
 from django.urls import include, path
 from django.views.decorators.cache import cache_page
 from django.views.i18n import JavaScriptCatalog
+from nginx.errors import custom_404, custom_500
 from recordtransfer.views.account import (
     AsyncPasswordChangeView,
     AsyncPasswordResetConfirmView,
@@ -28,6 +29,9 @@ from recordtransfer.views.account import (
     Login,
 )
 from utility import get_js_translation_version
+
+handler404 = custom_404
+handler500 = custom_500
 
 urlpatterns = [
     path("i18n/", include("django.conf.urls.i18n")),
