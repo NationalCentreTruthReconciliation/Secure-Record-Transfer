@@ -1180,7 +1180,7 @@ class TestFormToRights(TestCase):
         rights = self.metadata.rights.first()
         self.assertEqual(rights.rights_type, self.other_rights_type)
         self.assertEqual(rights.rights_value, "")
-        self.assertEqual(rights.rights_note, "Type of rights was noted as 'Test Type'")
+        self.assertEqual(rights.rights_note, "Rights type was noted as 'Test Type'")
 
     def test_populate_rights_other_rights_type_with_note(self):
         form_data = {
@@ -1201,7 +1201,7 @@ class TestFormToRights(TestCase):
         self.assertEqual(rights.rights_value, "")
         self.assertEqual(
             rights.rights_note,
-            "Type of rights was noted as 'Test Type'. Could not determine rights at this time.",
+            "Rights type was noted as 'Test Type'. Could not determine rights at this time.",
         )
 
     def test_populate_rights_prefer_rights_type_over_other(self):
