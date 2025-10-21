@@ -114,7 +114,6 @@ class MetadataForm(CaaisModelForm):
             "repository",
             "acquisition_method",
             "status",
-            "date_of_materials",
             "rules_or_conventions",
             "language_of_accession_record",
         )
