@@ -215,7 +215,7 @@ field.
 A preview of an uploaded file can be seen by clicking on its file icon. The donor can also remove
 uploaded files by clicking on the (x) icon.
 
-At the bottom of this section, there is also an indicator showing how many megabytes (MB) of files the donor can still upload. This helps donors keep track of their remaining upload limit as they add or remove files.
+At the bottom of this section, there is also an indicator showing how many megabytes (MB) of files the donor can still upload and how many more files can be uploaded. This helps donors keep track of their remaining upload limit as they add or remove files.
 
 .. image:: images/submission_step_8_uploaded_file.webp
     :alt: Step 8 of the submission form, an uploaded file
