@@ -16,8 +16,8 @@ RUN apt-get update && \
     libmagic1 && \
     rm -rf /var/lib/apt/lists/*
 
-# Install pnpm globally
-RUN npm install -g pnpm@latest-10
+# Install pnpm globally (force overwrite version in base)
+RUN npm install -g pnpm@latest-10 --force
 
 # Copy uv-related files, and install Python dependencies
 # Uses a persistent cache mount for uv (see https://docs.astral.sh/uv/guides/integration/docker/#caching)
