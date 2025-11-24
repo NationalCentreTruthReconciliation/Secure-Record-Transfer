@@ -18,11 +18,13 @@
                             {{ in_progress.upload_session_expires_at|time:"H:i" }}
                         </span>
                         {% if in_progress.upload_session_expired %}
-                            <span class="tooltip" data-tip="{% trans "Submission has expired" %}">
+                            <span class="tooltip tooltip-left"
+                                  data-tip="{% trans "Submission has expired" %}">
                                 <i class="fas fa-exclamation-triangle text-error"></i>
                             </span>
                         {% elif in_progress.upload_session_expires_soon %}
-                            <span class="tooltip" data-tip="{% trans "Submission is expiring soon" %}">
+                            <span class="tooltip tooltip-left"
+                                  data-tip="{% trans "Submission is expiring soon" %}">
                                 <i class="fas fa-exclamation-circle text-warning"></i>
                             </span>
                         {% endif %}
