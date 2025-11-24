@@ -37,7 +37,7 @@ header.homepage {
     visibility: hidden;
     opacity: 0;
     transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
-    z-index: 999;
+    z-index: 1005;
 }
 
 .menu-overlay.show {
@@ -61,7 +61,7 @@ header.homepage {
     position: fixed;
     top: 20px;
     right: 0;
-    z-index: 1001;
+    z-index: 1006;
 }
 
 /* Sliding menu styles */
@@ -78,7 +78,7 @@ header.homepage {
     background: #fff;
     box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
     padding: 50px 20px;
-    z-index: 1000;
+    z-index: 1005;
     visibility: hidden;
     box-sizing: border-box;
     border-radius: 5px;
@@ -165,7 +165,7 @@ header.homepage {
     border-bottom-right-radius: 0;
     border-bottom-left-radius: 0;
     padding-bottom: 20px;
-    z-index: 1001;
+    z-index: 1006;
     transition: all 0.3s ease;
 }
 
