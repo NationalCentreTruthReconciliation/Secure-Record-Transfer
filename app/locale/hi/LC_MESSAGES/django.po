@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-21 13:40-0500\n"
+"POT-Creation-Date: 2025-12-02 19:27-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2040,24 +2040,24 @@ msgstr ""
 msgid "Actions"
 msgstr ""
 
-#: recordtransfer/templates/includes/in_progress_submission_table.html:21
+#: recordtransfer/templates/includes/in_progress_submission_table.html:22
 msgid "Submission has expired"
 msgstr ""
 
-#: recordtransfer/templates/includes/in_progress_submission_table.html:25
+#: recordtransfer/templates/includes/in_progress_submission_table.html:27
 msgid "Submission is expiring soon"
 msgstr ""
 
-#: recordtransfer/templates/includes/in_progress_submission_table.html:40
+#: recordtransfer/templates/includes/in_progress_submission_table.html:42
 msgid "Resume"
 msgstr ""
 
-#: recordtransfer/templates/includes/in_progress_submission_table.html:51
+#: recordtransfer/templates/includes/in_progress_submission_table.html:53
 #: recordtransfer/templates/includes/submission_group_table.html:35
 msgid "Delete"
 msgstr ""
 
-#: recordtransfer/templates/includes/in_progress_submission_table.html:61
+#: recordtransfer/templates/includes/in_progress_submission_table.html:63
 msgid "You have no submissions that are in progress."
 msgstr ""
 
