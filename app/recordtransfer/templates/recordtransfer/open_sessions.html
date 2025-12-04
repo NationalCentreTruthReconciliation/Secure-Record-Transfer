@@ -18,7 +18,7 @@
 {% endblock javascript %}
 {% block content %}
     {% include "includes/messages.html" %}
-    <div class="max-w-6xl mx-auto px-4 py-8">
+    <div class="max-w-6xl mx-auto py-8">
         {% if max_open_sessions != -1 and total_open_sessions >= max_open_sessions %}
             <div class="mb-2 text-4xl text-primary">{% trans "Session Limit Reached" %}</div>
             <div class="card">
