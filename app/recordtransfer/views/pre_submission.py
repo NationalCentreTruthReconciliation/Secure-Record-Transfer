@@ -29,6 +29,7 @@ from django.http import (
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.formats import date_format
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
@@ -434,7 +435,11 @@ class SubmissionFormWizard(SessionWizardView):
                 expiry_message = gettext(
                     "This submission will expire on %(date)s. Please be sure to complete your "
                     "submission before then."
-                ) % {"date": timezone.localtime(expires_at).strftime(r"%a %b %-d, %Y @ %H:%M")}
+                ) % {
+                    "date": date_format(
+                        timezone.localtime(expires_at), format="DATETIME_FORMAT", use_l10n=True
+                    )
+                }
                 message = base_message + " " + expiry_message
 
             messages.success(request, message)
