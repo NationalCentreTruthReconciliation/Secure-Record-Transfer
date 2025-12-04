@@ -30,14 +30,14 @@ body {
     padding: 18px 12px 18px 12px;
 }
 
-.main-header-content,
 .main-content {
-    width: 80%;
     margin-left: auto;
     margin-right: auto;
 }
 
 .main-header-content {
+    margin-left: auto;
+    margin-right: auto;
     padding: 10px 0px;
 }
 
