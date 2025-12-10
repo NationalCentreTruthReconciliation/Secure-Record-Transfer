@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-02 19:27-0600\n"
+"POT-Creation-Date: 2025-12-09 19:38-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -881,7 +881,7 @@ msgstr "कोई फ़ाइल अटैच नहीं है"
 
 #: recordtransfer/admin.py:578
 #: recordtransfer/templates/includes/profile_forms.html:18
-#: recordtransfer/views/pre_submission.py:181
+#: recordtransfer/views/pre_submission.py:182
 msgid "Contact Information"
 msgstr ""
 
@@ -2163,7 +2163,7 @@ msgid "Language"
 msgstr ""
 
 #: recordtransfer/templates/includes/save_contact_info_modal.html:9
-#: recordtransfer/views/pre_submission.py:587
+#: recordtransfer/views/pre_submission.py:592
 msgid "Would you like to save your contact information to your profile?"
 msgstr ""
 
@@ -2206,7 +2206,7 @@ msgid "Save and continue"
 msgstr ""
 
 #: recordtransfer/templates/includes/submission_form_field.html:30
-#: recordtransfer/templates/recordtransfer/header.html:44
+#: recordtransfer/templates/recordtransfer/header.html:45
 #: recordtransfer/templates/recordtransfer/help.html:4
 #: recordtransfer/templates/recordtransfer/signup_form.html:123
 msgid "Help"
@@ -2293,7 +2293,7 @@ msgstr ""
 #: recordtransfer/templates/recordtransfer/about.html:4
 #: recordtransfer/templates/recordtransfer/about.html:8
 #: recordtransfer/templates/recordtransfer/footer.html:21
-#: recordtransfer/templates/recordtransfer/header.html:38
+#: recordtransfer/templates/recordtransfer/header.html:39
 msgid "About"
 msgstr "अबाउट"
 
@@ -2442,7 +2442,7 @@ msgid ""
 msgstr ""
 
 #: recordtransfer/templates/recordtransfer/email/email_base.html:136
-#: recordtransfer/templates/recordtransfer/header.html:12
+#: recordtransfer/templates/recordtransfer/header.html:13
 msgid "NCTR Logo"
 msgstr ""
 
@@ -2664,39 +2664,39 @@ msgstr ""
 msgid "© 2025 National Centre for Truth and Reconciliation"
 msgstr ""
 
-#: recordtransfer/templates/recordtransfer/header.html:18
+#: recordtransfer/templates/recordtransfer/header.html:19
 msgid "Secure Record Transfer"
 msgstr ""
 
-#: recordtransfer/templates/recordtransfer/header.html:32
+#: recordtransfer/templates/recordtransfer/header.html:33
 msgid "Home"
 msgstr "मुखपृष्ठ"
 
-#: recordtransfer/templates/recordtransfer/header.html:51
+#: recordtransfer/templates/recordtransfer/header.html:52
 msgid "Admin"
 msgstr "प्रशासनिक"
 
-#: recordtransfer/templates/recordtransfer/header.html:59
+#: recordtransfer/templates/recordtransfer/header.html:60
 #: recordtransfer/templates/recordtransfer/submission_group_detail.html:19
 msgid "Profile"
 msgstr "प्रोफ़ाइल"
 
-#: recordtransfer/templates/recordtransfer/header.html:65
+#: recordtransfer/templates/recordtransfer/header.html:66
 #: recordtransfer/templates/recordtransfer/submission_form_base.html:99
 msgid "Submit"
 msgstr "प्रस्तुति"
 
-#: recordtransfer/templates/recordtransfer/header.html:73
+#: recordtransfer/templates/recordtransfer/header.html:74
 msgid "Logout"
 msgstr "लॉगआउट"
 
-#: recordtransfer/templates/recordtransfer/header.html:80
+#: recordtransfer/templates/recordtransfer/header.html:81
 #: recordtransfer/templates/recordtransfer/signup_form.html:132
 #: recordtransfer/templates/registration/login.html:80
 msgid "Sign Up"
 msgstr "साइन अप"
 
-#: recordtransfer/templates/recordtransfer/header.html:88
+#: recordtransfer/templates/recordtransfer/header.html:89
 #: recordtransfer/templates/recordtransfer/home.html:25
 #: recordtransfer/templates/recordtransfer/signup_form.html:140
 msgid "Log In"
@@ -3660,7 +3660,7 @@ msgid "Next"
 msgstr ""
 
 #: recordtransfer/templates/recordtransfer/submission_form_base.html:112
-#: recordtransfer/views/pre_submission.py:269
+#: recordtransfer/views/pre_submission.py:270
 msgid "Review"
 msgstr ""
 
@@ -4017,7 +4017,7 @@ msgstr ""
 
 #: recordtransfer/tests/unit/views/test_profile.py:146
 #: recordtransfer/tests/unit/views/test_profile.py:241
-#: recordtransfer/views/pre_submission.py:528
+#: recordtransfer/views/pre_submission.py:533
 #: recordtransfer/views/profile.py:115
 msgid "Please correct the errors below."
 msgstr ""
@@ -4116,51 +4116,51 @@ msgstr ""
 msgid "Direct access is not allowed."
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:99
+#: recordtransfer/views/pre_submission.py:100
 msgid "Date Last Changed"
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:100
+#: recordtransfer/views/pre_submission.py:101
 msgid "Date Started"
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:101
+#: recordtransfer/views/pre_submission.py:102
 msgid "Files Uploaded"
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:176
+#: recordtransfer/views/pre_submission.py:177
 msgid "Legal Agreement"
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:184
+#: recordtransfer/views/pre_submission.py:185
 msgid ""
 "Enter your contact information in case you need to be contacted by one of "
 "our archivists regarding your submission"
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:190
+#: recordtransfer/views/pre_submission.py:191
 msgid "Record Source Information (Optional)"
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:193
+#: recordtransfer/views/pre_submission.py:194
 msgid ""
 "Are you submitting records on behalf of another person or organization? "
 "Select Yes to enter information about them."
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:198
+#: recordtransfer/views/pre_submission.py:199
 msgid "Record Description"
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:202
+#: recordtransfer/views/pre_submission.py:203
 msgid "Provide a brief description of the records you're submitting"
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:206
+#: recordtransfer/views/pre_submission.py:207
 msgid "Record Rights and Restrictions (Optional)"
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:210
+#: recordtransfer/views/pre_submission.py:211
 #, python-format
 msgid ""
 "Depending on the records you are submitting, there may be specific rights "
@@ -4169,11 +4169,11 @@ msgid ""
 "explanations."
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:225
+#: recordtransfer/views/pre_submission.py:226
 msgid "Identifiers (Optional)"
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:232
+#: recordtransfer/views/pre_submission.py:233
 msgid ""
 "If you have any identifiers associated with these records, such as reference "
 "numbers, codes, or other unique IDs, you may enter them here. <b> This step "
@@ -4181,76 +4181,76 @@ msgid ""
 "records, you may proceed to the next step."
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:238
+#: recordtransfer/views/pre_submission.py:239
 msgid "Assign Submission to Group (Optional)"
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:241
+#: recordtransfer/views/pre_submission.py:242
 msgid ""
 "You may assign this submission to a group to keep your records organized. "
 "<b>This step is optional</b>. If you do not wish to assign a group, you can "
 "proceed to the next step."
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:250
+#: recordtransfer/views/pre_submission.py:251
 msgid "Upload Files"
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:253
+#: recordtransfer/views/pre_submission.py:254
 msgid "Add any final notes you would like to add, and upload your files"
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:261
+#: recordtransfer/views/pre_submission.py:262
 msgid "Final Notes"
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:263
+#: recordtransfer/views/pre_submission.py:264
 msgid "Add any final notes that may not have fit in previous steps"
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:271
+#: recordtransfer/views/pre_submission.py:272
 msgid "Review the information you've entered before submitting"
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:293
+#: recordtransfer/views/pre_submission.py:294
 msgid "Invalid step name"
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:340
+#: recordtransfer/views/pre_submission.py:341
 msgid ""
 "Can't load this in-progress submission because it will put you over the "
 "maximum concurrent session limit."
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:350
+#: recordtransfer/views/pre_submission.py:351
 msgid ""
 "Can't create a new submission because it will put you over the maximum "
 "concurrent session limit."
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:401
+#: recordtransfer/views/pre_submission.py:402
 #, python-format
 msgid ""
 "Your submission was saved, but you have reached your session limit. Go to "
 "%(link_start)syour profile%(link_end)s to see your saved submissions."
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:416
+#: recordtransfer/views/pre_submission.py:417
 msgid "Submission saved successfully."
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:435
+#: recordtransfer/views/pre_submission.py:436
 #, python-format
 msgid ""
 "This submission will expire on %(date)s. Please be sure to complete your "
 "submission before then."
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:443
+#: recordtransfer/views/pre_submission.py:448
 msgid "There was an error saving the submission."
 msgstr ""
 
-#: recordtransfer/views/pre_submission.py:984
+#: recordtransfer/views/pre_submission.py:989
 msgid ""
 "There was an error creating your submission. Please try again later or "
 "contact us for assistance."
