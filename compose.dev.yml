@@ -46,7 +46,7 @@ services:
       target: dev
       dockerfile: Containerfile
       args:
-        BUN_ENV: development
+        NODE_ENV: development
     container_name: recordtransfer_rq_workers
     command: python manage.py devrqworker default
     restart: unless-stopped
@@ -65,7 +65,7 @@ services:
       - ENABLE_DEBUGPY=1
       - ENABLE_DEBUGPY_ON_COMMAND=devrqworker
       - DEBUGPY_PORT=8010
-      - BUN_ENV=development
+      - NODE_ENV=development
       - DJANGO_SETTINGS_MODULE=app.settings.docker_dev
     depends_on:
       - redis
@@ -83,7 +83,7 @@ services:
     environment:
       - ENV=dev
       - SERVICE_NAME=rq-scheduler
-      - BUN_ENV=development
+      - NODE_ENV=development
       - DJANGO_SETTINGS_MODULE=app.settings.docker_dev
     depends_on:
       - rq
@@ -108,7 +108,7 @@ services:
       - ENABLE_DEBUGPY=1
       - ENABLE_DEBUGPY_ON_COMMAND=runserver
       - DEBUGPY_PORT=8009
-      - BUN_ENV=development
+      - NODE_ENV=development
       - DJANGO_SETTINGS_MODULE=app.settings.docker_dev
     depends_on:
       - rq

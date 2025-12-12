@@ -34,8 +34,8 @@ RUN --mount=type=cache,target=/root/.bun/install/cache \
 COPY ./app ${APP_DIR}
 
 # Run Bun to bundle and minify assets
-ARG BUN_ENV=production
-ENV BUN_ENV=${BUN_ENV}
+ARG NODE_ENV=production
+ENV NODE_ENV=${NODE_ENV}
 COPY build.ts ${PROJ_DIR}
 RUN bun run build
 

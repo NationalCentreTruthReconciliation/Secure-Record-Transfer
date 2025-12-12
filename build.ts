@@ -18,7 +18,7 @@ const IMG_DIR = path.join(import.meta.dir, "app/recordtransfer/static/recordtran
 
 const STATIC_URL = "/static/";
 const STATS_FILE = path.join(import.meta.dir, "dist/webpack-stats.json");
-const isProd = process.env.BUN_ENV === "production";
+const isProd = process.env.NODE_ENV === "production";
 
 interface AssetEntry {
     name: string;
