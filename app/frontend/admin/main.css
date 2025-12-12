@@ -1,3 +1,21 @@
+#branding img {
+    float: left;
+    margin-right: 10px;
+}
+
+#branding h1 {
+    float: left;
+}
+
+#user-tools a, #logout-form button {
+    border-bottom: 1px solid #c2c2c2;
+}
+
+.theme-toggle {
+    display: none;
+}
+
+/* job log messages */
 .field-message_log .readonly {
     background-color: #000;
     color: white;

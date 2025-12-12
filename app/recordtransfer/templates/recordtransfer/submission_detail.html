@@ -1,6 +1,5 @@
 {% load i18n %}
 {% load static %}
-{% load render_bundle from webpack_loader %}
 {% get_current_language as LANGUAGE_CODE %}
 <html lang="{{ LANGUAGE_CODE }}">
     <head>
@@ -9,10 +8,12 @@
             Submission Report for {{ title }}
             {% endblocktrans %}
         </title>
+        <link rel="stylesheet"
+              type="text/css"
+              href="{% static 'recordtransfer/submission_detail.css' %}" />
         <meta name="description"
               content="Automatically generated report for the submission.">
         <meta name="keywords" content="report, submission, metadata">
-        {% render_bundle 'submission_detail' 'css' %}
     </head>
     <body>
         <div class="main-title">
