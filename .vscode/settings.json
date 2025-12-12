@@ -1,5 +1,6 @@
 {
     "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true,
     // Python linting and formatting
     "[python]": {
         "editor.formatOnSave": true,
@@ -24,12 +25,19 @@
     "python.analysis.extraPaths": [
         "./app"
     ],
-    // JavaScript linting and formatting
     "[javascript]": {
-        "editor.formatOnSave": false,
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "dbaeumer.vscode-eslint",
         "editor.codeActionsOnSave": {
             "source.fixAll.eslint": "explicit"
         },
+        "editor.rulers": [
+            99
+        ]
+    },
+    "[typescript]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "dbaeumer.vscode-eslint",
         "editor.rulers": [
             99
         ]
@@ -43,6 +51,11 @@
     "[django-html]": {
         "editor.formatOnSave": true,
         "editor.defaultFormatter": "monosans.djlint"
+    },
+    "[css]": {
+        "editor.formatOnSave": true,
+        "editor.tabSize": 4,
+        "editor.defaultFormatter": "aeschli.vscode-css-formatter"
     },
     "files.associations": {
         "**/templates/**/*.html": "django-html"
