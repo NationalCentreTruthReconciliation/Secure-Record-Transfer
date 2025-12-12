@@ -58,7 +58,7 @@ services:
       - .prod.env
     environment:
       - ENV=prod
-      - BUN_ENV=production
+      - NODE_ENV=production
       - SERVICE_NAME=rq
       - DJANGO_SETTINGS_MODULE=app.settings.docker_prod
     depends_on:
@@ -76,7 +76,7 @@ services:
       - .prod.env
     environment:
       - ENV=prod
-      - BUN_ENV=production
+      - NODE_ENV=production
       - SERVICE_NAME=rq-scheduler
       - DJANGO_SETTINGS_MODULE=app.settings.docker_prod
     depends_on:
@@ -99,7 +99,7 @@ services:
       - .prod.env
     environment:
       - ENV=prod
-      - BUN_ENV=production
+      - NODE_ENV=production
       - SERVICE_NAME=app
       - DJANGO_SETTINGS_MODULE=app.settings.docker_prod
     depends_on:
