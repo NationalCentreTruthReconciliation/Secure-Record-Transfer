@@ -1,23 +1,22 @@
-FROM nikolaik/python-nodejs:python3.11-nodejs22-slim AS base
+FROM python:3.11-slim AS base
 
 ENV PYTHONUNBUFFERED=1
 ENV UV_LINK_MODE=copy
 ENV PROJ_DIR="/opt/secure-record-transfer/"
 ENV APP_DIR="/opt/secure-record-transfer/app/"
-ENV PNPM_HOME="/pnpm"
-ENV PATH="$PNPM_HOME:$PATH"
 
 WORKDIR ${PROJ_DIR}
 
-# 🔧 Install gettext for for internationalization and libmagic for MIME type detection
+# 🔧 Install gettext for internationalization and libmagic for MIME type detection
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     gettext \
     libmagic1 && \
     rm -rf /var/lib/apt/lists/*
 
-# Install pnpm globally (force overwrite version in base)
-RUN npm install -g pnpm@latest-10 --force
+# Install Bun 1 and latest uv to /bin/
+COPY --from=docker.io/oven/bun:1 /usr/local/bin/bun /bin/
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 # Copy uv-related files, and install Python dependencies
 # Uses a persistent cache mount for uv (see https://docs.astral.sh/uv/guides/integration/docker/#caching)
@@ -25,22 +24,20 @@ COPY pyproject.toml uv.lock ${PROJ_DIR}
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync
 
-# Install Node.js dependencies with pnpm
-# Uses a persistent cache mount for pnpm (see https://pnpm.io/docker#minimizing-docker-image-size-and-build-time)
-COPY package.json pnpm-lock.yaml ${PROJ_DIR}
-RUN --mount=type=cache,id=pnpm,target=${PNPM_HOME}/store \
-    pnpm install --frozen-lockfile --prod
+# Install javascript dependencies with Bun
+# Uses a persistent cache mount for Bun
+COPY package.json bun.lock* ${PROJ_DIR}
+RUN --mount=type=cache,target=/root/.bun/install/cache \
+    bun install --frozen-lockfile
 
 # Copy application code to image
 COPY ./app ${APP_DIR}
 
-# Make arg passed from compose files into environment variable
-ARG WEBPACK_MODE=production
-ENV WEBPACK_MODE=${WEBPACK_MODE}
-
-# Run webpack to bundle and minify assets
-COPY webpack.config.js postcss.config.mjs ${PROJ_DIR}
-RUN pnpm run build
+# Run Bun to bundle and minify assets
+ARG BUN_ENV=production
+ENV BUN_ENV=${BUN_ENV}
+COPY build.ts ${PROJ_DIR}
+RUN bun run build
 
 # Copy entrypoint script to image
 COPY ./docker/entrypoint.sh ${PROJ_DIR}
@@ -84,6 +81,9 @@ FROM base AS builder
 
 ENV UV_LINK_MODE=copy
 ENV APP_DIR="/opt/secure-record-transfer/app/"
+ENV PROJ_DIR="/opt/secure-record-transfer/"
+
+WORKDIR ${PROJ_DIR}
 
 # Install build tools for production dependencies
 RUN apt-get update && \
@@ -93,10 +93,21 @@ RUN apt-get update && \
     pkg-config \
     gettext
 
+# Install uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
+# Copy dependency files
+COPY pyproject.toml uv.lock ${PROJ_DIR}
+
 # Install production dependencies (e.g., mysqlclient)
 # Compile byte code to improve startup time (see https://docs.astral.sh/uv/guides/integration/docker/#compiling-bytecode)
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --extra prod --compile-bytecode
+
+# Copy application code from base stage
+COPY --from=base ${APP_DIR} ${APP_DIR}
+COPY --from=base ${PROJ_DIR}/dist ${PROJ_DIR}/dist
+COPY --from=base ${PROJ_DIR}/entrypoint.sh ${PROJ_DIR}/entrypoint.sh
 
 # Compile locale message files
 RUN uv run python "${APP_DIR}/manage.py" compilemessages --ignore .venv
