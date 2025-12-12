@@ -11,7 +11,7 @@
         <!-- JS -->
         {% block javascript %}
             <script src="{% url 'javascript-catalog' %}"></script>
-            {% render_bundle 'main' 'js' %}
+            {% render_bundle 'app' 'js' %}
         {% endblock javascript %}
         {# Fonts #}
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,7 +25,7 @@
               href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
         {# CSS #}
         {% block stylesheet %}
-            {% render_bundle 'main' 'css' %}
+            {% render_bundle 'app' 'css' %}
         {% endblock stylesheet %}
         {# Favicon #}
         <link rel="shortcut icon"

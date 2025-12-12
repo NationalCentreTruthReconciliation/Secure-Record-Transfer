@@ -1,6 +1,7 @@
-import { setupSelectOtherToggle } from "../utils/otherField.js";
-import { setupPhoneNumberMask } from "../utils/phoneNumberMask.js";
-import "../../css/admin/job.css";
+import "./main.css";
+
+import { setupSelectOtherToggle } from "../app/js/utils/otherField.js";
+import { setupPhoneNumberMask } from "../app/js/utils/phoneNumberMask.js";
 
 document.addEventListener("DOMContentLoaded", () => {
     let context = null;
@@ -20,5 +21,6 @@ document.addEventListener("DOMContentLoaded", () => {
         context["id_other_province_or_state"],
         context["other_province_or_state_value"]
     );
+
     setupPhoneNumberMask();
 });

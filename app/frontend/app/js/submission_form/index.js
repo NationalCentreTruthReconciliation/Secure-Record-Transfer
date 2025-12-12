@@ -21,27 +21,27 @@ const _setupWithContext = () => {
     const contextFor = contextElement.id.replace(/^js_context_/, "");
 
     switch (contextFor) {
-    case "contactinfo":
-        setupContactInfoForm(context);
-        break;
-    case "sourceinfo":
-        setupSourceInfoForm(context);
-        break;
-    case "rights":
-        setupRightsForm(context);
+        case "contactinfo":
+            setupContactInfoForm(context);
+            break;
+        case "sourceinfo":
+            setupSourceInfoForm(context);
+            break;
+        case "rights":
+            setupRightsForm(context);
 
-        break;
-    case "otheridentifiers":
-        setupOtherIdentifiersForm(context);
-        break;
-    case "groupsubmission":
-        setupSubmissionGroupForm(context);
-        break;
-    case "uploadfiles":
-        setupUppy(context);
-        break;
-    default:
-        break;
+            break;
+        case "otheridentifiers":
+            setupOtherIdentifiersForm(context);
+            break;
+        case "groupsubmission":
+            setupSubmissionGroupForm(context);
+            break;
+        case "uploadfiles":
+            setupUppy(context);
+            break;
+        default:
+            break;
     }
 
     setupSubmitButton(context);
