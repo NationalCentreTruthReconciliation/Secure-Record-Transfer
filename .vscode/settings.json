@@ -58,6 +58,7 @@
         "editor.defaultFormatter": "aeschli.vscode-css-formatter"
     },
     "files.associations": {
-        "**/templates/**/*.html": "django-html"
+        "**/templates/**/*.html": "django-html",
+        "*.css": "css",
     }
 }
