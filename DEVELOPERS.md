@@ -184,30 +184,32 @@ The tests can be run in a few different ways:
 
 This document focuses only on the first two options. For information on [running and debugging tests with VS Code, click here](https://code.visualstudio.com/docs/python/testing#_run-tests).
 
+**Note that tests must be run locally!** There is no way (yet) to run tests in a container.
+
 The `pytest` commands can be run from the root of the repository. The Django admin tests must be run from the `app` directory.
 
 To run all tests:
 
 ```shell
-pytest
+uv run pytest
 
 # Or, from the app/ directory:
-python manage.py test
+uv run python manage.py test
 ```
 
 To run only the unit tests:
 
 ```shell
-pytest -k "unit"
+uv run pytest -k "unit"
 
 # Or, from the app/ directory:
-python manage.py test --exclude-tag=e2e
+uv run python manage.py test --exclude-tag=e2e
 ```
 
 To run only the end-to-end tests:
 
 ```shell
-pytest -k "e2e"
+uv run pytest -k "e2e"
 
 # There is currently no way to do this with python manage.py test (yet)
 ```
@@ -215,7 +217,7 @@ pytest -k "e2e"
 To display skipped tests and the reason why they were skipped, add the `-rs` flag to any pytest command:
 
 ```shell
-pytest -rs
+uv run pytest -rs
 ```
 
 ### Debugging Tests with VSCode
