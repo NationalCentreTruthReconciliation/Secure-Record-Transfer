@@ -2,7 +2,7 @@
     {% load static %}
     {% for message in messages %}
         <div class="flex justify-center">
-            <div class="alert alert-dismissible max-w-6xl w-full {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-error{% endif %}">
+            <div class="alert alert-dismissible max-w-4xl w-full {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-error{% endif %}">
                 <div>{{ message }}</div>
                 <button class="close alert-dismiss" data-dismiss="alert">
                     <img height="14"
