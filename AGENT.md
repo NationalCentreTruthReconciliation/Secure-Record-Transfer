@@ -15,11 +15,11 @@ Asynchronous jobs are run by RQ, which uses Redis as a message broker.
 - If on WSL, use `/usr/bin/docker` instead of `docker`
 - Run unit tests locally: `uv run pytest -k unit`
 - Run end-to-end tests locally: `uv run pytest -k e2e`
-- Build static resources locally (for testing Webpack config): `pnpm run build`
+- Build static resources locally: `bun run build`
 - Start the dev app: `docker compose -f compose.dev.yml up -d --build --remove-orphans`
 - Start the prod app: `docker compose -f compose.prod.yml up -d --build --remove-orphans`
-- Build static resources in dev app: `docker compose -f compose.dev.yml exec app pnpm run build`
-- Watch and re-build static resources in dev app: `docker compose -f compose.dev.yml exec app pnpm run watch`
+- Build static resources in dev app: `docker compose -f compose.dev.yml exec app bun run build`
+- Watch and re-build static resources in dev app: `docker compose -f compose.dev.yml exec app bun run watch`
 - Build docs: `uv run sphinx-build docs docs/_build`
 - Start local web server on port 8001 for docs: `uv run python -m http.server -d docs/_build 8001`
 - Reset the development database: `docker compose -f compose.dev.yml exec app python manage.py reset`
@@ -38,8 +38,8 @@ Asynchronous jobs are run by RQ, which uses Redis as a message broker.
 - Python: production-only dependencies should go in the `prod` optional dependencies.
 - Python: developer-only dependencies should go in the `dev` optional dependencies.
 - Python: sync dependencies for local development: `uv sync --extra dev`
-- NodeJS: use `pnpm` for dependency management.
-- NodeJS: sync dependencies for local development: `pnpm install`
+- JavaScript: use `bun` for dependency management and bundling.
+- JavaScript: sync dependencies for local development: `bun install`
 
 ## Code Style
 
@@ -59,8 +59,8 @@ Asynchronous jobs are run by RQ, which uses Redis as a message broker.
 - Backend: Django
 - Database: MySQL in production, SQLite in development
 - Styling: Tailwind CSS + DaisyUI
-- Static bundler: Webpack
-- Package managers: uv, pnpm
+- Static bundler: Bun
+- Package managers: uv, bun
 
 ## Security
 
@@ -83,7 +83,7 @@ Asynchronous jobs are run by RQ, which uses Redis as a message broker.
 
 ## Git Workflow
 
-- Run `pnpm run lint` before committing any changes to JS files, and fix linting errors before continuing
+- Run `bun run lint` before committing any changes to JS files, and fix linting errors before continuing
 - Run `uv run ruff check <FILE_PATH>` before commiting changes to Python files, and fix linting errors before continuing
 - If there are fixable errors from `ruff`, run `uv run ruff format <FILE_PATH>` to fix the errors
 - Run `uv run djlint --check --lint <FILE_PATH>` before committing any changes to HTML files, and fix linting errors before continuing
