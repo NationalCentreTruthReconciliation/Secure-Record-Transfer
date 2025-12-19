@@ -1,6 +1,13 @@
-/* Fix weird styling for text inputs and textareas */
-.inline-text-input,
+.hidden {
+    display: none;
+}
+
 .inline-textarea {
+    width: 97%;
+    resize: none;
+}
+
+.inline-text-input {
     width: 97%;
 }
 
