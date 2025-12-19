@@ -8,6 +8,7 @@ import "../css/base/navbar.css";
 import "../css/base/submission_form.css";
 import "../css/base/tooltip.css";
 import "../css/base/widget.css";
+import "../css/base/accounts.css";
 
 import "../css/submission_form/review_step.css";
 import "../css/submission_form/uppy.css";
