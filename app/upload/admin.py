@@ -1,14 +1,15 @@
 """Registers models to the admin site."""
 
-from datetime import datetime
 from typing import Callable, Sequence
 
 from django.contrib import admin
 from django.contrib.admin import display
 from django.http import HttpRequest
 from django.urls import reverse
+from django.utils.formats import date_format
 from django.utils.html import format_html
 from django.utils.safestring import SafeText, mark_safe
+from django.utils.timezone import localtime
 from django.utils.translation import gettext_lazy as _
 from utility import get_human_readable_size
 
@@ -268,6 +269,8 @@ class UploadSessionAdmin(admin.ModelAdmin):
         return upload_size
 
     @display(description=_("Last upload at"))
-    def last_upload_at(self, obj: UploadSession) -> datetime:
+    def last_upload_at(self, obj: UploadSession) -> str:
         """Display the last time a file was uploaded to the session."""
-        return obj.last_upload_interaction_time
+        return date_format(
+            localtime(obj.last_upload_interaction_time), "DATETIME_FORMAT", use_l10n=True
+        )
