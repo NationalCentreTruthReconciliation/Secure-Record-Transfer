@@ -4,7 +4,7 @@
  * @returns {string} The cookie value. null if it does not exist
  */
 export const getCookie = (name) => {
-    const cookieValue = null;
+    let cookieValue = null;
     if (document.cookie && document.cookie !== "") {
         const cookies = document.cookie.split(";");
         for (let i = 0; i < cookies.length; i++) {
