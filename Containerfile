@@ -67,6 +67,16 @@ ENTRYPOINT ["/opt/secure-record-transfer/entrypoint.sh"]
 
 ################################################################################
 #
+# TEST IMAGE
+#
+
+FROM dev AS test
+
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --extra dev
+
+################################################################################
+#
 # PRODUCTION IMAGE
 #
 
