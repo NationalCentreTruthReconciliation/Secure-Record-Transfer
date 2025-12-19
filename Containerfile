@@ -36,7 +36,7 @@ COPY ./app ${APP_DIR}
 
 # Make arg passed from compose files into environment variable
 ARG WEBPACK_MODE=production
-ENV WEBPACK_MODE ${WEBPACK_MODE}
+ENV WEBPACK_MODE=${WEBPACK_MODE}
 
 # Run webpack to bundle and minify assets
 COPY webpack.config.js postcss.config.mjs ${PROJ_DIR}
