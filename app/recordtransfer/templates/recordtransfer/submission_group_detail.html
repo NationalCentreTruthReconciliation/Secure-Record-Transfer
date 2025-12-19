@@ -12,7 +12,7 @@
     {% blocktrans with name=group.name %}Submission Group: {{ name }}{% endblocktrans %}
 {% endblock title %}
 {% block content %}
-    <div class="mb-8">
+    <div class="max-w-6xl mx-auto mb-8">
         <a href="{% url 'recordtransfer:user_profile' %}"
            class="non-nav-link link link-info no-underline inline-block mb-6">
             <i class="fas fa-arrow-left"></i>
