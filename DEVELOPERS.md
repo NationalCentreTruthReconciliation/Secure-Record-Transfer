@@ -178,11 +178,16 @@ Ensure you follow the instructions in the [Local Python Environment Setup](#loca
 
 The tests can be run in a few different ways:
 
-1. Using [pytest](https://docs.pytest.org/en/stable/how-to/usage.html) (this uses [settings in the `pyproject.toml` file](https://pytest-django.readthedocs.io/en/latest/#example-using-pyproject-toml))
-2. The [Django test runner](https://docs.djangoproject.com/en/4.2/ref/django-admin/#test)
-3. The [VS Code test runner](https://code.visualstudio.com/docs/python/testing#_run-tests)
+1. Locally, using [pytest](https://docs.pytest.org/en/stable/how-to/usage.html) (this uses [settings in the `pyproject.toml` file](https://pytest-django.readthedocs.io/en/latest/#example-using-pyproject-toml))
+2. Locally, using the [Django test runner](https://docs.djangoproject.com/en/5.2/ref/django-admin/#test)
+3. In a container.
+4. The [VS Code test runner](https://code.visualstudio.com/docs/python/testing#_run-tests)
 
-This document focuses only on the first two options. For information on [running and debugging tests with VS Code, click here](https://code.visualstudio.com/docs/python/testing#_run-tests).
+This document focuses only on the first three options. For information on [running and debugging tests with VS Code, click here](https://code.visualstudio.com/docs/python/testing#_run-tests).
+
+### Running Tests Locally
+
+The easiest way to run tests is to run them from your local machine.
 
 **Note that tests must be run locally!** There is no way (yet) to run tests in a container.
 
@@ -218,6 +223,22 @@ To display skipped tests and the reason why they were skipped, add the `-rs` fla
 
 ```shell
 uv run pytest -rs
+```
+
+### Running Tests in a Container
+
+You can also choose to run tests in a container. This is useful if you don't want to install any dependencies locally.
+
+To run the tests in a container, first build a test image, and then run the tests in a container with the built image.
+
+```shell
+# Using Docker:
+docker build -f Containerfile --target test -t secure-record-transfer-test .
+docker run --rm -e ENV=dev secure-record-transfer-test pytest -k unit -rs
+
+# With Podman:
+podman build -f Containerfile --target test -t secure-record-transfer-test .
+podman run --rm -e ENV=dev secure-record-transfer-test pytest -k unit -rs
 ```
 
 ### Debugging Tests with VSCode
