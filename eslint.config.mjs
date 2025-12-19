@@ -5,15 +5,14 @@ import importPlugin from "eslint-plugin-import";
 import jsdoc from "eslint-plugin-jsdoc";
 import globals from "globals";
 
-
-/** @type {import('eslint').Linter.Config[]} */
 export default [
     {
         ignores: [
             "{env,venv,.env,.venv}/**",
-            "dist/",
-            "node_modules/",
-            "docs/"
+            "dist/**",
+            "node_modules/**",
+            "docs/**",
+            "app/static/**",
         ],
     },
     {
@@ -42,7 +41,10 @@ export default [
         }
     },
     {
-        files: ["build.ts", "scripts/**/*.ts"],
+        files: [
+            "build.ts",
+            "scripts/*.ts",
+        ],
         languageOptions: { globals: { ...globals.nodeBuiltin, Bun: "readonly" } },
         plugins: {
             "@stylistic/js": stylisticJs,
@@ -67,8 +69,8 @@ export default [
         }
     },
     // Docstring rules
-    jsdoc.configs["flat/recommended"],
+    { ...jsdoc.configs["flat/recommended"], files: ["app/**/*.{js,ts}", "build.ts", "scripts/*.ts"] },
     // Recommended ESLint rules
-    eslint.configs.recommended,
-    ...tseslint.configs.recommended,
+    { ...eslint.configs.recommended, files: ["app/**/*.{js,ts}", "build.ts", "scripts/*.ts"] },
+    ...tseslint.configs.recommended.map(config => ({ ...config, files: ["app/**/*.{js,ts}", "build.ts", "scripts/*.ts"] })),
 ];

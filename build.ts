@@ -190,7 +190,7 @@ function generateWebpackStats(artifacts: Artifact[]): WebpackStats {
 
 /**
  * Run complete build.
- * @param options
+ * @param {BuildOptions} options Options that control the build
  */
 async function runBuild(options: BuildOptions | null) {
     const mode = options?.production ? "production" : "development";
