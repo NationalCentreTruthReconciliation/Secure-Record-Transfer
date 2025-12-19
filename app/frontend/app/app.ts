@@ -1,5 +1,3 @@
-import "./main.css";
-
 import "htmx-ext-head-support";
 import htmx from "htmx.org";
 

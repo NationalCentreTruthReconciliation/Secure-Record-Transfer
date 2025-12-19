@@ -1,4 +1,3 @@
-import "air-datepicker/air-datepicker.css";
 import AirDatepicker from "air-datepicker";
 import localeEn from "air-datepicker/locale/en";
 import localeFr from "air-datepicker/locale/fr";

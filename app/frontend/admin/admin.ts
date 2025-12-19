@@ -1,5 +1,3 @@
-import "./main.css";
-
 import { setupSelectOtherToggle } from "../app/js/utils/otherField.js";
 import { setupPhoneNumberMask } from "../app/js/utils/phoneNumberMask.js";
 

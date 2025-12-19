@@ -1,5 +1,3 @@
-import "@uppy/core/css/style.css";
-import "@uppy/dashboard/css/style.css";
 
 import Uppy from "@uppy/core";
 import Dashboard from "@uppy/dashboard";

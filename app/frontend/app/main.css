@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+/* Vendor Styles */
+@import "@uppy/core/css/style.css";
+@import "@uppy/dashboard/css/style.css";
+@import "air-datepicker/air-datepicker.css";
+
+/* Custom Styles */
 @import "./css/base/banner.css";
 @import "./css/base/base.css";
 @import "./css/base/footer.css";
@@ -12,6 +18,7 @@
 @import "./css/submission_form/review_step.css";
 @import "./css/submission_form/uppy.css";
 
+/* DaisyUI w/ theme */
 @plugin "daisyui";
 
 @plugin "daisyui/theme" {
