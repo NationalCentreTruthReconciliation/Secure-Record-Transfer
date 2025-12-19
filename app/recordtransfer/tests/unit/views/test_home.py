@@ -43,7 +43,6 @@ class TestAboutPage(TestCase):
         response = self.client.get(reverse("recordtransfer:about"))
         self.assertIn("ACCEPTED_FILE_FORMATS", response.context)
         self.assertContains(response, "Image Files")
-        print(response.content.decode())
         self.assertContains(response, "jpg")
         self.assertContains(response, "png")
         self.assertContains(response, "gif")

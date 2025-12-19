@@ -1,7 +1,10 @@
+import logging
 from argparse import ArgumentParser
 
 from django.contrib.sites.models import Site
 from django.core.management.base import BaseCommand
+
+logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -31,18 +34,14 @@ class Command(BaseCommand):
         display_name = options["display_name"]
 
         if any(domain.startswith(prefix) for prefix in Command.INVALID_PREFIXES):
-            self.stdout.write(
-                self.style.WARNING(
-                    "Domain should not start with any of the following prefixes: "
-                    f"{', '.join(Command.INVALID_PREFIXES)}"
-                )
+            logger.warning(
+                "Domain should not start with any of the following prefixes: %s",
+                ", ".join(Command.INVALID_PREFIXES),
             )
             return
 
         if any(c.isspace() for c in domain):
-            self.stdout.write(
-                self.style.WARNING("Domain should not contain whitespace")
-            )
+            logger.warning("Domain should not contain whitespace")
             return
 
         current_site = Site.objects.get_current()
@@ -54,8 +53,4 @@ class Command(BaseCommand):
 
         current_site.save()
 
-        self.stdout.write(
-            self.style.SUCCESS(
-                f'Successfully set domain to "{domain}" for site "{current_site.name}"'
-            )
-        )
+        logger.info('Successfully set domain to "%s" for site "%s"', domain, current_site.name)
