@@ -36,7 +36,7 @@ class Command(BaseCommand):
         if any(domain.startswith(prefix) for prefix in Command.INVALID_PREFIXES):
             logger.warning(
                 "Domain should not start with any of the following prefixes: %s",
-                f"{', '.join(Command.INVALID_PREFIXES)}",
+                ", ".join(Command.INVALID_PREFIXES),
             )
             return
 
