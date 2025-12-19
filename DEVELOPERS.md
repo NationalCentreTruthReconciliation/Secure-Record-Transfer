@@ -167,7 +167,11 @@ podman-compose -f compose.dev.yml exec app pnpm run watch
 
 This will re-build the bundled JS files any time you save a change to a `.js` file which is useful while you're writing Javascript. This command does not exit until you press CTRL-C, so make sure to run it in a separate terminal.
 
-## Running Tests
+## Running and Debugging Tests
+
+Tests can be run either locally or in a container. Note that End-to-end (E2E) tests can only be run locally, and tests can only be debugged locally, so running tests locally is the preferred method.
+
+### Running Tests Locally
 
 Ensure you follow the instructions in the [Local Python Environment Setup](#local-python-environment-setup) section before continuing.
 
@@ -176,19 +180,13 @@ Ensure you follow the instructions in the [Local Python Environment Setup](#loca
 - **macOS**: `brew install libmagic`
 - **Ubuntu/Debian**: `sudo apt-get install libmagic1`
 
-The tests can be run in a few different ways:
+There are three ways to run tests locally:
 
 1. Using [pytest](https://docs.pytest.org/en/stable/how-to/usage.html) (this uses [settings in the `pyproject.toml` file](https://pytest-django.readthedocs.io/en/latest/#example-using-pyproject-toml))
-2. The [Django test runner](https://docs.djangoproject.com/en/4.2/ref/django-admin/#test)
-3. The [VS Code test runner](https://code.visualstudio.com/docs/python/testing#_run-tests)
+2. Using the [Django test runner](https://docs.djangoproject.com/en/5.2/ref/django-admin/#test)
+3. Using the [VS Code test runner](https://code.visualstudio.com/docs/python/testing#_run-tests). See here for information on [running and debugging tests with VS Code](https://code.visualstudio.com/docs/python/testing#_run-tests).
 
-This document focuses only on the first two options. For information on [running and debugging tests with VS Code, click here](https://code.visualstudio.com/docs/python/testing#_run-tests).
-
-**Note that tests must be run locally!** There is no way (yet) to run tests in a container.
-
-The `pytest` commands can be run from the root of the repository. The Django admin tests must be run from the `app` directory.
-
-To run all tests:
+To run all tests with Pytest or the Django test runner:
 
 ```shell
 uv run pytest
@@ -218,6 +216,22 @@ To display skipped tests and the reason why they were skipped, add the `-rs` fla
 
 ```shell
 uv run pytest -rs
+```
+
+### Running Tests in a Container
+
+You can also choose to run tests in a container. This is useful if you don't want to install any dependencies locally. Note that debugging is not set up for running the tests in this manner, and it is not possible to run E2E tests using this test method.
+
+To run the tests in a container, first build a test image, and then run the tests in a container with the built image.
+
+```shell
+# Using Docker:
+docker build -f Containerfile --target test -t secure-record-transfer-test .
+docker run --rm -e ENV=dev secure-record-transfer-test pytest -k unit -rs
+
+# With Podman:
+podman build -f Containerfile --target test -t secure-record-transfer-test .
+podman run --rm -e ENV=dev secure-record-transfer-test pytest -k unit -rs
 ```
 
 ### Debugging Tests with VSCode

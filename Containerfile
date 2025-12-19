@@ -36,7 +36,7 @@ COPY ./app ${APP_DIR}
 
 # Make arg passed from compose files into environment variable
 ARG WEBPACK_MODE=production
-ENV WEBPACK_MODE ${WEBPACK_MODE}
+ENV WEBPACK_MODE=${WEBPACK_MODE}
 
 # Run webpack to bundle and minify assets
 COPY webpack.config.js postcss.config.mjs ${PROJ_DIR}
@@ -64,6 +64,16 @@ ENV VIRTUAL_ENV="${PROJ_DIR}/.venv"
 WORKDIR ${APP_DIR}
 
 ENTRYPOINT ["/opt/secure-record-transfer/entrypoint.sh"]
+
+################################################################################
+#
+# TEST IMAGE
+#
+
+FROM dev AS test
+
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --extra dev
 
 ################################################################################
 #
