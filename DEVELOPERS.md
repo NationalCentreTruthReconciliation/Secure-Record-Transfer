@@ -189,8 +189,6 @@ This document focuses only on the first three options. For information on [runni
 
 The easiest way to run tests is to run them from your local machine.
 
-**Note that tests must be run locally!** There is no way (yet) to run tests in a container.
-
 The `pytest` commands can be run from the root of the repository. The Django admin tests must be run from the `app` directory.
 
 To run all tests:
