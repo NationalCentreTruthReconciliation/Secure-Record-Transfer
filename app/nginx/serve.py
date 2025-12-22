@@ -7,6 +7,29 @@ from django.http import (
 )
 from upload.mime import mime
 
+MIME_RENDER_INLINE = {
+    "text/plain",
+    "image/apng",
+    "image/avif",
+    "image/bmp",
+    "image/gif",
+    "image/jpeg",
+    "image/png",
+    "image/svg+xml",
+    "image/webp",
+    "image/tiff",
+    "audio/aac",
+    "audio/mpeg",
+    "audio/ogg",
+    "audio/wav",
+    "audio/webm",
+    "video/mp4",
+    "video/mpeg",
+    "video/ogg",
+    "video/webm",
+    "application/pdf",
+}
+
 
 def serve_media_file(file_url: str) -> HttpResponse:
     """Create a response that allows a client to download a media file.
@@ -44,8 +67,12 @@ def serve_media_file(file_url: str) -> HttpResponse:
         if mime_types:
             # Sort MIME types to ensure deterministic behavior
             sorted_mime_types = sorted(mime_types)
-            headers["Content-Type"] = sorted_mime_types[0]
-            headers["Content-Disposition"] = f'attachment; filename="{file_path.name}"'
+            mime_type = sorted_mime_types[0]
+            headers["Content-Type"] = mime_type
+            if mime_type in MIME_RENDER_INLINE:
+                headers["Content-Disposition"] = "inline"
+            else:
+                headers["Content-Disposition"] = f'attachment; filename="{file_path.name}"'
 
         response = HttpResponse(headers=headers)
 
