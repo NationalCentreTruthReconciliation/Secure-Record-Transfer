@@ -1,6 +1,6 @@
 {
     "name": "secure-record-transfer",
-    "version": "2025.12.4",
+    "version": "2025.12.22",
     "description": "Transfer files and metadata to an archive based on accession standards",
     "scripts": {
         "build": "webpack --config webpack.config.js",
