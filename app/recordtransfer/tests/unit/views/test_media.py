@@ -139,7 +139,7 @@ class TestJobFileView(TestCase):
 
     @override_settings(DEBUG=False)
     def test_job_file_headers_pdf_production_mode(self) -> None:
-        """Test that a PDF file does not have content headers in production mode."""
+        """Test that a PDF file has content headers in production mode."""
         self.client.login(username="staff", password="1X<ISRUkw+tuK")
 
         response = self.client.get(
@@ -148,5 +148,5 @@ class TestJobFileView(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response["X-Accel-Redirect"].endswith("test_report.pdf"))
-        self.assertNotIn("Content-Type", response.headers)
-        self.assertNotIn("Content-Disposition", response.headers)
+        self.assertIn("Content-Type", response.headers)
+        self.assertIn("Content-Disposition", response.headers)
