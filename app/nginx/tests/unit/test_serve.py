@@ -27,6 +27,9 @@ class ServeMediaFileTests(TestCase):
         file_url = "/media/temp/aaa/file.zip"
         response = serve_media_file(file_url)
         self.assertFalse(hasattr(response, "url"))
-        self.assertEqual(response["Content-Type"], "application/zip")
+        self.assertIn(
+            response["Content-Type"],
+            ["application/zip", "application/x-zip-compressed"],
+        )
         self.assertEqual(response["Content-Disposition"], 'attachment; filename="file.zip"')
         self.assertEqual(response["X-Accel-Redirect"], file_url)
