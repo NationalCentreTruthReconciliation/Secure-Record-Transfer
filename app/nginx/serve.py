@@ -5,6 +5,7 @@ from django.http import (
     HttpResponse,
     HttpResponseRedirect,
 )
+from upload.mime import mime
 
 
 def serve_media_file(file_url: str) -> HttpResponse:
@@ -36,10 +37,15 @@ def serve_media_file(file_url: str) -> HttpResponse:
     else:
         headers = {"X-Accel-Redirect": file_url}
 
-        # NGINX will change the file name if we do not set these headers
-        if file_url.endswith(".zip"):
-            headers["Content-Type"] = "application/zip"
-            headers["Content-Disposition"] = f'attachment; filename="{Path(file_url).name}"'
+        # Determine MIME type based on file extension and set headers deterministically
+        file_path = Path(file_url)
+        extension = file_path.suffix.lower().lstrip(".")
+        mime_types = mime.guess(extension)
+        if mime_types:
+            # Sort MIME types to ensure deterministic behavior
+            sorted_mime_types = sorted(mime_types)
+            headers["Content-Type"] = sorted_mime_types[0]
+            headers["Content-Disposition"] = f'attachment; filename="{file_path.name}"'
 
         response = HttpResponse(headers=headers)
 
