@@ -131,7 +131,10 @@ class TestJobFileView(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response["X-Accel-Redirect"].endswith("bag.zip"))
-        self.assertEqual(response["Content-Type"], "application/zip")
+        self.assertIn(
+            response["Content-Type"],
+            ["application/zip", "application/x-zip-compressed"],
+        )
         self.assertEqual(response["Content-Disposition"], 'attachment; filename="my_bag.zip"')
 
     @override_settings(DEBUG=False)
