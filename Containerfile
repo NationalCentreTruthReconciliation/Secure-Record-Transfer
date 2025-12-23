@@ -28,7 +28,8 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 # Uses a persistent cache mount for Bun
 COPY package.json bun.lock* ${PROJ_DIR}
 RUN --mount=type=cache,target=/root/.bun/install/cache \
-    bun install --frozen-lockfile
+    bun install --frozen-lockfile && \
+    bun run install-tailwind
 
 # Copy application code to image
 COPY ./app ${APP_DIR}

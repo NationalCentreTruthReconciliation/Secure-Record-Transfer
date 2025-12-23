@@ -9,12 +9,30 @@
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, rmSync, watch, writeFileSync } from "node:fs";
 import path from "node:path";
+import { parseArgs } from "util";
 import { build } from "bun";
 
-const args = Bun.argv;
-const shouldClean = args.includes("--clean");
-const shouldWatch = args.includes("--watch");
+const { values } = parseArgs({
+    args: Bun.argv,
+    options: {
+        "clean": {
+            type: "boolean",
+        },
+        "watch": {
+            type: "boolean",
+        },
+    },
+    strict: true,
+    allowPositionals: true,
+});
+
 const isProd = process.env.NODE_ENV === "production";
+
+const TAILWIND_EXECUTABLE = path.join(
+    import.meta.dir,
+    "tools",
+    "win32" === process.platform ? "tailwindcss.exe" : "tailwindcss",
+);
 
 const JS_ENTRYPOINTS: Record<string, string> = {
     app: path.join(import.meta.dir, "app/frontend/admin/admin.ts"),
@@ -108,6 +126,10 @@ async function buildCss(
         mkdirSync(DIST_DIR);
     }
 
+    if (!existsSync(TAILWIND_EXECUTABLE)) {
+        throw new Error("Tailwind is not installed, try running bun run install-tailwind first");
+    }
+
     // Execute tailwindcss/cli for each entrypoint
     await Promise.all(
         Object.entries(entrypoints).map(async ([name, inputPath]) => {
@@ -120,7 +142,7 @@ async function buildCss(
                 args.push("--minify");
             }
 
-            const result = Bun.spawn(["bun", "run", "tailwindcss", ...args], {
+            const result = Bun.spawn([TAILWIND_EXECUTABLE, ...args], {
                 stdout: "pipe",
                 stderr: "pipe",
             });
@@ -283,11 +305,11 @@ async function startWatchMode(options: BuildOptions) {
 }
 
 const buildOptions: BuildOptions = {
-    clean: shouldClean,
+    clean: values.clean ?? false,
     production: isProd,
 };
 
-if (shouldWatch) {
+if (values.watch ?? false) {
     await startWatchMode(buildOptions);
 } else {
     await runBuild(buildOptions);

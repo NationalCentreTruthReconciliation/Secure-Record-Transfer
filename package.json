@@ -3,13 +3,14 @@
     "version": "2025.12.22",
     "description": "Transfer files and metadata to an archive based on accession standards",
     "scripts": {
+        "prebuild": "bun run install-tailwind",
         "build": "bun run build.ts",
         "watch": "bun run build.ts --watch",
-        "lint": "eslint"
+        "lint": "eslint",
+        "install-tailwind": "bun run scripts/installTailwind.ts v4.1.18"
     },
     "dependencies": {
         "@floating-ui/dom": "1.7.4",
-        "@tailwindcss/cli": "^4.1.18",
         "@uppy/core": "^5.0.0",
         "@uppy/dashboard": "^5.0.0",
         "@uppy/locales": "^5.0.1",
@@ -18,8 +19,7 @@
         "daisyui": "^5.5.13",
         "htmx-ext-head-support": "^2.0.4",
         "htmx.org": "^2.0.4",
-        "imask": "^7.6.1",
-        "tailwindcss": "^4.1.18"
+        "imask": "^7.6.1"
     },
     "devDependencies": {
         "@eslint/js": "^9.17.0",

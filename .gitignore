@@ -92,6 +92,9 @@ local_settings.py
 # Collected static files
 app/static/
 
+# Tailwind CLI
+tools/tailwindcss
+
 .env
 .dev.env
 .prod.env
