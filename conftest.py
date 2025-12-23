@@ -18,22 +18,22 @@ def pytest_runtestloop(session: pytest.Session) -> None:
         "/e2e/" in item.nodeid for item in selected_items
     ):
         try:
-            pnpm_cmd = shutil.which("pnpm") or "pnpm"
+            bun_cmd = shutil.which("bun") or "bun"
             subprocess.run(
-                [pnpm_cmd, "install"],
+                [bun_cmd, "install"],
                 check=True,
             )
             subprocess.run(
-                [pnpm_cmd, "run", "build"],
+                [bun_cmd, "run", "build"],
                 check=True,
                 env={
                     **os.environ,
-                    "WEBPACK_MODE": "development",
+                    "NODE_ENV": "development",
                 },
             )
         except subprocess.CalledProcessError as e:
-            pytest.exit(f"Failed to run pnpm install or build: {e}")
+            pytest.exit(f"Failed to run bun install or build: {e}")
         except FileNotFoundError as e:
             pytest.exit(
-                f"pnpm command not found (got: {e}). pnpm must be installed to run e2e tests."
+                f"bun command not found (got: {e}). bun must be installed to run e2e tests."
             )

@@ -6,6 +6,7 @@
         "tamasfe.even-better-toml",
         "batisteo.vscode-django",
         "monosans.djlint",
-        "bradlc.vscode-tailwindcss"
+        "bradlc.vscode-tailwindcss",
+        "aeschli.vscode-css-formatter"
     ]
 }
