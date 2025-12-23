@@ -1,15 +1,19 @@
 /**
  * Build Javascript assets with Bun and CSS assets with the Tailwind CLI.
  *
+ * Activate watched mode with --watch
+ * Clean dist/ dir before building with --clean
+ *
  * Generates JSON stats to mimic webpack-bundle-tracker. See: https://www.npmjs.com/package/webpack-bundle-tracker
  */
 import { createHash } from "node:crypto";
-import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, rmSync, watch, writeFileSync } from "node:fs";
 import path from "node:path";
 import { build } from "bun";
 
 const args = Bun.argv;
 const shouldClean = args.includes("--clean");
+const shouldWatch = args.includes("--watch");
 const isProd = process.env.NODE_ENV === "production";
 
 const JS_ENTRYPOINTS: Record<string, string> = {
@@ -23,6 +27,9 @@ const CSS_ENTRYPOINTS: Record<string, string> = {
 };
 
 const DIST_DIR = path.join(import.meta.dir, "dist");
+const WATCH_DIR = path.join(import.meta.dir, "app/frontend");
+const WATCHED_ASSETS = [".js", ".ts", ".css"];
+const DEBOUNCE_MS = 300;
 
 const STATIC_URL = "/static/";
 const STATS_FILE = path.join(import.meta.dir, "dist/webpack-stats.json");
@@ -220,7 +227,68 @@ async function runBuild(options: BuildOptions | null) {
     console.info(`Stats written to ${STATS_FILE}`);
 }
 
-await runBuild({
+/**
+ * Start watching for file changes and rebuild on changes.
+ * @param {BuildOptions} options Options that control the build
+ */
+async function startWatchMode(options: BuildOptions) {
+    await runBuild(options);
+
+    console.info(`\nWatching for changes in ${WATCH_DIR}...`);
+
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+    let isBuilding = false;
+
+    const triggerBuild = async (fileChanged: string) => {
+        if (isBuilding) {
+            return;
+        }
+
+        isBuilding = true;
+
+        console.info(`\nFile changed: ${fileChanged}`);
+        console.info("💫 Rebuilding...\n");
+
+        try {
+            await runBuild({ ...options, clean: false });
+        } catch (error) {
+            console.error("Build failed:", error);
+        }
+
+        isBuilding = false;
+    };
+
+    watch(WATCH_DIR, { recursive: true }, (_event, filename) => {
+        if (null === filename) {
+            return;
+        }
+
+        const extension = path.extname(filename).toLowerCase();
+
+        if (-1 === WATCHED_ASSETS.indexOf(extension)) {
+            return;
+        }
+
+        if (debounceTimer) {
+            clearTimeout(debounceTimer);
+        }
+
+        debounceTimer = setTimeout(() => { triggerBuild(filename); }, DEBOUNCE_MS);
+    });
+
+    process.on("SIGINT", () => {
+        console.info("\nStopping watch mode.");
+        process.exit(0);
+    });
+}
+
+const buildOptions: BuildOptions = {
     clean: shouldClean,
     production: isProd,
-});
+};
+
+if (shouldWatch) {
+    await startWatchMode(buildOptions);
+} else {
+    await runBuild(buildOptions);
+}
