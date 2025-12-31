@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-09 19:38-0600\n"
+"POT-Creation-Date: 2025-12-30 19:40-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Gabrielle Archambault <Gabrielle.Archambault@umanitoba.ca>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1000,7 +1000,7 @@ msgctxt "\"Selected\" refers to one or more Submission objects."
 msgid "Export AtoM 2.1 Accession CSV for Metadata in Selected"
 msgstr "Exporter AtoM 2.1 Accession CSV pour Sélectionnés"
 
-#: recordtransfer/admin.py:545 upload/admin.py:53
+#: recordtransfer/admin.py:545 upload/admin.py:54
 msgid "File Link"
 msgstr "Lien de fichier"
 
@@ -2436,7 +2436,7 @@ msgstr "Expire bientôt"
 
 #: recordtransfer/templates/includes/open_session_table.html:30
 #: recordtransfer/templates/includes/submission_table.html:24
-#: upload/admin.py:50 upload/admin.py:257 upload/admin.py:267
+#: upload/admin.py:51 upload/admin.py:258 upload/admin.py:268
 msgid "N/A"
 msgstr "Sans objet"
 
@@ -5147,15 +5147,15 @@ msgid ""
 msgstr ""
 "Veuillez réessayer plus tard. Contactez-nous si les difficultés persistent."
 
-#: upload/admin.py:46 upload/admin.py:260
+#: upload/admin.py:47 upload/admin.py:261
 msgid "Upload Size"
 msgstr "Taille du téléchargement"
 
-#: upload/admin.py:57
+#: upload/admin.py:58
 msgid "File was removed"
 msgstr "Le fichier a été supprimé"
 
-#: upload/admin.py:270
+#: upload/admin.py:271
 msgid "Last upload at"
 msgstr "Dernier téléchargement à"
 
