@@ -3,8 +3,7 @@
       hx-post="{% url 'recordtransfer:contact_info_update' %}"
       hx-target="#contact-info-form"
       hx-swap="innerHTML"
-      hx-select="#contact-info-form"
-      hx-on::after-request="setupUserContactInfoForm(event);">
+      hx-select="#contact-info-form">
     {% csrf_token %}
     <!-- Phone Number Section -->
     <div class="flex mb-4 w-full">

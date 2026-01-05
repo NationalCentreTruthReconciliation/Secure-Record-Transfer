@@ -49,7 +49,7 @@ export const initializeCustomModalEvents = () => {
 
     modalContainer.addEventListener(
         "htmx:afterRequest", (event) => {
-            const triggeredBy = event.detail.elt?.id;
+            const triggeredBy = event.detail.requestConfig?.elt?.id;
 
             if (triggeredBy === "confirm_delete_ip_btn") {
                 document.dispatchEvent(
@@ -174,7 +174,11 @@ export function setupBaseHtmxEventListeners() {
  * @param {string} tableElementId - DOM element ID of the table to update
  * @returns {void}
  */
-const refreshTable = (tableUrl, paginateQueryName, tableElementId) => {
+export const refreshTable = (tableUrl, paginateQueryName, tableElementId) => {
+    if (!document.getElementById(tableElementId)) {
+        return;
+    }
+
     const currentPage = getCurrentTablePage();
     const finalUrl = addQueryParam(tableUrl, paginateQueryName, currentPage);
 
@@ -184,7 +188,7 @@ const refreshTable = (tableUrl, paginateQueryName, tableElementId) => {
     });
 };
 
-const refreshSubmissionGroupTable = (context) => {
+export const refreshSubmissionGroupTable = (context) => {
     refreshTable(
         context["SUBMISSION_GROUP_TABLE_URL"],
         context["PAGINATE_QUERY_NAME"],
@@ -192,7 +196,7 @@ const refreshSubmissionGroupTable = (context) => {
     );
 };
 
-const refreshIPSubmissionTable = (context) => {
+export const refreshIPSubmissionTable = (context) => {
     refreshTable(
         context["IN_PROGRESS_SUBMISSION_TABLE_URL"],
         context["PAGINATE_QUERY_NAME"],
@@ -200,7 +204,7 @@ const refreshIPSubmissionTable = (context) => {
     );
 };
 
-const refreshSubmissionTable = (context) => {
+export const refreshSubmissionTable = (context) => {
     refreshTable(
         context["SUBMISSION_TABLE_URL"],
         context["PAGINATE_QUERY_NAME"],
@@ -208,7 +212,7 @@ const refreshSubmissionTable = (context) => {
     );
 };
 
-const refreshOpenSessionTable = (context) => {
+export const refreshOpenSessionTable = (context) => {
     refreshTable(
         context["OPEN_SESSION_TABLE_URL"],
         context["PAGINATE_QUERY_NAME"],

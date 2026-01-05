@@ -16,7 +16,6 @@
             <button class="btn">{% trans "Cancel" %}</button>
             <button id="confirm_delete_submission_group_btn"
                     hx-delete="{{ submission_group.get_delete_url }}"
-                    hx-on::after-request="handleDeleteSubmissionGroupAfterRequest(event)"
                     class="btn btn-primary">{% trans "Yes" %}</button>
         </div>
     </form>

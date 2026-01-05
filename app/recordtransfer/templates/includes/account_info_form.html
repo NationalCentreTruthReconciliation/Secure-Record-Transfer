@@ -3,8 +3,7 @@
       hx-post="{% url 'recordtransfer:account_info_update' %}"
       hx-target="#account-info-form"
       hx-swap="innerHTML"
-      hx-select="#account-info-form"
-      hx-on::after-request="setupProfileForm()">
+      hx-select="#account-info-form">
     {% csrf_token %}
     <!-- Account Information Section -->
     <div class="flex flex-col md:flex-row w-full gap-4 mb-6">
