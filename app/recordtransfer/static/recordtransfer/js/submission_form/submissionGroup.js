@@ -1,7 +1,4 @@
-import {
-    handleModalBeforeSwap,
-    handleModalAfterSwap
-} from "../utils/htmx.js";
+import { closeModal, showModal } from "../utils/utils.js";
 
 const noDescription = window.django.gettext("No description available");
 
@@ -19,13 +16,18 @@ export async function setupSubmissionGroupForm(context) {
         updateGroupDescription(selectField, groupDescDisplay)
     );
 
-    window.handleModalBeforeSwap = (e) => {
-        return handleModalBeforeSwap(e, context);
-    };
-    window.handleModalAfterSwap = (e) => {
-        return handleModalAfterSwap(e, context);
-    };
-    setupSubmissionGroupCreatedEventListener(selectField);
+    document.addEventListener("modal:afterSwap", (e) => {
+        const triggeredBy = e.detail.requestConfig.elt.id;
+
+        if ("id_new_submission_group_button" === triggeredBy) {
+            showModal();
+        }
+    });
+
+    window.htmx.on("submissionGroupCreated", (event) => {
+        closeModal();
+        handleNewGroupAdded(event.detail.group, selectField);
+    });
 
     // Set the initial content of the group description
     // This will be updated after the group descriptions have been fetched asynchronously
@@ -118,18 +120,4 @@ const handleNewGroupAdded = (group, selectField) => {
     option.setAttribute("data-description", group.description);
     selectField.append(option);
     selectGroup(group.uuid, selectField);
-};
-
-/**
- * Sets up the event listener for the submissionGroupCreated event.
- * This event is triggered by a server response when a new submission group is created.
- * @param {HTMLSelectElement} selectField - The select field where the new group should be added.
- */
-const setupSubmissionGroupCreatedEventListener = (selectField) => {
-    if (!window.htmx) {
-        return;
-    }
-    window.htmx.on("submissionGroupCreated", (event) => {
-        handleNewGroupAdded(event.detail.group, selectField);
-    });
 };
