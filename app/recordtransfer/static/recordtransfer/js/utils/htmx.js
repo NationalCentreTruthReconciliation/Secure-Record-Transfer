@@ -74,28 +74,6 @@ export const initializeCustomModalEvents = () => {
 };
 
 /**
- * Handles the UI and table refresh after a delete request for an in-progress submission.
- *
- * Closes the delete confirmation modal and, if the request was successful,
- * refreshes the in-progress submissions table via HTMX AJAX.
- * @param {CustomEvent} e - The event object containing the request result in
- * `e.detail.successful`.
- * @param {object} context - Context object with URLs and element IDs for table refresh.
- */
-export const handleDeleteIpSubmissionAfterRequest = (e, context) => {
-    closeModal();
-
-    if (e.detail.successful) {
-        if (context["ID_OPEN_SESSION_TABLE"]) {
-            refreshOpenSessionTable(context);
-        }
-        else {
-            refreshIPSubmissionTable(context);
-        }
-    }
-};
-
-/**
  * Handles the after-swap event for the modal.
  * This function is triggered after the modal content has been swapped in.
  * @param {Event} e - The HTMX after-swap event object containing request details
