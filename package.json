@@ -3,11 +3,9 @@
     "version": "2025.12.22",
     "description": "Transfer files and metadata to an archive based on accession standards",
     "scripts": {
-        "prebuild": "bun run install-tailwind",
         "build": "bun run build.ts",
         "watch": "bun run build.ts --watch",
-        "lint": "eslint",
-        "install-tailwind": "bun run scripts/installTailwind.ts v4.1.18"
+        "lint": "eslint"
     },
     "dependencies": {
         "@floating-ui/dom": "1.7.4",

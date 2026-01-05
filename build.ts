@@ -7,7 +7,15 @@
  * Generates JSON stats to mimic webpack-bundle-tracker. See: https://www.npmjs.com/package/webpack-bundle-tracker
  */
 import { createHash } from "node:crypto";
-import { existsSync, mkdirSync, rmSync, watch, writeFileSync } from "node:fs";
+import {
+    chmodSync,
+    existsSync,
+    mkdirSync,
+    readdirSync,
+    rmSync,
+    watch,
+    writeFileSync,
+} from "node:fs";
 import path from "node:path";
 import { parseArgs } from "util";
 import { build } from "bun";
@@ -21,6 +29,9 @@ const { values } = parseArgs({
         "watch": {
             type: "boolean",
         },
+        "only-tailwind": {
+            type: "boolean",
+        },
     },
     strict: true,
     allowPositionals: true,
@@ -28,10 +39,11 @@ const { values } = parseArgs({
 
 const isProd = process.env.NODE_ENV === "production";
 
+const TOOLS_DIR = path.join(import.meta.dir, "tools");
+const TAILWIND_VERSION = process.env.TAILWIND_VERSION?? "v4.1.18";
 const TAILWIND_EXECUTABLE = path.join(
-    import.meta.dir,
-    "tools",
-    "win32" === process.platform ? "tailwindcss.exe" : "tailwindcss",
+    TOOLS_DIR,
+    "win32" === process.platform ? "tailwindcss.exe" : "tailwindcss"
 );
 
 const JS_ENTRYPOINTS: Record<string, string> = {
@@ -74,6 +86,71 @@ interface WebpackStats {
     status: string;
     assets: Record<string, AssetEntry>;
     chunks: Record<string, string[]>;
+}
+
+/**
+ * Get the platform suffix for the current machine.
+ * @returns {string} The platform suffix for this host.
+ */
+function getPlatformSuffix(): string {
+    const platform = process.platform;
+    const arch = process.arch;
+
+    if (platform === "linux" && arch === "x64") {
+        return "linux-x64";
+    } else if (platform === "linux" && arch === "arm64") {
+        return "linux-arm64";
+    } else if (platform === "darwin" && arch === "x64") {
+        return "macos-x64";
+    } else if (platform === "darwin" && arch === "arm64") {
+        return "macos-arm64";
+    } else if (platform === "win32" && arch === "x64") {
+        return "windows-x64.exe";
+    } else if (platform === "win32" && arch === "arm64") {
+        return "windows-arm64.exe";
+    }
+    throw new Error(`Unsupported platform: ${platform}-${arch}`);
+}
+
+/**
+ * Install standalone Tailwind CLI if it is not already installed.
+ * @returns {Promise<boolean>} true if Tailwind is/was installed, false if not or if some error
+ * occurred
+ */
+async function ensureTailwindInstalled(): Promise<boolean> {
+    if (!existsSync(TOOLS_DIR)) {
+        mkdirSync(TOOLS_DIR, { recursive: false });
+    }
+
+    const targetName = path.basename(TAILWIND_EXECUTABLE);
+    const targetPath = path.join(TOOLS_DIR, targetName);
+    const existingFiles = readdirSync(TOOLS_DIR).filter(f => f.startsWith("tailwindcss"));
+
+    if (existingFiles.includes(targetName)) {
+        return true;
+    }
+
+    const platformSuffix = getPlatformSuffix();
+    const downloadUrl = `https://github.com/tailwindlabs/tailwindcss/releases/download/${TAILWIND_VERSION}/tailwindcss-${platformSuffix}`;
+    console.info(`Downloading Tailwind CLI ${TAILWIND_VERSION} from ${downloadUrl}...`);
+
+    const response = await fetch(downloadUrl);
+
+    if (!response.ok) {
+        console.error(`Failed to download: ${response.status} ${response.statusText}`);
+        return false;
+    }
+
+    const buffer = await response.arrayBuffer();
+    await Bun.write(targetPath, buffer);
+
+    // Make executable on Unix systems
+    if (process.platform !== "win32") {
+        chmodSync(targetPath, 0o755);
+    }
+
+    console.info(`Standalone Tailwind CLI ${TAILWIND_VERSION} installed to ${targetPath}`);
+    return true;
 }
 
 /**
@@ -127,7 +204,7 @@ async function buildCss(
     }
 
     if (!existsSync(TAILWIND_EXECUTABLE)) {
-        throw new Error("Tailwind is not installed, try running bun run install-tailwind first");
+        throw new Error("Tailwind is not installed!");
     }
 
     // Execute tailwindcss/cli for each entrypoint
@@ -304,13 +381,26 @@ async function startWatchMode(options: BuildOptions) {
     });
 }
 
-const buildOptions: BuildOptions = {
-    clean: values.clean ?? false,
-    production: isProd,
-};
+const installed = await ensureTailwindInstalled();
 
-if (values.watch ?? false) {
-    await startWatchMode(buildOptions);
-} else {
-    await runBuild(buildOptions);
+if (!installed) {
+    console.error("Could not install Tailwind CLI, aborting.");
+    process.exit(1);
+}
+else if (installed && values["only-tailwind"]) {
+    // Exit early if only tailwind.
+    console.info("Tailwind CLI is installed");
+    process.exit(0);
+}
+else {
+    const buildOptions: BuildOptions = {
+        clean: values.clean ?? false,
+        production: isProd,
+    };
+
+    if (values.watch ?? false) {
+        await startWatchMode(buildOptions);
+    } else {
+        await runBuild(buildOptions);
+    }
 }
