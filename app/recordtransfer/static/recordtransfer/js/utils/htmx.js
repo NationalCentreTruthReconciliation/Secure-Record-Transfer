@@ -3,6 +3,52 @@ import { initializeSubmissionForm } from "../submission_form/index";
 import { addQueryParam, showModal, closeModal, getCurrentTablePage } from "./utils.js";
 
 /**
+ * Initialize custom events that are triggered by modal actions.
+ *
+ * This function creates modal-specific events that can be subscribed to. The purpose of these
+ * events are to be more specific than general HTMX events.
+ *
+ * Following are the custom events that are set up:
+ *
+ * modal:beforeSwap - Triggered before swapping content in the modal container.
+ * modal:afterSwap - Triggered after swapping content in the modal container.
+ * modal:afterInProgressDelete - Triggered when an in-progress submission is deleted via a modal.
+ * modal:afterGroupDelete - Triggered when a submission group is deleted via a modal.
+ */
+export const initializeCustomModalEvents = () => {
+    // Custom "Before/after swap" events. See:
+    // https://htmx.org/events/#htmx:beforeSwap
+    // https://htmx.org/events/#htmx:afterSwap
+
+    document.getElementById("modal-content-container")?.addEventListener(
+        "htmx:beforeSwap", (detail) => {
+            new CustomEvent("modal:beforeSwap", { detail: detail });
+        }
+    );
+
+    document.getElementById("modal-content-container")?.addEventListener(
+        "htmx:afterSwap", (detail) => {
+            new CustomEvent("modal:afterSwap", { detail: detail });
+        }
+    );
+
+    // Custom "After request" events. See:
+    // https://htmx.org/events/#htmx:afterRequest
+
+    document.getElementById("confirm_delete_ip_btn")?.addEventListener(
+        "htmx:afterRequest", (detail) => {
+            new CustomEvent("modal:afterInProgressDelete", { detail: detail });
+        }
+    );
+
+    document.getElementById("confirm_delete_submission_group_btn")?.addEventListener(
+        "htmx:afterRequest", (detail) => {
+            new CustomEvent("modal:afterGroupDelete", { detail: detail });
+        }
+    );
+};
+
+/**
  * Handles the UI and table refresh after a delete request for an in-progress submission.
  *
  * Closes the delete confirmation modal and, if the request was successful,
