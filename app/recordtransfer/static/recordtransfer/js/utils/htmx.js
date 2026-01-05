@@ -13,6 +13,7 @@ import { addQueryParam, showModal, closeModal, getCurrentTablePage } from "./uti
  * modal:beforeSwap - Triggered before swapping content in the modal container.
  * modal:afterSwap - Triggered after swapping content in the modal container.
  * modal:afterInProgressDelete - Triggered when an in-progress submission is deleted via a modal.
+ * modal:afterGroupCreate - Triggered when a submission group is created via a modal.
  * modal:afterGroupDelete - Triggered when a submission group is deleted via a modal.
  */
 export const initializeCustomModalEvents = () => {
@@ -36,22 +37,27 @@ export const initializeCustomModalEvents = () => {
         }
     );
 
-    // Custom "After request" events. See:
-    // https://htmx.org/events/#htmx:afterRequest
+    // Custom "After request" events using event delegation on the modal container.
+    // These elements are dynamically loaded, so we listen on the container and check the target.
+    // See: https://htmx.org/events/#htmx:afterRequest
 
-    document.getElementById("confirm_delete_ip_btn")?.addEventListener(
+    document.getElementById("modal-content-container")?.addEventListener(
         "htmx:afterRequest", (event) => {
-            document.dispatchEvent(
-                new CustomEvent("modal:afterInProgressDelete", { detail: event.detail })
-            );
-        }
-    );
+            const triggeredBy = event.detail.elt?.id;
 
-    document.getElementById("confirm_delete_submission_group_btn")?.addEventListener(
-        "htmx:afterRequest", (event) => {
-            document.dispatchEvent(
-                new CustomEvent("modal:afterGroupDelete", { detail: event.detail })
-            );
+            if (triggeredBy === "confirm_delete_ip_btn") {
+                document.dispatchEvent(
+                    new CustomEvent("modal:afterInProgressDelete", { detail: event.detail })
+                );
+            } else if (triggeredBy === "submission-group-form") {
+                document.dispatchEvent(
+                    new CustomEvent("modal:afterGroupCreate", { detail: event.detail })
+                );
+            } else if (triggeredBy === "confirm_delete_submission_group_btn") {
+                document.dispatchEvent(
+                    new CustomEvent("modal:afterGroupDelete", { detail: event.detail })
+                );
+            }
         }
     );
 };
