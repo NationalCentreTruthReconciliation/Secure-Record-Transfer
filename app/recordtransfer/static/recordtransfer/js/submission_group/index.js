@@ -1,8 +1,6 @@
-import {
-    handleModalBeforeSwap,
-    handleModalAfterSwap,
-} from "../utils/htmx.js";
-import { isValidUrl } from "../utils/utils.js";
+import { setupAssignSubmissionGroupForm } from "../forms/forms.js";
+import { refreshSubmissionTable } from "../utils/htmx.js";
+import { closeModal, isValidUrl, showModal } from "../utils/utils.js";
 
 /**
  * Initializes the submission group detail page functionality including form setup,
@@ -10,26 +8,31 @@ import { isValidUrl } from "../utils/utils.js";
  */
 export const initializeSubmissionGroup = function () {
     const context = getContext();
-    if (!context) {return;}
+
+    if (!context) {
+        return;
+    }
 
     setupSubmissionGroupForm(context);
 
-    window.handleModalBeforeSwap = (e) => {
-        return handleModalBeforeSwap(e, context);
-    };
+    document.addEventListener("modal:afterSwap", (e) => {
+        const triggeredBy = e.detail.requestConfig.elt.id;
 
-    window.handleModalAfterSwap = (e) => {
-        return handleModalAfterSwap(e, context);
-    };
-
-    window.handleSubmissionGroupFormAfterSwap = () => {
-        const newContext = getContext();
-        if (newContext) {
-            setupSubmissionGroupForm(newContext);
+        if (triggeredBy.startsWith("assign_submission_group")) {
+            setupAssignSubmissionGroupForm();
         }
-    };
 
-    window.handleDeleteSubmissionGroupAfterRequest = (e) => {
+        showModal();
+    });
+
+    document.addEventListener("modal:afterGroupChange", () => {
+        closeModal();
+        refreshSubmissionTable(context);
+    });
+
+    document.addEventListener("modal:afterGroupDelete", (e) => {
+        closeModal();
+
         if (e.detail.successful) {
             const hxTriggerHeader = e.detail.xhr.getResponseHeader("hx-trigger");
 
@@ -49,14 +52,19 @@ export const initializeSubmissionGroup = function () {
                 window.location.href = "/";
             }
         }
-    };
+    });
+
+    document.getElementById("submission-group-form")?.addEventListener("htmx:afterRequest", () => {
+        const context = getContext();
+        setupSubmissionGroupForm(context);
+    });
 };
 
 /**
  * Gets the context object from the DOM element containing submission group data
  * @returns {object|null} The parsed context object or null if element not found
  */
-function getContext(){
+function getContext() {
     const contextElement = document.getElementById("py_context_submission_group");
     if (!contextElement) {
         return null;
@@ -72,6 +80,10 @@ function getContext(){
  * field
  */
 function setupSubmissionGroupForm(context) {
+    if (!context) {
+        return;
+    }
+
     const groupName = document.getElementById(context["ID_SUBMISSION_GROUP_NAME"]);
     const groupDescription = document.getElementById(context["ID_SUBMISSION_GROUP_DESCRIPTION"]);
     const saveButton = document.getElementById("id_create_group_button");

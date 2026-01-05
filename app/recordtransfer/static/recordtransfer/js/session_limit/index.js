@@ -1,8 +1,5 @@
-import {
-    handleDeleteIpSubmissionAfterRequest,
-    handleModalBeforeSwap,
-    handleModalAfterSwap
-} from "../utils/htmx.js";
+import { refreshOpenSessionTable } from "../utils/htmx.js";
+import { closeModal, showModal } from "../utils/utils.js";
 
 /**
  * Main initialization function to set up session limit page.
@@ -16,21 +13,18 @@ export const initializeSessionLimitPage = function() {
     }
 
     context = JSON.parse(contextElement.textContent);
+
     if (!context) {
         console.error("Context not available to set up session limit page.");
         return;
     }
 
-    // Wrapper functions to provide context to HTMX event handlers
-    window.handleDeleteIpSubmissionAfterRequest = (e) => {
-        return handleDeleteIpSubmissionAfterRequest(e, context);
-    };
+    document.addEventListener("modal:afterSwap", () => {
+        showModal();
+    });
 
-    window.handleModalBeforeSwap = (e) => {
-        return handleModalBeforeSwap(e, context);
-    };
-
-    window.handleModalAfterSwap = (e) => {
-        return handleModalAfterSwap(e, context);
-    };
+    document.addEventListener("modal:afterInProgressDelete", () => {
+        closeModal();
+        refreshOpenSessionTable(context);
+    });
 };

@@ -2,7 +2,6 @@
 <form hx-post="{% url 'recordtransfer:submission_group_detail' uuid=group.uuid %}"
       hx-select="#submission-group-form"
       hx-select-oob="#title-text"
-      hx-on::after-swap="handleSubmissionGroupFormAfterSwap(event)"
       id="submission-group-form">
     {% csrf_token %}
     {% include "includes/submission_group_form_fields.html" %}
