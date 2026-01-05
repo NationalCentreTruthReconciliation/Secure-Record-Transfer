@@ -69,7 +69,7 @@ module.exports = {
     },
     entry: {
         images: [
-            ...glob.sync("./app/recordtransfer/static/recordtransfer/img/*.{jpg,jpeg,png,webp,ico}") // eslint-disable-line
+            ...glob.sync("./app/recordtransfer/static/recordtransfer/img/*.{jpg,jpeg,png,webp,ico}")  
                 .map(file => "./" + path.relative(__dirname, file)),
         ],
         main: "./app/recordtransfer/static/recordtransfer/js/index.js",

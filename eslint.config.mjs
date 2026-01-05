@@ -1,22 +1,22 @@
-import pluginJs from "@eslint/js";
-import stylisticJs from "@stylistic/eslint-plugin-js";
+import eslint from "@eslint/js";
+import tseslint from "typescript-eslint";
+import stylisticJs from "@stylistic/eslint-plugin";
 import importPlugin from "eslint-plugin-import";
 import jsdoc from "eslint-plugin-jsdoc";
 import globals from "globals";
 
-
-/** @type {import('eslint').Linter.Config[]} */
 export default [
     {
         ignores: [
             "{env,venv,.env,.venv}/**",
-            "dist/",
-            "node_modules/",
-            "app/static/",
-            "docs/"
+            "dist/**",
+            "node_modules/**",
+            "docs/**",
+            "app/static/**",
         ],
     },
     {
+        files: ["app/**/*.{js,ts}"],
         languageOptions: { globals: globals.browser },
         plugins: {
             "@stylistic/js": stylisticJs,
@@ -41,13 +41,16 @@ export default [
         }
     },
     {
-        files: ["webpack.config.js"],
+        files: [
+            "webpack.config.js",
+        ],
         languageOptions: {
-            globals: globals.node,
+            globals: globals.node
         },
     },
     // Docstring rules
     jsdoc.configs["flat/recommended"],
     // Recommended ESLint rules
-    pluginJs.configs.recommended,
+    eslint.configs.recommended,
+    ...tseslint.configs.recommended,
 ];
