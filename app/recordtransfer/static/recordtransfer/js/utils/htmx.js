@@ -79,6 +79,7 @@ export const initializeCustomModalEvents = () => {
 export function setupBaseHtmxEventListeners() {
     document.addEventListener("htmx:afterSwap", (event) => {
         if (event.detail.target.id === "main-container") {
+            initializeCustomModalEvents();
             initializeSubmissionForm();
         }
     });
