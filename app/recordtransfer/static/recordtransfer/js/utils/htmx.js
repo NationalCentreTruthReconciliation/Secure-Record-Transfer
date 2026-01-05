@@ -21,14 +21,18 @@ export const initializeCustomModalEvents = () => {
     // https://htmx.org/events/#htmx:afterSwap
 
     document.getElementById("modal-content-container")?.addEventListener(
-        "htmx:beforeSwap", (detail) => {
-            new CustomEvent("modal:beforeSwap", { detail: detail });
+        "htmx:beforeSwap", (event) => {
+            document.dispatchEvent(
+                new CustomEvent("modal:beforeSwap", { detail: event.detail })
+            );
         }
     );
 
     document.getElementById("modal-content-container")?.addEventListener(
-        "htmx:afterSwap", (detail) => {
-            new CustomEvent("modal:afterSwap", { detail: detail });
+        "htmx:afterSwap", (event) => {
+            document.dispatchEvent(
+                new CustomEvent("modal:afterSwap", { detail: event.detail })
+            );
         }
     );
 
@@ -36,14 +40,18 @@ export const initializeCustomModalEvents = () => {
     // https://htmx.org/events/#htmx:afterRequest
 
     document.getElementById("confirm_delete_ip_btn")?.addEventListener(
-        "htmx:afterRequest", (detail) => {
-            new CustomEvent("modal:afterInProgressDelete", { detail: detail });
+        "htmx:afterRequest", (event) => {
+            document.dispatchEvent(
+                new CustomEvent("modal:afterInProgressDelete", { detail: event.detail })
+            );
         }
     );
 
     document.getElementById("confirm_delete_submission_group_btn")?.addEventListener(
-        "htmx:afterRequest", (detail) => {
-            new CustomEvent("modal:afterGroupDelete", { detail: detail });
+        "htmx:afterRequest", (event) => {
+            document.dispatchEvent(
+                new CustomEvent("modal:afterGroupDelete", { detail: event.detail })
+            );
         }
     );
 };
