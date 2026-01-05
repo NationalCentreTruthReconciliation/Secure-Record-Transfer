@@ -1,6 +1,5 @@
-import { setupSubmissionGroupForm, setupAssignSubmissionGroupForm } from "../forms/forms.js";
 import { initializeSubmissionForm } from "../submission_form/index";
-import { addQueryParam, showModal, closeModal, getCurrentTablePage } from "./utils.js";
+import { addQueryParam, getCurrentTablePage } from "./utils.js";
 
 /**
  * Initialize custom events that are triggered by modal actions.
@@ -71,60 +70,6 @@ export const initializeCustomModalEvents = () => {
             }
         }
     );
-};
-
-/**
- * Handles the after-swap event for the modal.
- * This function is triggered after the modal content has been swapped in.
- * @param {Event} e - The HTMX after-swap event object containing request details
- * @param {object} context - The context object for the current operation
- * @returns {void}
- */
-export const handleModalAfterSwap = (e, context) => {
-    const triggeredBy = e.detail.requestConfig.elt.id;
-    // Check if swap was triggered by the new submission group button
-    if (triggeredBy === "id_new_submission_group_button") {
-        setupSubmissionGroupForm(context);
-    } else if (triggeredBy.startsWith("assign_submission_group_")) {
-        setupAssignSubmissionGroupForm();
-    }
-    // Always show the modal after a swap on the modal content container
-    showModal();
-};
-
-/**
- * Handles the modal swap event before content is replaced.
- * This function is triggered before the modal content is swapped and handles successful form
- * submissions by closing the modal and refreshing appropriate tables.
- * @param {CustomEvent} e - The event object containing the server response and request details.
- * @param {object} context - Context object with URLs and element IDs for table refresh.
- */
-export const handleModalBeforeSwap = (e, context) => {
-    // Only proceed if there's no server response (indicates successful form submission)
-    if (!e.detail.serverResponse) {
-        const triggeredBy = e.detail.requestConfig.elt.id;
-
-        if (triggeredBy === "submission-group-form") {
-            e.preventDefault(); // Stop the event from bubbling up
-            closeModal();
-            // Handler may be used on other pages where the submission group table is not present
-            if (context["ID_SUBMISSION_GROUP_TABLE"] &&
-                document.getElementById(context["ID_SUBMISSION_GROUP_TABLE"])) {
-                refreshSubmissionGroupTable(context);
-            }
-        } else if (triggeredBy === "assign-submission-group-form") {
-            e.preventDefault();
-            closeModal();
-            if (context["ID_SUBMISSION_TABLE"] &&
-                document.getElementById(context["ID_SUBMISSION_TABLE"])) {
-                refreshSubmissionTable(context);
-            }
-            if (context["ID_SUBMISSION_GROUP_TABLE"] &&
-                document.getElementById(context["ID_SUBMISSION_GROUP_TABLE"])) {
-                refreshSubmissionGroupTable(context);
-            }
-        }
-    }
 };
 
 /**
