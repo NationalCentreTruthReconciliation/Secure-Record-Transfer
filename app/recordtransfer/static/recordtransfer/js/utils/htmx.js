@@ -17,11 +17,17 @@ import { addQueryParam, showModal, closeModal, getCurrentTablePage } from "./uti
  * modal:afterGroupDelete - Triggered when a submission group is deleted via a modal.
  */
 export const initializeCustomModalEvents = () => {
+    const modalContainer = document.getElementById("modal-content-container");
+
+    if (null === modalContainer) {
+        return;
+    }
+
     // Custom "Before/after swap" events. See:
     // https://htmx.org/events/#htmx:beforeSwap
     // https://htmx.org/events/#htmx:afterSwap
 
-    document.getElementById("modal-content-container")?.addEventListener(
+    modalContainer.addEventListener(
         "htmx:beforeSwap", (event) => {
             document.dispatchEvent(
                 new CustomEvent("modal:beforeSwap", { detail: event.detail })
@@ -29,7 +35,7 @@ export const initializeCustomModalEvents = () => {
         }
     );
 
-    document.getElementById("modal-content-container")?.addEventListener(
+    modalContainer.addEventListener(
         "htmx:afterSwap", (event) => {
             document.dispatchEvent(
                 new CustomEvent("modal:afterSwap", { detail: event.detail })
@@ -41,7 +47,7 @@ export const initializeCustomModalEvents = () => {
     // These elements are dynamically loaded, so we listen on the container and check the target.
     // See: https://htmx.org/events/#htmx:afterRequest
 
-    document.getElementById("modal-content-container")?.addEventListener(
+    modalContainer.addEventListener(
         "htmx:afterRequest", (event) => {
             const triggeredBy = event.detail.elt?.id;
 
