@@ -35,28 +35,6 @@ export const initializeProfile = function() {
     restoreTab();
     redirectToCorrectFragment();
 
-    document.addEventListener("modal:beforeSwap", (e) => {
-        // A server response indicates an unsuccessful form submission
-        if (e.detail.serverReponse) {
-            return;
-        }
-
-        const triggeredBy = e.detail.requestConfig.elt.id;
-
-        if ("submission-group-form" === triggeredBy) {
-            e.preventDefault();
-            closeModal();
-            refreshSubmissionGroupTable(context);
-        }
-
-        else if ("assign-submission-group-form" === triggeredBy) {
-            e.preventDefault();
-            closeModal();
-            refreshSubmissionTable(context);
-            refreshSubmissionGroupTable(context);
-        }
-    });
-
     document.addEventListener("modal:afterSwap", (e) => {
         const triggeredBy = e.detail.requestConfig.elt.id;
 
@@ -82,6 +60,12 @@ export const initializeProfile = function() {
     });
 
     document.addEventListener("modal:afterGroupCreate", () => {
+        closeModal();
+        refreshSubmissionGroupTable(context);
+        refreshSubmissionTable(context);
+    });
+
+    document.addEventListener("modal:afterGroupChange", () => {
         closeModal();
         refreshSubmissionGroupTable(context);
         refreshSubmissionTable(context);

@@ -14,6 +14,7 @@ import { addQueryParam, showModal, closeModal, getCurrentTablePage } from "./uti
  * modal:afterSwap - Triggered after swapping content in the modal container.
  * modal:afterInProgressDelete - Triggered when an in-progress submission is deleted via a modal.
  * modal:afterGroupCreate - Triggered when a submission group is created via a modal.
+ * modal:afterGroupChange - Triggered when a submission's group is changed via a modal.
  * modal:afterGroupDelete - Triggered when a submission group is deleted via a modal.
  */
 export const initializeCustomModalEvents = () => {
@@ -59,6 +60,10 @@ export const initializeCustomModalEvents = () => {
                 document.dispatchEvent(
                     new CustomEvent("modal:afterGroupCreate", { detail: event.detail })
                 );
+            } else if (triggeredBy === "assign-submission-group-form") {
+                document.dispatchEvent(
+                    new CustomEvent("modal:afterGroupChange", { detail: event.detail })
+                );
             } else if (triggeredBy === "confirm_delete_submission_group_btn") {
                 document.dispatchEvent(
                     new CustomEvent("modal:afterGroupDelete", { detail: event.detail })
@@ -87,17 +92,6 @@ export const handleDeleteIpSubmissionAfterRequest = (e, context) => {
         else {
             refreshIPSubmissionTable(context);
         }
-    }
-};
-
-export const handleDeleteSubmissionGroupAfterRequest = (e, context) => {
-    closeModal();
-
-    // If the request was successful, refresh the submission group table, *and* the submission
-    // table, in case the deleted group was linked to any submissions.
-    if (e.detail.successful) {
-        refreshSubmissionGroupTable(context);
-        refreshSubmissionTable(context);
     }
 };
 
