@@ -3,6 +3,7 @@ FROM docker.io/python:3.11-slim AS base
 ENV PYTHONUNBUFFERED=1
 ENV PROJ_DIR="/opt/secure-record-transfer/"
 ENV APP_DIR="/opt/secure-record-transfer/app/"
+ENV NVM_VERSION=0.40.3
 ENV NODE_VERSION=22.21.1
 ENV PNPM_VERSION=10.27.0
 
@@ -20,7 +21,7 @@ RUN apt-get update && \
 # This does not activate nvm for use in the container. To do that, you need to run ". /nvm/nvm.sh"
 ENV NVM_DIR="/nvm"
 RUN mkdir "${NVM_DIR}" && \
-    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash && \
+    curl -o- "https://raw.githubusercontent.com/nvm-sh/nvm/v${NVM_VERSION}/install.sh" | bash && \
     . "$NVM_DIR/nvm.sh" && \
     nvm install "${NODE_VERSION}" && \
     nvm alias default "v${NODE_VERSION}" && \
