@@ -1,7 +1,7 @@
 """CAAIS metadata administrator."""
 
 from datetime import datetime
-from typing import Any, ClassVar, Callable, Mapping, Optional, Sequence
+from typing import Any, Callable, ClassVar, Mapping, Optional, Sequence
 
 from django.contrib import admin
 from django.contrib.admin import ListFilter
