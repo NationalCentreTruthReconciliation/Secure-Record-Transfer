@@ -1,7 +1,6 @@
 import path, { dirname } from "path";
 import { fileURLToPath } from "url";
 import CssMinimizerPlugin from "css-minimizer-webpack-plugin";
-import { glob } from "glob";
 import MiniCssExtractPlugin from "mini-css-extract-plugin";
 import BundleTracker from "webpack-bundle-tracker";
 
@@ -26,13 +25,6 @@ export default {
     },
     entry: {
         main: "./app/recordtransfer/static/recordtransfer/js/index.ts",
-        // The submission detail page has its own styling (TODO: FIX!)
-        submission_detail: [
-            ...glob.sync(
-                "./app/recordtransfer/static/" +
-                "recordtransfer/css/submission_detail/*.css")
-                .map(file => "./" + path.relative(__dirname, file)),
-        ],
         // Admin Site static assets
         admin_recordtransfer: "./app/recordtransfer/static/recordtransfer/js/admin/index.js",
         admin_caais: [

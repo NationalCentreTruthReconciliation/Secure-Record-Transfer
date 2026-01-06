@@ -39,8 +39,7 @@ elif [ "$SERVICE_NAME" = 'app' ]; then
     echo ">> Collecting static files."
     python manage.py collectstatic --no-input --clear \
       --ignore "recordtransfer/**/*.js" \
-      --ignore "recordtransfer/**/*.ts" \
-      --ignore "recordtransfer/**/*.css"
+      --ignore "recordtransfer/**/*.ts"
   fi
 
   echo ">> Starting app"
