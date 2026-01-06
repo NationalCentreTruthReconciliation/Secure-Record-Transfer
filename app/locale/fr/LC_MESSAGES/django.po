@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-09 19:38-0600\n"
+"POT-Creation-Date: 2026-01-06 11:24-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Gabrielle Archambault <Gabrielle.Archambault@umanitoba.ca>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -149,7 +149,7 @@ msgstr "Numéro de téléphone"
 
 #: caais/forms.py:378 recordtransfer/forms/submission_forms.py:125
 #: recordtransfer/forms/user_forms.py:36
-#: recordtransfer/templates/includes/account_info_form.html:13
+#: recordtransfer/templates/includes/account_info_form.html:12
 msgid "Email"
 msgstr "Courriel"
 
@@ -1000,7 +1000,7 @@ msgctxt "\"Selected\" refers to one or more Submission objects."
 msgid "Export AtoM 2.1 Accession CSV for Metadata in Selected"
 msgstr "Exporter AtoM 2.1 Accession CSV pour Sélectionnés"
 
-#: recordtransfer/admin.py:545 upload/admin.py:53
+#: recordtransfer/admin.py:545 upload/admin.py:54
 msgid "File Link"
 msgstr "Lien de fichier"
 
@@ -1456,9 +1456,9 @@ msgid ""
 msgstr ""
 "Nom par défaut du type d'événement de soumission - relatif à la section "
 "5.1.1. de la NCIAA.\n"
-"Au moment de la réception d'une soumission, un événement de type « "
-"Soumission » est créé pour cette soumission. Vous pouvez contrôler le nom du "
-"Type d'événement pour cet événement ici."
+"Au moment de la réception d'une soumission, un événement de type "
+"« Soumission » est créé pour cette soumission. Vous pouvez contrôler le nom "
+"du Type d'événement pour cet événement ici."
 
 #: recordtransfer/enums.py:279
 msgid ""
@@ -1469,9 +1469,9 @@ msgid ""
 msgstr ""
 "Valeur par défaut de l'Agent de l'événement - relatif à la section 5.1.3. de "
 "la NCIAA.\n"
-"Au moment de la réception d'une soumission, un événement de type « "
-"Soumission » est créé pour cette soumission. Vous pouvez contrôler le nom de "
-"l'Agent d'événement pour cet événement ici."
+"Au moment de la réception d'une soumission, un événement de type "
+"« Soumission » est créé pour cette soumission. Vous pouvez contrôler le nom "
+"de l'Agent d'événement pour cet événement ici."
 
 #: recordtransfer/enums.py:287
 msgid ""
@@ -1482,8 +1482,8 @@ msgid ""
 msgstr ""
 "Valeur par défaut de la note sur l - relatif à la section 5.1.4. de la "
 "NCIAA.\n"
-"Au moment de la réception d'une soumission, un événement de type « "
-"Soumission » est créé pour cette soumission. Vous pouvez contrôler ici si "
+"Au moment de la réception d'une soumission, un événement de type "
+"« Soumission » est créé pour cette soumission. Vous pouvez contrôler ici si "
 "une note sur l'événement est ajoutée pour cet événement."
 
 #: recordtransfer/enums.py:296
@@ -1652,8 +1652,8 @@ msgid "If \"Source role\" is Other, enter your own source role"
 msgstr "Si « rôle de source » est Autre, entrez votre propre rôle de source"
 
 #: recordtransfer/forms/submission_forms.py:225
-#: recordtransfer/templates/includes/delete_in_progress_submission_modal.html:22
-#: recordtransfer/templates/includes/delete_submission_group_modal.html:20
+#: recordtransfer/templates/includes/delete_in_progress_submission_modal.html:21
+#: recordtransfer/templates/includes/delete_submission_group_modal.html:19
 #: recordtransfer/templates/recordtransfer/submission_form_review.html:64
 msgid "Yes"
 msgstr "Oui"
@@ -2008,7 +2008,7 @@ msgid "The email %(email)s is already in use"
 msgstr "Le courriel %(email)s est déjà utilisée"
 
 #: recordtransfer/forms/user_forms.py:44
-#: recordtransfer/templates/includes/account_info_form.html:23
+#: recordtransfer/templates/includes/account_info_form.html:22
 msgid "Username"
 msgstr "Nom d'utilisateur"
 
@@ -2041,7 +2041,7 @@ msgid "Last Name"
 msgstr "Nom de famille"
 
 #: recordtransfer/forms/user_forms.py:100
-#: recordtransfer/templates/includes/account_info_form.html:60
+#: recordtransfer/templates/includes/account_info_form.html:59
 msgid "Receive notification emails?"
 msgstr "Recevoir des courriels de notification?"
 
@@ -2121,9 +2121,9 @@ msgstr ""
 "Administration de l'application de transfert sécurisé des dossiers du CNVR"
 
 #: recordtransfer/templates/admin/sitesetting_change_form.html:5
-#: recordtransfer/templates/includes/account_info_form.html:80
-#: recordtransfer/templates/includes/contact_info_form.html:131
-#: recordtransfer/templates/includes/submission_group_edit_form.html:12
+#: recordtransfer/templates/includes/account_info_form.html:79
+#: recordtransfer/templates/includes/contact_info_form.html:130
+#: recordtransfer/templates/includes/submission_group_edit_form.html:11
 #: recordtransfer/templates/recordtransfer/submission_form_base.html:79
 msgid "Save"
 msgstr "Enregistrer"
@@ -2172,13 +2172,13 @@ msgstr ""
 msgid "%(group)s Files"
 msgstr "%(group)s Fichiers"
 
-#: recordtransfer/templates/includes/account_info_form.html:25
+#: recordtransfer/templates/includes/account_info_form.html:24
 #: recordtransfer/templates/registration/password_change_form.html:4
 #: recordtransfer/templates/registration/password_change_form.html:10
 msgid "Change Password"
 msgstr "Modifier le mot de passe"
 
-#: recordtransfer/templates/includes/account_info_form.html:52
+#: recordtransfer/templates/includes/account_info_form.html:51
 msgid "Notification options"
 msgstr "Options de notification"
 
@@ -2273,27 +2273,27 @@ msgstr "Direction:"
 msgid "Direction"
 msgstr "Direction"
 
-#: recordtransfer/templates/includes/contact_info_form.html:18
+#: recordtransfer/templates/includes/contact_info_form.html:17
 msgid "Enter phone number"
 msgstr "Entrez votre numéro de téléphone"
 
-#: recordtransfer/templates/includes/contact_info_form.html:37
+#: recordtransfer/templates/includes/contact_info_form.html:36
 msgid "Enter street address"
 msgstr "Entrez l'adresse postale"
 
-#: recordtransfer/templates/includes/contact_info_form.html:50
+#: recordtransfer/templates/includes/contact_info_form.html:49
 msgid "Apartment, suite, etc."
 msgstr "Appartement, suite, etc."
 
-#: recordtransfer/templates/includes/contact_info_form.html:62
+#: recordtransfer/templates/includes/contact_info_form.html:61
 msgid "Enter city"
 msgstr "Entrez la ville"
 
-#: recordtransfer/templates/includes/contact_info_form.html:93
+#: recordtransfer/templates/includes/contact_info_form.html:92
 msgid "Enter state/province if not listed above"
 msgstr "Indiquez l'état/la province s'il n'est pas mentionné ci-dessus"
 
-#: recordtransfer/templates/includes/contact_info_form.html:105
+#: recordtransfer/templates/includes/contact_info_form.html:104
 msgid "Enter postal/zip code"
 msgstr "Entrez le code postal"
 
@@ -2436,7 +2436,7 @@ msgstr "Expire bientôt"
 
 #: recordtransfer/templates/includes/open_session_table.html:30
 #: recordtransfer/templates/includes/submission_table.html:24
-#: upload/admin.py:50 upload/admin.py:257 upload/admin.py:267
+#: upload/admin.py:51 upload/admin.py:258 upload/admin.py:268
 msgid "N/A"
 msgstr "Sans objet"
 
@@ -3710,8 +3710,8 @@ msgstr "Le formulaire n'était pas valide."
 msgid "Already have an account?"
 msgstr "Vous avez déjà un compte?"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:8
-#: recordtransfer/templates/recordtransfer/submission_detail.html:19
+#: recordtransfer/templates/recordtransfer/submission_detail.html:7
+#: recordtransfer/templates/recordtransfer/submission_detail.html:20
 #, python-format
 msgid ""
 "\n"
@@ -3722,7 +3722,7 @@ msgstr ""
 "            Rapport de soumission pour %(title)s\n"
 "            "
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:25
+#: recordtransfer/templates/recordtransfer/submission_detail.html:26
 #, python-format
 msgid ""
 "\n"
@@ -3734,53 +3734,53 @@ msgstr ""
 "\n"
 "                Ce qui suit est un rapport généré automatiquement pour la "
 "soumission effectuée par\n"
-"                %(username)s (%(email)s) le %(date)s, intitulée « %(title)s "
-"».\n"
+"                %(username)s (%(email)s) le %(date)s, intitulée "
+"« %(title)s ».\n"
 "          "
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:33
+#: recordtransfer/templates/recordtransfer/submission_detail.html:34
 msgid "Submission Context"
 msgstr "Contexte de la soumission"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:38
+#: recordtransfer/templates/recordtransfer/submission_detail.html:39
 msgid "Submission Date"
 msgstr "Date de la soumission"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:44
+#: recordtransfer/templates/recordtransfer/submission_detail.html:45
 msgid "Submitted By"
 msgstr "Soumis par"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:50
+#: recordtransfer/templates/recordtransfer/submission_detail.html:51
 msgid "Report Generation Date"
 msgstr "Date de génération du rapport"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:56
+#: recordtransfer/templates/recordtransfer/submission_detail.html:57
 msgid "Submission UUID"
 msgstr "UUID de soumission"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:61
+#: recordtransfer/templates/recordtransfer/submission_detail.html:62
 msgid "1. Identity Information Section"
 msgstr "1. Section relative aux informations d'identité"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:63
+#: recordtransfer/templates/recordtransfer/submission_detail.html:64
 msgid "1.1 Repository"
 msgstr "1.1 Établissement"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:68
-#: recordtransfer/templates/recordtransfer/submission_detail.html:108
-#: recordtransfer/templates/recordtransfer/submission_detail.html:128
-#: recordtransfer/templates/recordtransfer/submission_detail.html:148
-#: recordtransfer/templates/recordtransfer/submission_detail.html:276
-#: recordtransfer/templates/recordtransfer/submission_detail.html:549
-#: recordtransfer/templates/recordtransfer/submission_detail.html:594
+#: recordtransfer/templates/recordtransfer/submission_detail.html:69
+#: recordtransfer/templates/recordtransfer/submission_detail.html:109
+#: recordtransfer/templates/recordtransfer/submission_detail.html:129
+#: recordtransfer/templates/recordtransfer/submission_detail.html:149
+#: recordtransfer/templates/recordtransfer/submission_detail.html:277
+#: recordtransfer/templates/recordtransfer/submission_detail.html:550
+#: recordtransfer/templates/recordtransfer/submission_detail.html:595
 msgid "(Not specified)"
 msgstr "(Non spécifié)"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:71
+#: recordtransfer/templates/recordtransfer/submission_detail.html:72
 msgid "1.2 Identifiers"
 msgstr "1.2 Identifiants"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:77
+#: recordtransfer/templates/recordtransfer/submission_detail.html:78
 #, python-format
 msgid ""
 "\n"
@@ -3791,66 +3791,66 @@ msgstr ""
 "                                    Identifiant %(num)s sur %(total)s\n"
 "                  "
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:84
+#: recordtransfer/templates/recordtransfer/submission_detail.html:85
 msgid "1.2.1 Identifier Type:"
 msgstr "1.2.1 Type d'identifiant:"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:88
+#: recordtransfer/templates/recordtransfer/submission_detail.html:89
 msgid "1.2.1 Identifier Value:"
 msgstr "1.2.1 Valeur de l'identifiant:"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:92
+#: recordtransfer/templates/recordtransfer/submission_detail.html:93
 msgid "1.2.1 Identifier Note:"
 msgstr "1.2.1 Note sur l'identifiant:"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:100
-#: recordtransfer/templates/recordtransfer/submission_detail.html:120
-#: recordtransfer/templates/recordtransfer/submission_detail.html:140
-#: recordtransfer/templates/recordtransfer/submission_detail.html:253
-#: recordtransfer/templates/recordtransfer/submission_detail.html:265
-#: recordtransfer/templates/recordtransfer/submission_detail.html:316
-#: recordtransfer/templates/recordtransfer/submission_detail.html:328
-#: recordtransfer/templates/recordtransfer/submission_detail.html:340
-#: recordtransfer/templates/recordtransfer/submission_detail.html:355
-#: recordtransfer/templates/recordtransfer/submission_detail.html:387
-#: recordtransfer/templates/recordtransfer/submission_detail.html:419
-#: recordtransfer/templates/recordtransfer/submission_detail.html:451
-#: recordtransfer/templates/recordtransfer/submission_detail.html:483
-#: recordtransfer/templates/recordtransfer/submission_detail.html:523
-#: recordtransfer/templates/recordtransfer/submission_detail.html:538
-#: recordtransfer/templates/recordtransfer/submission_detail.html:586
+#: recordtransfer/templates/recordtransfer/submission_detail.html:101
+#: recordtransfer/templates/recordtransfer/submission_detail.html:121
+#: recordtransfer/templates/recordtransfer/submission_detail.html:141
+#: recordtransfer/templates/recordtransfer/submission_detail.html:254
+#: recordtransfer/templates/recordtransfer/submission_detail.html:266
+#: recordtransfer/templates/recordtransfer/submission_detail.html:317
+#: recordtransfer/templates/recordtransfer/submission_detail.html:329
+#: recordtransfer/templates/recordtransfer/submission_detail.html:341
+#: recordtransfer/templates/recordtransfer/submission_detail.html:356
+#: recordtransfer/templates/recordtransfer/submission_detail.html:388
+#: recordtransfer/templates/recordtransfer/submission_detail.html:420
+#: recordtransfer/templates/recordtransfer/submission_detail.html:452
+#: recordtransfer/templates/recordtransfer/submission_detail.html:484
+#: recordtransfer/templates/recordtransfer/submission_detail.html:524
+#: recordtransfer/templates/recordtransfer/submission_detail.html:539
+#: recordtransfer/templates/recordtransfer/submission_detail.html:587
 msgid "(None specified)"
 msgstr "(Aucun spécifié)"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:103
+#: recordtransfer/templates/recordtransfer/submission_detail.html:104
 msgid "1.3 Accession Title"
 msgstr "1.3 Titre de l’acquisition"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:111
+#: recordtransfer/templates/recordtransfer/submission_detail.html:112
 msgid "1.4 Archival Unit"
 msgstr "1.4 Unité archivistique"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:123
+#: recordtransfer/templates/recordtransfer/submission_detail.html:124
 msgid "1.5 Acquisition Method"
 msgstr "1.5 Méthode d’acquisition"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:131
+#: recordtransfer/templates/recordtransfer/submission_detail.html:132
 msgid "1.6 Disposition Authority"
 msgstr "1.6 Autorisation de disposition"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:143
+#: recordtransfer/templates/recordtransfer/submission_detail.html:144
 msgid "1.7 Status"
 msgstr "1.7 Statut"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:152
+#: recordtransfer/templates/recordtransfer/submission_detail.html:153
 msgid "2. Source Information Section"
 msgstr "2. Zone d’information sur la source"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:154
+#: recordtransfer/templates/recordtransfer/submission_detail.html:155
 msgid "2.1 Source of Materials"
 msgstr "2.1 Source du document"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:160
+#: recordtransfer/templates/recordtransfer/submission_detail.html:161
 #, python-format
 msgid ""
 "\n"
@@ -3862,19 +3862,19 @@ msgstr ""
 "%(total)s\n"
 "                                 "
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:167
+#: recordtransfer/templates/recordtransfer/submission_detail.html:168
 msgid "2.1.1 Source Type:"
 msgstr "2.1.1 Type de source:"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:171
+#: recordtransfer/templates/recordtransfer/submission_detail.html:172
 msgid "2.1.2 Source Name:"
 msgstr "2.1.2 Nom de la source:"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:175
+#: recordtransfer/templates/recordtransfer/submission_detail.html:176
 msgid "2.1.3 Source Contact Information:"
 msgstr "2.1.3 Coordonnées de la source:"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:179
+#: recordtransfer/templates/recordtransfer/submission_detail.html:180
 #, python-format
 msgid ""
 "\n"
@@ -3885,7 +3885,7 @@ msgstr ""
 "                                                Nom du contact : %(name)s\n"
 "           "
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:184
+#: recordtransfer/templates/recordtransfer/submission_detail.html:185
 #, python-format
 msgid ""
 "\n"
@@ -3897,7 +3897,7 @@ msgstr ""
 "%(title)s\n"
 "                                                "
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:189
+#: recordtransfer/templates/recordtransfer/submission_detail.html:190
 #, python-format
 msgid ""
 "\n"
@@ -3910,7 +3910,7 @@ msgstr ""
 "%(organization)s\n"
 "                                                "
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:194
+#: recordtransfer/templates/recordtransfer/submission_detail.html:195
 #, python-format
 msgid ""
 "\n"
@@ -3922,7 +3922,7 @@ msgstr ""
 "%(phone)s\n"
 "                                                "
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:199
+#: recordtransfer/templates/recordtransfer/submission_detail.html:200
 #, python-format
 msgid ""
 "\n"
@@ -3933,7 +3933,7 @@ msgstr ""
 "                                                Courriel : %(email)s\n"
 "                                                "
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:204
+#: recordtransfer/templates/recordtransfer/submission_detail.html:205
 #, python-format
 msgid ""
 "\n"
@@ -3946,7 +3946,7 @@ msgstr ""
 "%(address_line)s\n"
 "                                                "
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:209
+#: recordtransfer/templates/recordtransfer/submission_detail.html:210
 #, python-format
 msgid ""
 "\n"
@@ -3959,7 +3959,7 @@ msgstr ""
 "%(address_line)s\n"
 "                                                "
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:214
+#: recordtransfer/templates/recordtransfer/submission_detail.html:215
 #, python-format
 msgid ""
 "\n"
@@ -3970,7 +3970,7 @@ msgstr ""
 "                                                Ville: %(city)s\n"
 "                                                "
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:219
+#: recordtransfer/templates/recordtransfer/submission_detail.html:220
 #, python-format
 msgid ""
 "\n"
@@ -3981,7 +3981,7 @@ msgstr ""
 "                                                Région : %(region)s\n"
 "                                                "
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:224
+#: recordtransfer/templates/recordtransfer/submission_detail.html:225
 #, python-format
 msgid ""
 "\n"
@@ -3994,7 +3994,7 @@ msgstr ""
 "%(postal_or_zip_code)s\n"
 "                                                "
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:229
+#: recordtransfer/templates/recordtransfer/submission_detail.html:230
 #, python-format
 msgid ""
 "\n"
@@ -4005,35 +4005,35 @@ msgstr ""
 "                                                Pays : %(country)s\n"
 "                                                "
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:237
+#: recordtransfer/templates/recordtransfer/submission_detail.html:238
 msgid "2.1.4 Source Role:"
 msgstr "2.1.4 Rôle de la source:"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:241
+#: recordtransfer/templates/recordtransfer/submission_detail.html:242
 msgid "2.1.5 Source Note:"
 msgstr "2.1.4 Rôle de la source:"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:245
+#: recordtransfer/templates/recordtransfer/submission_detail.html:246
 msgid "2.1.6 Source Confidentiality:"
 msgstr "2.1.6 Confidentialité de la source:"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:256
+#: recordtransfer/templates/recordtransfer/submission_detail.html:257
 msgid "2.2 Preliminary Custodial History"
 msgstr "2.2 Historique préliminaire de la conservation"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:269
+#: recordtransfer/templates/recordtransfer/submission_detail.html:270
 msgid "3. Materials Information Section"
 msgstr "3. Zone d’information sur les documents"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:271
+#: recordtransfer/templates/recordtransfer/submission_detail.html:272
 msgid "3.1 Date of Materials"
 msgstr "3.1 Date des documents"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:279
+#: recordtransfer/templates/recordtransfer/submission_detail.html:280
 msgid "3.2 Extent Statement"
 msgstr "3.2 Énoncé d’étendue"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:285
+#: recordtransfer/templates/recordtransfer/submission_detail.html:286
 #, python-format
 msgid ""
 "\n"
@@ -4044,47 +4044,47 @@ msgstr ""
 "                                     Énoncé d’étendue %(num)s de %(total)s\n"
 "                                    "
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:292
+#: recordtransfer/templates/recordtransfer/submission_detail.html:293
 msgid "3.2.1 Extent Type:"
 msgstr "3.2.1 Type d’étendue:"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:296
+#: recordtransfer/templates/recordtransfer/submission_detail.html:297
 msgid "3.2.2 Quantity and Unit of Measure:"
 msgstr "3.2.2 Quantité et unité de mesure:"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:300
+#: recordtransfer/templates/recordtransfer/submission_detail.html:301
 msgid "3.2.3 Content Type:"
 msgstr "3.2.3 Type de contenu:"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:304
+#: recordtransfer/templates/recordtransfer/submission_detail.html:305
 msgid "3.2.4 Carrier Type:"
 msgstr "3.2.4 Type de support:"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:308
+#: recordtransfer/templates/recordtransfer/submission_detail.html:309
 msgid "3.2.5 Extent Note:"
 msgstr "3.2.5 Note sur l’étendue:"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:319
+#: recordtransfer/templates/recordtransfer/submission_detail.html:320
 msgid "3.3 Preliminary Scope and Content"
 msgstr "3.3 Portée et contenu préliminaires"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:331
+#: recordtransfer/templates/recordtransfer/submission_detail.html:332
 msgid "3.4 Language of Material"
 msgstr "3.4 Langue des documents"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:344
+#: recordtransfer/templates/recordtransfer/submission_detail.html:345
 msgid "4. Management Information Section"
 msgstr "4. Zone d’information de gestion"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:346
+#: recordtransfer/templates/recordtransfer/submission_detail.html:347
 msgid "4.1 Storage Location"
 msgstr "4.1 Lieu d’entreposage"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:358
+#: recordtransfer/templates/recordtransfer/submission_detail.html:359
 msgid "4.2 Rights"
 msgstr "4.2 Droits"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:364
+#: recordtransfer/templates/recordtransfer/submission_detail.html:365
 #, python-format
 msgid ""
 "\n"
@@ -4095,23 +4095,23 @@ msgstr ""
 "                                    Droits %(num)s de %(total)s\n"
 "                                    "
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:371
+#: recordtransfer/templates/recordtransfer/submission_detail.html:372
 msgid "4.2.1 Rights Type:"
 msgstr "4.2.1 Type de droits:"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:375
+#: recordtransfer/templates/recordtransfer/submission_detail.html:376
 msgid "4.2.2 Rights Value:"
 msgstr "4.2.2 Valeur des droits:"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:379
+#: recordtransfer/templates/recordtransfer/submission_detail.html:380
 msgid "4.2.3 Rights Note:"
 msgstr "4.2.3 Note sur les droits:"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:390
+#: recordtransfer/templates/recordtransfer/submission_detail.html:391
 msgid "4.3 Preservation Requirements"
 msgstr "4.3 Exigences de préservation"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:396
+#: recordtransfer/templates/recordtransfer/submission_detail.html:397
 #, python-format
 msgid ""
 "\n"
@@ -4124,23 +4124,23 @@ msgstr ""
 "%(total)s\n"
 "                                    "
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:403
+#: recordtransfer/templates/recordtransfer/submission_detail.html:404
 msgid "4.3.1 Preservation Requirements Type:"
 msgstr "4.3.1 Type d’exigence de conservation:"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:407
+#: recordtransfer/templates/recordtransfer/submission_detail.html:408
 msgid "4.3.2 Preservation Requirements Value:"
 msgstr "4.3.2 Valeur de l’exigence de conservation:"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:411
+#: recordtransfer/templates/recordtransfer/submission_detail.html:412
 msgid "4.3.3 Preservation Requirements Note:"
 msgstr "4.3.3 Note sur l’exigence de conservation:"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:422
+#: recordtransfer/templates/recordtransfer/submission_detail.html:423
 msgid "4.4 Appraisal"
 msgstr "4.4 Évaluation"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:428
+#: recordtransfer/templates/recordtransfer/submission_detail.html:429
 #, python-format
 msgid ""
 "\n"
@@ -4151,23 +4151,23 @@ msgstr ""
 "                                    Évaluation %(num)s de %(total)s\n"
 "                                    "
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:435
+#: recordtransfer/templates/recordtransfer/submission_detail.html:436
 msgid "4.4.1 Appraisal Type:"
 msgstr "4.4.1 Type d’évaluation:"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:439
+#: recordtransfer/templates/recordtransfer/submission_detail.html:440
 msgid "4.4.2 Appraisal Value:"
 msgstr "4.4.2 Valeur d’évaluation:"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:443
+#: recordtransfer/templates/recordtransfer/submission_detail.html:444
 msgid "4.4.3 Appraisal Note:"
 msgstr "4.4.3 Note sur l’évaluation:"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:454
+#: recordtransfer/templates/recordtransfer/submission_detail.html:455
 msgid "4.5 Associated Documentation"
 msgstr "4.5 Documentation apparentée"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:460
+#: recordtransfer/templates/recordtransfer/submission_detail.html:461
 #, python-format
 msgid ""
 "\n"
@@ -4180,27 +4180,27 @@ msgstr ""
 "%(total)s\n"
 "                                    "
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:467
+#: recordtransfer/templates/recordtransfer/submission_detail.html:468
 msgid "4.5.1 Associated Documentation Type:"
 msgstr "4.5.1 Type de documentation apparentée:"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:471
+#: recordtransfer/templates/recordtransfer/submission_detail.html:472
 msgid "4.5.2 Associated Documentation Title:"
 msgstr "4.5.2 Titre des documents apparentés:"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:475
+#: recordtransfer/templates/recordtransfer/submission_detail.html:476
 msgid "4.5.3 Associated Documentation Note:"
 msgstr "4.5.3 Note sur les documents apparentés:"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:487
+#: recordtransfer/templates/recordtransfer/submission_detail.html:488
 msgid "5. Event Information Section"
 msgstr "5. Zone d’information sur les événements"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:489
+#: recordtransfer/templates/recordtransfer/submission_detail.html:490
 msgid "5.1 Events"
 msgstr "5.1 Événements"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:496
+#: recordtransfer/templates/recordtransfer/submission_detail.html:497
 #, python-format
 msgid ""
 "\n"
@@ -4211,43 +4211,43 @@ msgstr ""
 "                                    Événement %(num)s de %(total)s\n"
 "                                    "
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:503
+#: recordtransfer/templates/recordtransfer/submission_detail.html:504
 msgid "5.1.1 Event Type:"
 msgstr "5.1.1 Type d’événement:"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:507
+#: recordtransfer/templates/recordtransfer/submission_detail.html:508
 msgid "5.1.1 Event Date:"
 msgstr "5.1.2 Date de l’événement:"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:511
+#: recordtransfer/templates/recordtransfer/submission_detail.html:512
 msgid "5.1.3 Event Agent:"
 msgstr "5.1.3 Agent de l’événement:"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:515
+#: recordtransfer/templates/recordtransfer/submission_detail.html:516
 msgid "5.1.4 Event Note:"
 msgstr "5.1.4 Note sur l’événement:"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:527
+#: recordtransfer/templates/recordtransfer/submission_detail.html:528
 msgid "6. General Information Section"
 msgstr "6. Zone d’information générale"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:529
+#: recordtransfer/templates/recordtransfer/submission_detail.html:530
 msgid "6.1 General Note"
 msgstr "6.1 Note générale"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:542
+#: recordtransfer/templates/recordtransfer/submission_detail.html:543
 msgid "7. Control Information Section"
 msgstr "7. Zone d’information de contrôle"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:544
+#: recordtransfer/templates/recordtransfer/submission_detail.html:545
 msgid "7.1 Rules or Conventions"
 msgstr "7.1 Règles ou conventions"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:552
+#: recordtransfer/templates/recordtransfer/submission_detail.html:553
 msgid "7.2 Date of Creation or Revision"
 msgstr "7.2 Date de création ou de révision"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:559
+#: recordtransfer/templates/recordtransfer/submission_detail.html:560
 #, python-format
 msgid ""
 "\n"
@@ -4260,23 +4260,23 @@ msgstr ""
 "de %(total)s\n"
 "                                    "
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:566
+#: recordtransfer/templates/recordtransfer/submission_detail.html:567
 msgid "7.2.1 Creation or Revision Type:"
 msgstr "7.2.1 Type de création ou de revision:"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:570
+#: recordtransfer/templates/recordtransfer/submission_detail.html:571
 msgid "7.2.2 Creation or Revision Date:"
 msgstr "7.2.2 Date de création ou de revision:"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:574
+#: recordtransfer/templates/recordtransfer/submission_detail.html:575
 msgid "7.2.3 Creation or Revision Agent:"
 msgstr "7.2.3 Agent de création ou de revision:"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:578
+#: recordtransfer/templates/recordtransfer/submission_detail.html:579
 msgid "7.2.4 Creation or Revision Note:"
 msgstr "7.2.4 Note sur la création ou la revision:"
 
-#: recordtransfer/templates/recordtransfer/submission_detail.html:589
+#: recordtransfer/templates/recordtransfer/submission_detail.html:590
 msgid "7.3 Language of Accession Record"
 msgstr "7.3 Langue de la notice d’acquisition"
 
@@ -5147,15 +5147,15 @@ msgid ""
 msgstr ""
 "Veuillez réessayer plus tard. Contactez-nous si les difficultés persistent."
 
-#: upload/admin.py:46 upload/admin.py:260
+#: upload/admin.py:47 upload/admin.py:261
 msgid "Upload Size"
 msgstr "Taille du téléchargement"
 
-#: upload/admin.py:57
+#: upload/admin.py:58
 msgid "File was removed"
 msgstr "Le fichier a été supprimé"
 
-#: upload/admin.py:270
+#: upload/admin.py:271
 msgid "Last upload at"
 msgstr "Dernier téléchargement à"
 
