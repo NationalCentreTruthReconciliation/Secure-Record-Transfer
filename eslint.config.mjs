@@ -1,34 +1,41 @@
-import eslint from "@eslint/js";
-import stylisticJs from "@stylistic/eslint-plugin";
+import js from "@eslint/js";
+import stylistic from "@stylistic/eslint-plugin";
+import { defineConfig, globalIgnores } from "eslint/config";
 import importPlugin from "eslint-plugin-import";
 import jsdoc from "eslint-plugin-jsdoc";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 
-export default [
-    {
-        ignores: [
-            "{env,venv,.env,.venv}/**",
-            "dist/**",
-            "node_modules/**",
-            "docs/**",
-            "app/static/**",
+export default defineConfig([
+    globalIgnores(
+        [
+            "{env,venv,.env,.venv}/*",
+            "dist/*",
+            "app/static/*",
+            "docs/*"
         ],
-    },
+    ),
     {
         files: ["app/**/*.{js,ts}"],
-        languageOptions: { globals: globals.browser },
         plugins: {
-            "@stylistic/js": stylisticJs,
-            "import": importPlugin,
+            "js": js,
+            "@stylistic": stylistic,
             "jsdoc": jsdoc,
+            "import": importPlugin,
+        },
+        extends: [
+            "js/recommended"
+        ],
+        languageOptions: {
+            globals: globals.browser
         },
         rules: {
             // Plugin rules
-            "@stylistic/js/indent": ["error", 4],
-            "@stylistic/js/max-len": ["error", { code: 99, tabWidth: 4, ignoreUrls: true }],
-            "@stylistic/js/semi": ["error", "always"],
-            "@stylistic/js/quotes": ["error", "double"],
+            "@stylistic/indent": ["error", 4],
+            "@stylistic/max-len": ["error", { code: 99, tabWidth: 4, ignoreUrls: true }],
+            "@stylistic/semi": ["error", "always"],
+            "@stylistic/space-before-blocks": ["error", "always"],
+            "@stylistic/quotes": ["error", "double"],
             "import/order": ["error", {
                 "alphabetize": { "order": "asc", "caseInsensitive": true }
             }],
@@ -43,25 +50,32 @@ export default [
     {
         files: [
             "webpack.config.mjs",
-            "postcss.config.mjs",
             "eslint.config.mjs",
+            "postcss.config.mjs",
+        ],
+        plugins: {
+            "js": js,
+            "@stylistic": stylistic,
+            "jsdoc": jsdoc,
+            "import": importPlugin,
+        },
+        extends: [
+            "js/recommended"
         ],
         languageOptions: {
             globals: globals.node
         },
-        plugins: {
-            "@stylistic/js": stylisticJs,
-            "import": importPlugin,
-            "jsdoc": jsdoc,
-        },
         rules: {
-            "@stylistic/js/indent": ["error", 4],
-            "@stylistic/js/max-len": ["error", { code: 99, tabWidth: 4, ignoreUrls: true }],
-            "@stylistic/js/semi": ["error", "always"],
-            "@stylistic/js/quotes": ["error", "double"],
+            // Plugin rules
+            "@stylistic/indent": ["error", 4],
+            "@stylistic/max-len": ["error", { code: 99, tabWidth: 4, ignoreUrls: true }],
+            "@stylistic/semi": ["error", "always"],
+            "@stylistic/space-before-blocks": ["error", "always"],
+            "@stylistic/quotes": ["error", "double"],
             "import/order": ["error", {
                 "alphabetize": { "order": "asc", "caseInsensitive": true }
             }],
+            // ESLint extra rules
             "no-console": ["warn", { "allow": ["error", "warn", "info"] }],
             "eqeqeq": "error",
             "curly": "error",
@@ -69,9 +83,7 @@ export default [
             "no-duplicate-imports": "error",
         }
     },
-    // Docstring rules
     jsdoc.configs["flat/recommended"],
-    // Recommended ESLint rules
-    eslint.configs.recommended,
-    ...tseslint.configs.recommended,
-];
+    js.configs.recommended,
+    tseslint.configs.recommended,
+]);
