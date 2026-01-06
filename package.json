@@ -25,7 +25,6 @@
         "mini-css-extract-plugin": "^2.9.2",
         "postcss": "^8.5.3",
         "postcss-loader": "^8.2.0",
-        "sharp": "^0.33.5",
         "tailwindcss": "^4.1.7",
         "ts-loader": "^9.5.4",
         "typescript": "^5.9.3",
