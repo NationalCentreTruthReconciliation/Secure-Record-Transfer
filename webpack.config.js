@@ -77,7 +77,7 @@ export default {
             ...glob.sync("./app/recordtransfer/static/recordtransfer/img/*.{jpg,jpeg,png,webp,ico}")
                 .map(file => "./" + path.relative(__dirname, file)),
         ],
-        main: "./app/recordtransfer/static/recordtransfer/js/index.js",
+        main: "./app/recordtransfer/static/recordtransfer/js/index.ts",
         // The submission detail page has its own styling (TODO: FIX!)
         submission_detail: [
             ...glob.sync(
@@ -118,6 +118,11 @@ export default {
                 generator: {
                     filename: "[name][ext]" // Match your template path
                 }
+            },
+            {
+                test: /\.ts$/,
+                use: "ts-loader",
+                exclude: /node_modules/,
             },
         ]
     },

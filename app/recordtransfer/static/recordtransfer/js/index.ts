@@ -31,8 +31,14 @@ import { initializeSubmissionGroup } from "./submission_group/index.js";
 import { initializeCustomModalEvents, setupBaseHtmxEventListeners } from "./utils/htmx.js";
 import { setupToastNotifications, displayStoredToast } from "./utils/toast.js";
 
+declare global {
+    interface Window {
+        htmx: unknown;
+    }
+}
 
 window.htmx = htmx;
+
 document.addEventListener("DOMContentLoaded", () => {
     setupBaseHtmxEventListeners();
     initializeCustomModalEvents();
