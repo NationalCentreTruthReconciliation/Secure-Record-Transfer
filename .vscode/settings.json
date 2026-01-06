@@ -46,6 +46,10 @@
             99
         ]
     },
+    "[css]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "aeschli.vscode-css-formatter"
+    },
     "[restructuredtext]": {
         "editor.rulers": [
             99
@@ -57,6 +61,7 @@
         "editor.defaultFormatter": "monosans.djlint"
     },
     "files.associations": {
-        "**/templates/**/*.html": "django-html"
+        "**/templates/**/*.html": "django-html",
+        "*.css": "css"
     }
 }
