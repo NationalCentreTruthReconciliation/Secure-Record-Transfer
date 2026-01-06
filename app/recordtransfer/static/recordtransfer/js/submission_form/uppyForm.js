@@ -3,18 +3,18 @@ import "@uppy/dashboard/css/style.css";
 
 import Uppy from "@uppy/core";
 import Dashboard from "@uppy/dashboard";
-import English from "@uppy/locales/lib/en_US";
-import French from "@uppy/locales/lib/fr_FR";
-import Hindi from "@uppy/locales/lib/hi_IN";
+import English from "@uppy/locales/lib/en_US.js";
+import French from "@uppy/locales/lib/fr_FR.js";
+import Hindi from "@uppy/locales/lib/hi_IN.js";
 import XHR from "@uppy/xhr-upload";
-import FileValidationPlugin from "./customUppyPlugin";
+import FileValidationPlugin from "./customUppyPlugin.js";
 import {
     getCookie,
     fetchUploadedFiles,
     makeMockBlob,
     sendDeleteRequestForFile,
     updateCapacityDisplay,
-} from "./utils";
+} from "./utils.js";
 
 const UPPY_DEFAULT_LANGUAGE = "en";
 

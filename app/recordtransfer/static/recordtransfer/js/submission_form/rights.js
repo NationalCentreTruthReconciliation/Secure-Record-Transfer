@@ -1,6 +1,6 @@
-import { setupHelpTooltips } from "../base/tooltip";
-import { setupSelectOtherToggle } from "../utils/otherField";
-import { setupFormset } from "./formset";
+import { setupHelpTooltips } from "../base/tooltip.js";
+import { setupSelectOtherToggle } from "../utils/otherField.js";
+import { setupFormset } from "./formset.js";
 
 /**
  * Sets up the rights form.

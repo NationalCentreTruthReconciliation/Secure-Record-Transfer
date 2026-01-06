@@ -16,19 +16,19 @@ import "../css/submission_form/uppy.css";
 import "htmx-ext-head-support";
 import htmx from "htmx.org";
 
-import { setupMessages } from "./base/messages";
-import { setupNavbar } from "./base/navbar";
-import { setupHelpTooltips } from "./base/tooltip";
-import { initializeProfile } from "./profile/index";
+import { setupMessages } from "./base/messages.js";
+import { setupNavbar } from "./base/navbar.js";
+import { setupHelpTooltips } from "./base/tooltip.js";
+import { initializeProfile } from "./profile/index.js";
 import {
     setupRegistrationFormValidation,
     setupLoginFormValidation,
     setupPasswordResetFormValidation,
-} from "./registration/form-validation";
-import { initializeSessionLimitPage } from "./session_limit/index";
-import { initializeSubmissionForm } from "./submission_form/index";
-import { initializeSubmissionGroup } from "./submission_group/index";
-import { initializeCustomModalEvents, setupBaseHtmxEventListeners } from "./utils/htmx";
+} from "./registration/form-validation.js";
+import { initializeSessionLimitPage } from "./session_limit/index.js";
+import { initializeSubmissionForm } from "./submission_form/index.js";
+import { initializeSubmissionGroup } from "./submission_group/index.js";
+import { initializeCustomModalEvents, setupBaseHtmxEventListeners } from "./utils/htmx.js";
 import { setupToastNotifications, displayStoredToast } from "./utils/toast.js";
 
 

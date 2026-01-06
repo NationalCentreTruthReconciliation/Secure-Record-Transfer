@@ -1,4 +1,4 @@
-import { initializeSubmissionForm } from "../submission_form/index";
+import { initializeSubmissionForm } from "../submission_form/index.js";
 import { addQueryParam, getCurrentTablePage } from "./utils.js";
 
 /**

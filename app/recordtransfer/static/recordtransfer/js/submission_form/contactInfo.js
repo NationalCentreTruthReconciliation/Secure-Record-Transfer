@@ -1,5 +1,5 @@
-import { setupSelectOtherToggle } from "../utils/otherField";
-import { showErrorToast } from "../utils/toast";
+import { setupSelectOtherToggle } from "../utils/otherField.js";
+import { showErrorToast } from "../utils/toast.js";
 
 /**
  * Sets up the contact info form.

@@ -1,4 +1,4 @@
-import { setupSelectOtherToggle } from "../utils/otherField";
+import { setupSelectOtherToggle } from "../utils/otherField.js";
 
 /**
  * Sets up the expandable source info form.
