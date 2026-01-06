@@ -1,7 +1,7 @@
 """CAAIS metadata administrator."""
 
 from datetime import datetime
-from typing import Any, Callable, Mapping, Optional, Sequence
+from typing import Any, ClassVar, Callable, Mapping, Optional, Sequence
 
 from django.contrib import admin
 from django.contrib.admin import ListFilter
@@ -224,7 +224,12 @@ class MetadataAdmin(admin.ModelAdmin):
     class Media:
         """Static assets for the Metadata admin."""
 
-        js = ("https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js",)
+        js = (
+            "https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js",
+            "caais/js/adminChangeForm.js",
+        )
+
+        css: ClassVar = {"screen": ["caais/css/adminChangeForm.css"]}
 
     change_form_template = "admin/metadata_change_form.html"
 
