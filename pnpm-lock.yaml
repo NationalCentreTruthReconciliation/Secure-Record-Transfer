@@ -71,9 +71,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      typescript-eslint:
-        specifier: ^8.52.0
-        version: 8.52.0(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3)
       webpack:
         specifier: ^5.99.9
         version: 5.101.3(webpack-cli@6.0.1)
@@ -102,6 +99,9 @@ importers:
       globals:
         specifier: ^15.14.0
         version: 15.15.0
+      typescript-eslint:
+        specifier: ^8.52.0
+        version: 8.52.0(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3)
 
 packages:
 
