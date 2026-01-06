@@ -1,6 +1,13 @@
-/* Fix weird styling for text inputs and textareas */
-.inline-text-input,
+.hidden {
+    display: none;
+}
+
 .inline-textarea {
+    width: 97%;
+    resize: none;
+}
+
+.inline-text-input {
     width: 97%;
 }
 
@@ -74,7 +81,7 @@ input#id_date_of_materials {
     font-weight: bold;
 }
 
-@media screen and (max-width: 767px) {
+@media screen and (max-width:767px) {
     .date-is-approximate-wrapper {
         margin-left: 0;
         padding-left: 0;

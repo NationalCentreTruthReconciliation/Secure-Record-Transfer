@@ -1,11 +1,10 @@
-/* global django */
+const $ = django.jQuery;
 
 /**
  * Apply date mask to the date of materials field using jQuery Mask plugin.
  * Supports both single date (YYYY-MM-DD) and date range (YYYY-MM-DD - YYYY-MM-DD) formats.
  */
-export function setupDateOfMaterials() {
-    const $ = django.jQuery;
+function setupDateOfMaterials() {
     const dateField = $("#id_date_of_materials");
 
     if (!dateField.length) {
@@ -90,3 +89,56 @@ export function setupDateOfMaterials() {
 
     $("#id_date_is_approximate").on("change", toggleApproxDatePlaceholders);
 }
+
+/**
+ * Setup phone number mask for form fields ending with -phone_number
+ */
+function setupPhoneNumberMask() {
+    $("input[id$=\"-phone_number\"").each(function() {
+        $(this).mask("+0 (000) 000-0000");
+    });
+}
+
+/**
+ * Sets up the "Show More/Less..." button functionality for date entries.
+ * Toggles visibility of additional date entries when the button is clicked.
+ */
+function setupShowMoreDates() {
+    const showMoreBtn = document.getElementById("show-more-dates");
+    if (!showMoreBtn) {
+        return;
+    }
+    let expanded = false;
+    showMoreBtn.addEventListener("click", function(e) {
+        e.preventDefault();
+        const entries = document.querySelectorAll(".date-entry");
+        if (!expanded) {
+            entries.forEach((entry) => {
+                entry.classList.remove("hidden");
+                entry.style.display = "";
+            });
+            showMoreBtn.textContent = "Show less...";
+            expanded = true;
+        } else {
+            entries.forEach((entry, idx) => {
+                if (idx < 3) {
+                    entry.classList.remove("hidden");
+                    entry.style.display = "";
+                } else {
+                    entry.classList.add("hidden");
+                    entry.style.display = "";
+                }
+            });
+            showMoreBtn.textContent = "Show more...";
+            expanded = false;
+        }
+    });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    if (typeof django !== "undefined" && django.jQuery) {
+        setupDateOfMaterials();
+        setupPhoneNumberMask();
+        setupShowMoreDates();
+    }
+});
