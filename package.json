@@ -3,8 +3,8 @@
     "version": "2025.12.22",
     "description": "Transfer files and metadata to an archive based on accession standards",
     "scripts": {
-        "build": "webpack --config webpack.config.js",
-        "watch": "webpack --watch --config webpack.config.js",
+        "build": "webpack --config webpack.config.mjs",
+        "watch": "webpack --watch --config webpack.config.mjs",
         "lint": "eslint"
     },
     "dependencies": {

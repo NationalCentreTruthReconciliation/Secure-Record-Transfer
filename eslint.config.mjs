@@ -42,7 +42,7 @@ export default [
     },
     {
         files: [
-            "webpack.config.js",
+            "webpack.config.mjs",
             "eslint.config.mjs",
         ],
         languageOptions: {
