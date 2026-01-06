@@ -39,7 +39,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 # Uses a persistent cache mount for pnpm (see https://pnpm.io/docker#minimizing-docker-image-size-and-build-time)
 RUN npm install -g "pnpm@${PNPM_VERSION}"
 COPY package.json pnpm-lock.yaml ${PROJ_DIR}
-RUN --mount=type=cache,id=pnpm,target=${PNPM_HOME}/store \
+RUN --mount=type=cache,id=pnpm,target=/root/.cache/pnpm \
     pnpm install --frozen-lockfile --prod
 
 # Copy application code to image
