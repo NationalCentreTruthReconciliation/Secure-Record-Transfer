@@ -6,30 +6,9 @@
     {{ block.super }}
     <link rel="icon" href="{% static 'recordtransfer/img/favicon.ico' %}" />
     {{ js_context|json_script:"py_context_admin" }}
-    {% render_bundle 'admin_recordtransfer' 'js' %}
-    {% render_bundle 'admin_recordtransfer' 'css' %}
+    {% render_bundle 'admin' 'js' %}
+    {% render_bundle 'admin' 'css' %}
 {% endblock extrahead %}
-{% block extrastyle %}
-    {{ block.super }}
-    <style>
-        #branding img {
-            float: left;
-            margin-right: 10px;
-        }
-
-        #branding h1 {
-            float: left;
-        }
-
-        #user-tools a, #logout-form button {
-            border-bottom: 1px solid #c2c2c2;
-        }
-
-        .theme-toggle {
-            display: none;
-        }
-    </style>
-{% endblock extrastyle %}
 {% block branding %}
     <img height="40"
          src="{% static 'recordtransfer/img/nctrlogo_flame_150x150px.webp' %}"
