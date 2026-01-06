@@ -1,5 +1,5 @@
-import { setupFormChangeTracking } from "../utils/forms";
-import { setupSelectOtherToggle } from "../utils/otherField";
+import { setupFormChangeTracking } from "../utils/forms.js";
+import { setupSelectOtherToggle } from "../utils/otherField.js";
 
 /**
  * Sets up the contact info form.

@@ -39,7 +39,7 @@ ARG WEBPACK_MODE=production
 ENV WEBPACK_MODE=${WEBPACK_MODE}
 
 # Run webpack to bundle and minify assets
-COPY webpack.config.js postcss.config.mjs ${PROJ_DIR}
+COPY webpack.config.mjs postcss.config.mjs tsconfig.json ${PROJ_DIR}
 RUN pnpm run build
 
 # Copy entrypoint script to image

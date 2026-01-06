@@ -1,7 +1,7 @@
 import "air-datepicker/air-datepicker.css";
 import AirDatepicker from "air-datepicker";
-import localeEn from "air-datepicker/locale/en";
-import localeFr from "air-datepicker/locale/fr";
+import localeEn from "air-datepicker/locale/en.js";
+import localeFr from "air-datepicker/locale/fr.js";
 import IMask from "imask";
 
 const DEFAULT_LANGUAGE = "en";

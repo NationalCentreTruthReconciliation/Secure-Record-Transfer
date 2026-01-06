@@ -1,10 +1,10 @@
-const path = require("path");
-const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
-const glob = require("glob");
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const sharp = require("sharp");
-const BundleTracker = require("webpack-bundle-tracker");
-
+import path, { dirname } from "path";
+import { fileURLToPath } from "url";
+import CssMinimizerPlugin from "css-minimizer-webpack-plugin";
+import { glob } from "glob";
+import MiniCssExtractPlugin from "mini-css-extract-plugin";
+import sharp from "sharp";
+import BundleTracker from "webpack-bundle-tracker";
 
 const mode = process.env.WEBPACK_MODE || "production"; // Default if not passed
 
@@ -56,7 +56,11 @@ class WebPConverterPlugin {
 }
 
 
-module.exports = {
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+
+export default {
     mode: mode,
     devtool: process.env.WEBPACK_MODE === "production" ? false : "eval-source-map",
     watchOptions: {
@@ -72,7 +76,7 @@ module.exports = {
             ...glob.sync("./app/recordtransfer/static/recordtransfer/img/*.{jpg,jpeg,png,webp,ico}") // eslint-disable-line
                 .map(file => "./" + path.relative(__dirname, file)),
         ],
-        main: "./app/recordtransfer/static/recordtransfer/js/index.js",
+        main: "./app/recordtransfer/static/recordtransfer/js/index.ts",
         // The submission detail page has its own styling (TODO: FIX!)
         submission_detail: [
             ...glob.sync(
@@ -113,6 +117,11 @@ module.exports = {
                 generator: {
                     filename: "[name][ext]" // Match your template path
                 }
+            },
+            {
+                test: /\.ts$/,
+                use: "ts-loader",
+                exclude: /node_modules/,
             },
         ]
     },

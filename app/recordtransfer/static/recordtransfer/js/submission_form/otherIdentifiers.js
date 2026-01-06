@@ -1,5 +1,5 @@
-import { setupHelpTooltips } from "../base/tooltip";
-import { setupFormset } from "./formset";
+import { setupHelpTooltips } from "../base/tooltip.js";
+import { setupFormset } from "./formset.js";
 
 /**
  * Sets up the other identifiers form.
