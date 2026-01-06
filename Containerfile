@@ -1,34 +1,46 @@
-FROM nikolaik/python-nodejs:python3.11-nodejs22-slim AS base
+FROM docker.io/python:3.11-slim AS base
 
 ENV PYTHONUNBUFFERED=1
-ENV UV_LINK_MODE=copy
 ENV PROJ_DIR="/opt/secure-record-transfer/"
 ENV APP_DIR="/opt/secure-record-transfer/app/"
-ENV PNPM_HOME="/pnpm"
-ENV PATH="$PNPM_HOME:$PATH"
+ENV NVM_VERSION=0.40.3
+ENV NODE_VERSION=22.21.1
+ENV PNPM_VERSION=10.27.0
 
 WORKDIR ${PROJ_DIR}
 
-# 🔧 Install gettext for for internationalization and libmagic for MIME type detection
+# 🔧 Install curl for downloading files, gettext for for internationalization and libmagic for MIME type detection
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
+    curl \
     gettext \
     libmagic1 && \
     rm -rf /var/lib/apt/lists/*
 
-# Install pnpm globally (force overwrite version in base)
-RUN npm install -g pnpm@latest-10 --force
+# Install nvm (Node Version Manager) and install NodeJS
+# This does not activate nvm for use in the container. To do that, you need to run ". /nvm/nvm.sh"
+ENV NVM_DIR="/nvm"
+RUN mkdir "${NVM_DIR}" && \
+    curl -o- "https://raw.githubusercontent.com/nvm-sh/nvm/v${NVM_VERSION}/install.sh" | bash && \
+    . "$NVM_DIR/nvm.sh" && \
+    nvm install "${NODE_VERSION}" && \
+    nvm alias default "v${NODE_VERSION}" && \
+    nvm use default
+ENV PATH="$NVM_DIR/versions/node/v${NODE_VERSION}/bin/:$PATH"
 
-# Copy uv-related files, and install Python dependencies
+# Install uv and install Python dependencies
 # Uses a persistent cache mount for uv (see https://docs.astral.sh/uv/guides/integration/docker/#caching)
+COPY --from=ghcr.io/astral-sh/uv:0.8.8 /uv /uvx /bin/
+ENV UV_LINK_MODE=copy
 COPY pyproject.toml uv.lock ${PROJ_DIR}
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync
 
-# Install Node.js dependencies with pnpm
+# Install pnpm and install Javascript dependencies
 # Uses a persistent cache mount for pnpm (see https://pnpm.io/docker#minimizing-docker-image-size-and-build-time)
-COPY package.json pnpm-lock.yaml ${PROJ_DIR}
-RUN --mount=type=cache,id=pnpm,target=${PNPM_HOME}/store \
+RUN npm install -g "pnpm@${PNPM_VERSION}"
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ${PROJ_DIR}
+RUN --mount=type=cache,id=pnpm,target=/root/.cache/pnpm \
     pnpm install --frozen-lockfile --prod
 
 # Copy application code to image
@@ -102,7 +114,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 RUN uv run python "${APP_DIR}/manage.py" compilemessages --ignore .venv
 
 
-FROM python:3.11-slim AS prod
+FROM docker.io/python:3.11-slim AS prod
 
 ENV PYTHONUNBUFFERED=1
 ENV PROJ_DIR="/opt/secure-record-transfer/"
