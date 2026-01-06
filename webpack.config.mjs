@@ -27,9 +27,6 @@ export default {
         main: "./app/recordtransfer/static/recordtransfer/js/index.ts",
         // Admin Site static assets
         admin_recordtransfer: "./app/recordtransfer/static/recordtransfer/js/admin/index.js",
-        admin_caais: [
-            "./app/caais/static/caais/js/admin/index.js",
-        ],
     },
     output: {
         filename: "js/[name].[chunkhash:8].js",
