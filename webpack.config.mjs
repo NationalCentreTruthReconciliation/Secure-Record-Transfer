@@ -32,7 +32,6 @@ export default {
         chunkFilename: "js/[name].[chunkhash:8].chunk.js",
         path: path.resolve(__dirname, "dist/"),
         publicPath: "/static/",
-
     },
     module: {
         rules: [

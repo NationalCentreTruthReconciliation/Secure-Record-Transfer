@@ -6,8 +6,8 @@
     {{ block.super }}
     <link rel="icon" href="{% static 'recordtransfer/img/favicon.ico' %}" />
     {{ js_context|json_script:"py_context_admin" }}
-    {% render_bundle 'admin_recordtransfer' 'js' %}
-    {% render_bundle 'admin_recordtransfer' 'css' %}
+    {% render_bundle 'admin' 'js' %}
+    {% render_bundle 'admin' 'css' %}
 {% endblock extrahead %}
 {% block extrastyle %}
     {{ block.super }}
