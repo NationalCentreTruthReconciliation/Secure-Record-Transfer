@@ -28,7 +28,7 @@ These instructions apply to all operating systems. First, install the following 
 
 If developing on Mac or Linux, you'll need the following tools:
 
-1. **Node.js 22+** for Javascript dependency management and builds ([Download Node.js](https://nodejs.org/en/download/))
+1. **Node.js 24.x** for Javascript dependency management and builds. It's recommended to use [nvm](https://github.com/nvm-sh/nvm), but you can also [download Node.js](https://nodejs.org/en/download/).
 2. **pnpm** for Javascript package management ([pnpm.io](https://pnpm.io/)). Use the following command to install pnpm:
 
 ```shell
@@ -53,7 +53,7 @@ If developing on Windows, you'll need the following tools:
 curl -LsSf https://astral.sh/uv/0.8.8/install.sh | sh
 ```
 
-3. **Node.js 22+** ([Node.js on WSL Installation Guide](https://learn.microsoft.com/en-us/windows/dev-environment/javascript/nodejs-on-wsl#install-nvm-nodejs-and-npm))
+3. **Node.js 24.x** ([Node.js on WSL Installation Guide](https://learn.microsoft.com/en-us/windows/dev-environment/javascript/nodejs-on-wsl#install-nvm-nodejs-and-npm))
 
 4. **pnpm** for Javascript package management ([pnpm.io](https://pnpm.io/)). After installing npm, use the following command to install pnpm:
 
