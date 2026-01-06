@@ -39,7 +39,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 # Install pnpm and install Javascript dependencies
 # Uses a persistent cache mount for pnpm (see https://pnpm.io/docker#minimizing-docker-image-size-and-build-time)
 RUN npm install -g "pnpm@${PNPM_VERSION}"
-COPY package.json pnpm-lock.yaml ${PROJ_DIR}
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ${PROJ_DIR}
 RUN --mount=type=cache,id=pnpm,target=/root/.cache/pnpm \
     pnpm install --frozen-lockfile --prod
 
