@@ -3,12 +3,12 @@ name: PR JS Lint Check
 on:
   pull_request:
     paths:
-      - '**.js'
+      - "**.js"
       - eslint.config.mjs
 
     branches:
       - master
-      - 'feat-*'
+      - "feat-*"
 
     types: [opened, synchronize, reopened]
 
@@ -33,7 +33,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: "24"
           cache: "pnpm"
 
       - name: Install dependencies
