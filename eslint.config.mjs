@@ -27,7 +27,10 @@ export default defineConfig([
             "js/recommended"
         ],
         languageOptions: {
-            globals: globals.browser
+            globals: {
+                ...globals.browser,
+                "django": false,
+            },
         },
         rules: {
             // Plugin rules
