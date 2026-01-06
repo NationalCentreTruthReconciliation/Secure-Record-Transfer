@@ -1,10 +1,9 @@
-import path from "path";
-import { dirname } from "path";
-import { glob } from "glob";
+import path, { dirname } from "path";
+import { fileURLToPath } from "url";
 import CssMinimizerPlugin from "css-minimizer-webpack-plugin";
+import { glob } from "glob";
 import MiniCssExtractPlugin from "mini-css-extract-plugin";
 import sharp from "sharp";
-import { fileURLToPath } from "url";
 import BundleTracker from "webpack-bundle-tracker";
 
 const mode = process.env.WEBPACK_MODE || "production"; // Default if not passed
@@ -74,7 +73,7 @@ export default {
     },
     entry: {
         images: [
-            ...glob.sync("./app/recordtransfer/static/recordtransfer/img/*.{jpg,jpeg,png,webp,ico}")
+            ...glob.sync("./app/recordtransfer/static/recordtransfer/img/*.{jpg,jpeg,png,webp,ico}") // eslint-disable-line
                 .map(file => "./" + path.relative(__dirname, file)),
         ],
         main: "./app/recordtransfer/static/recordtransfer/js/index.ts",
