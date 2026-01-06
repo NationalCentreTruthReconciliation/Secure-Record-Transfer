@@ -1,3 +1,4 @@
+import "./css/customizations.css";
 import "./css/job.css";
 
 import { setupSelectOtherToggle } from "../main/js/utils/otherField.js";
