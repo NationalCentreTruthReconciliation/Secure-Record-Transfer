@@ -43,6 +43,7 @@ export default [
     {
         files: [
             "webpack.config.mjs",
+            "postcss.config.mjs",
             "eslint.config.mjs",
         ],
         languageOptions: {
