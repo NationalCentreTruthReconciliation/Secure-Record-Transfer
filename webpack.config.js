@@ -1,10 +1,11 @@
-const path = require("path");
-const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
-const glob = require("glob");
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const sharp = require("sharp");
-const BundleTracker = require("webpack-bundle-tracker");
-
+import path from "path";
+import { dirname } from "path";
+import { glob } from "glob";
+import CssMinimizerPlugin from "css-minimizer-webpack-plugin";
+import MiniCssExtractPlugin from "mini-css-extract-plugin";
+import sharp from "sharp";
+import { fileURLToPath } from "url";
+import BundleTracker from "webpack-bundle-tracker";
 
 const mode = process.env.WEBPACK_MODE || "production"; // Default if not passed
 
@@ -56,7 +57,11 @@ class WebPConverterPlugin {
 }
 
 
-module.exports = {
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+
+export default {
     mode: mode,
     devtool: process.env.WEBPACK_MODE === "production" ? false : "eval-source-map",
     watchOptions: {
@@ -69,7 +74,7 @@ module.exports = {
     },
     entry: {
         images: [
-            ...glob.sync("./app/recordtransfer/static/recordtransfer/img/*.{jpg,jpeg,png,webp,ico}")  
+            ...glob.sync("./app/recordtransfer/static/recordtransfer/img/*.{jpg,jpeg,png,webp,ico}")
                 .map(file => "./" + path.relative(__dirname, file)),
         ],
         main: "./app/recordtransfer/static/recordtransfer/js/index.js",

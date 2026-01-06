@@ -41,6 +41,7 @@
         "eslint-plugin-jsdoc": "^61.4.1",
         "globals": "^15.14.0"
     },
+    "type": "module",
     "repository": {
         "type": "git",
         "url": "git+https://github.com/NationalCentreTruthReconciliation/Secure-Record-Transfer.git"
