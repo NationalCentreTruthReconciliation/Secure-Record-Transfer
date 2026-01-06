@@ -3,58 +3,11 @@ import { fileURLToPath } from "url";
 import CssMinimizerPlugin from "css-minimizer-webpack-plugin";
 import { glob } from "glob";
 import MiniCssExtractPlugin from "mini-css-extract-plugin";
-import sharp from "sharp";
 import BundleTracker from "webpack-bundle-tracker";
 
 const mode = process.env.WEBPACK_MODE || "production"; // Default if not passed
 
 console.info("CURRENT MODE IN WEBPACK: ", mode);
-
-class WebPConverterPlugin {
-    constructor(options = {}) {
-        this.quality = options.quality || 85;
-    }
-
-    apply(compiler) {
-        compiler.hooks.thisCompilation.tap("WebPConverterPlugin", (compilation) => {
-            compilation.hooks.processAssets.tapAsync(
-                {
-                    name: "WebPConverterPlugin",
-                    stage: compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONS,
-                },
-                (assets, callback) => {
-                    const promises = [];
-
-                    Object.keys(assets).forEach(filename => {
-                        if (filename.match(/\.(jpe?g|png)$/i)) {
-                            const asset = assets[filename];
-                            const source = asset.source();
-                            const webpFilename = filename.replace(/\.(jpe?g|png)$/i, ".webp");
-
-                            const promise = sharp(source)
-                                .webp({ quality: this.quality })
-                                .toBuffer()
-                                .then(buffer => {
-                                    // Emit the WebP version
-                                    compilation.emitAsset(webpFilename, {
-                                        source: () => buffer,
-                                        size: () => buffer.length
-                                    });
-                                    // Remove the original asset
-                                    compilation.deleteAsset(filename);
-                                });
-
-                            promises.push(promise);
-                        }
-                    });
-
-                    Promise.all(promises).then(() => callback());
-                }
-            );
-        });
-    }
-}
-
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -72,10 +25,6 @@ export default {
         ],
     },
     entry: {
-        images: [
-            ...glob.sync("./app/recordtransfer/static/recordtransfer/img/*.{jpg,jpeg,png,webp,ico}") // eslint-disable-line
-                .map(file => "./" + path.relative(__dirname, file)),
-        ],
         main: "./app/recordtransfer/static/recordtransfer/js/index.ts",
         // The submission detail page has its own styling (TODO: FIX!)
         submission_detail: [
@@ -84,7 +33,6 @@ export default {
                 "recordtransfer/css/submission_detail/*.css")
                 .map(file => "./" + path.relative(__dirname, file)),
         ],
-
         // Admin Site static assets
         admin_recordtransfer: "./app/recordtransfer/static/recordtransfer/js/admin/index.js",
         admin_caais: [
@@ -105,13 +53,6 @@ export default {
                 use: [MiniCssExtractPlugin.loader, "css-loader", "postcss-loader"] // Extract CSS
             },
             {
-                test: /\.(jpe?g|png|webp)$/i,
-                type: "asset/resource",
-                generator: {
-                    filename: "[name][ext]"
-                }
-            }, // Add this new rule for favicon and other icon files
-            {
                 test: /\.ico$/i,
                 type: "asset/resource",
                 generator: {
@@ -129,10 +70,6 @@ export default {
         new MiniCssExtractPlugin({
             filename: "css/[name].[contenthash:8].css",
         }),
-
-        new WebPConverterPlugin({
-            quality: 80
-        }),
         new BundleTracker({
             path: path.resolve(__dirname, "dist"),
             filename: "webpack-stats.json"
@@ -143,7 +80,6 @@ export default {
             "...", // This keeps the default JavaScript minifier
             new CssMinimizerPlugin(), // Add this line to minify CSS
         ],
-
         splitChunks: {
             cacheGroups: {
                 vendor: {
