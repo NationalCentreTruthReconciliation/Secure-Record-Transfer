@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-14 20:23-0500\n"
+"POT-Creation-Date: 2026-01-06 19:41-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,19 +18,19 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: recordtransfer/static/recordtransfer/js/submission_form/customUppyPlugin.js:31
+#: frontend/main/js/submission_form/customUppyPlugin.js:31
 #, javascript-format
 msgid "Cannot add the duplicate file '%s', it already exists"
 msgstr "डुप्लिकेट फ़ाइल '%s' को नहीं जोड़ा जा सकता, यह पहले से मौजूद है"
 
-#: recordtransfer/static/recordtransfer/js/submission_form/submissionGroup.js:6
+#: frontend/main/js/submission_form/submissionGroup.js:3
 msgid "No description available"
 msgstr "कोई विवरण उपलब्ध नहीं है"
 
-#: recordtransfer/static/recordtransfer/js/submission_form/uppyForm.js:157
+#: frontend/main/js/submission_form/uppyForm.js:157
 msgid "You must upload at least one file."
 msgstr "आपको कम से कम एक फ़ाइल अपलोड करनी होगी"
 
-#: recordtransfer/static/recordtransfer/js/submission_form/uppyForm.js:166
+#: frontend/main/js/submission_form/uppyForm.js:166
 msgid "Remove the files with issues to proceed."
 msgstr "आगे बढ़ने के लिए समस्या वाली फ़ाइलें हटाएँ."
