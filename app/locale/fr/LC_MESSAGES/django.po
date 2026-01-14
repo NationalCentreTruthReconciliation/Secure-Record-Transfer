@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-06 11:24-0600\n"
+"POT-Creation-Date: 2026-01-13 19:45-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Gabrielle Archambault <Gabrielle.Archambault@umanitoba.ca>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -30,35 +30,35 @@ msgstr "Français"
 msgid "Hindi"
 msgstr "Hindi"
 
-#: caais/admin.py:282 caais/models.py:922 caais/models.py:1017
+#: caais/admin.py:287 caais/models.py:922 caais/models.py:1017
 msgid "Source name"
 msgstr "Nom de la source"
 
-#: caais/admin.py:289
+#: caais/admin.py:294
 msgid "Last changed"
 msgstr ""
 
-#: caais/admin.py:339
+#: caais/admin.py:344
 msgctxt "\"Selected\" refers to one or more Metadata objects."
 msgid "Export CAAIS 1.0 CSV for Selected"
 msgstr "Exporter CSV NCIAA 1.0 pour Sélectionnés"
 
-#: caais/admin.py:349
+#: caais/admin.py:354
 msgctxt "\"Selected\" refers to one or more Metadata objects."
 msgid "Export AtoM 2.6 Accession CSV for Selected"
 msgstr "Exporter AtoM 2.6 Accession CSV pour Sélectionnés"
 
-#: caais/admin.py:361
+#: caais/admin.py:366
 msgctxt "\"Selected\" refers to one or more Metadata objects."
 msgid "Export AtoM 2.3 Accession CSV for Selected"
 msgstr "Exporter AtoM 2.3 Accession CSV pour Sélectionnés"
 
-#: caais/admin.py:373
+#: caais/admin.py:378
 msgctxt "\"Selected\" refers to one or more Metadata objects."
 msgid "Export AtoM 2.2 Accession CSV for Selected"
 msgstr "Exporter AtoM 2.2 Accession CSV pour Sélectionnés"
 
-#: caais/admin.py:385
+#: caais/admin.py:390
 msgctxt "\"Selected\" refers to one or more Metadata objects."
 msgid "Export AtoM 2.1 Accession CSV for Selected"
 msgstr "Exporter AtoM 2.1 Accession CSV pour Sélectionnés"
@@ -1456,9 +1456,9 @@ msgid ""
 msgstr ""
 "Nom par défaut du type d'événement de soumission - relatif à la section "
 "5.1.1. de la NCIAA.\n"
-"Au moment de la réception d'une soumission, un événement de type "
-"« Soumission » est créé pour cette soumission. Vous pouvez contrôler le nom "
-"du Type d'événement pour cet événement ici."
+"Au moment de la réception d'une soumission, un événement de type « "
+"Soumission » est créé pour cette soumission. Vous pouvez contrôler le nom du "
+"Type d'événement pour cet événement ici."
 
 #: recordtransfer/enums.py:279
 msgid ""
@@ -1469,9 +1469,9 @@ msgid ""
 msgstr ""
 "Valeur par défaut de l'Agent de l'événement - relatif à la section 5.1.3. de "
 "la NCIAA.\n"
-"Au moment de la réception d'une soumission, un événement de type "
-"« Soumission » est créé pour cette soumission. Vous pouvez contrôler le nom "
-"de l'Agent d'événement pour cet événement ici."
+"Au moment de la réception d'une soumission, un événement de type « "
+"Soumission » est créé pour cette soumission. Vous pouvez contrôler le nom de "
+"l'Agent d'événement pour cet événement ici."
 
 #: recordtransfer/enums.py:287
 msgid ""
@@ -1482,8 +1482,8 @@ msgid ""
 msgstr ""
 "Valeur par défaut de la note sur l - relatif à la section 5.1.4. de la "
 "NCIAA.\n"
-"Au moment de la réception d'une soumission, un événement de type "
-"« Soumission » est créé pour cette soumission. Vous pouvez contrôler ici si "
+"Au moment de la réception d'une soumission, un événement de type « "
+"Soumission » est créé pour cette soumission. Vous pouvez contrôler ici si "
 "une note sur l'événement est ajoutée pour cet événement."
 
 #: recordtransfer/enums.py:296
@@ -2115,7 +2115,7 @@ msgstr "Terminé"
 msgid "Failed"
 msgstr "Échoué"
 
-#: recordtransfer/templates/admin/base_site.html:38
+#: recordtransfer/templates/admin/base_site.html:17
 msgid "NCTR Secure Record Transfer App Administration"
 msgstr ""
 "Administration de l'application de transfert sécurisé des dossiers du CNVR"
@@ -3734,8 +3734,8 @@ msgstr ""
 "\n"
 "                Ce qui suit est un rapport généré automatiquement pour la "
 "soumission effectuée par\n"
-"                %(username)s (%(email)s) le %(date)s, intitulée "
-"« %(title)s ».\n"
+"                %(username)s (%(email)s) le %(date)s, intitulée « %(title)s "
+"».\n"
 "          "
 
 #: recordtransfer/templates/recordtransfer/submission_detail.html:34
