@@ -9,7 +9,7 @@
     },
     "dependencies": {
         "@floating-ui/dom": "^1.6.12",
-        "@tailwindcss/postcss": "^4.1.7",
+        "@tailwindcss/postcss": "^4.2.1",
         "@uppy/core": "^5.2.0",
         "@uppy/dashboard": "^5.1.1",
         "@uppy/locales": "^5.0.1",
@@ -24,7 +24,7 @@
         "mini-css-extract-plugin": "^2.9.2",
         "postcss": "^8.5.3",
         "postcss-loader": "^8.2.0",
-        "tailwindcss": "^4.1.7",
+        "tailwindcss": "^4.2.1",
         "ts-loader": "^9.5.4",
         "typescript": "^5.9.3",
         "webpack": "^5.105.4",
