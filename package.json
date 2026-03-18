@@ -9,14 +9,14 @@
     },
     "dependencies": {
         "@floating-ui/dom": "^1.6.12",
-        "@tailwindcss/postcss": "^4.1.7",
-        "@uppy/core": "^5.0.0",
-        "@uppy/dashboard": "^5.0.0",
+        "@tailwindcss/postcss": "^4.2.1",
+        "@uppy/core": "^5.2.0",
+        "@uppy/dashboard": "^5.1.1",
         "@uppy/locales": "^5.0.1",
         "@uppy/xhr-upload": "^5.0.0",
         "air-datepicker": "^3.5.3",
         "css-loader": "^7.1.2",
-        "css-minimizer-webpack-plugin": "^7.0.0",
+        "css-minimizer-webpack-plugin": "^8.0.0",
         "daisyui": "^5.0.35",
         "htmx-ext-head-support": "^2.0.4",
         "htmx.org": "^2.0.4",
@@ -24,21 +24,27 @@
         "mini-css-extract-plugin": "^2.9.2",
         "postcss": "^8.5.3",
         "postcss-loader": "^8.2.0",
-        "tailwindcss": "^4.1.7",
+        "tailwindcss": "^4.2.1",
         "ts-loader": "^9.5.4",
         "typescript": "^5.9.3",
-        "webpack": "^5.99.9",
+        "webpack": "^5.105.4",
         "webpack-bundle-tracker": "^3.2.0",
-        "webpack-cli": "^6.0.1"
+        "webpack-cli": "^7.0.2"
     },
     "devDependencies": {
-        "@eslint/js": "^9.17.0",
-        "@stylistic/eslint-plugin": "^5.6.1",
-        "eslint": "^9.39.1",
-        "eslint-plugin-import": "^2.31.0",
-        "eslint-plugin-jsdoc": "^61.4.1",
+        "@eslint/js": "^9.39.4",
+        "@stylistic/eslint-plugin": "^5.10.0",
+        "eslint": "^9.39.4",
+        "eslint-plugin-import": "^2.32.0",
+        "eslint-plugin-jsdoc": "^62.8.0",
         "globals": "^15.14.0",
-        "typescript-eslint": "^8.52.0"
+        "typescript-eslint": "^8.57.1"
+    },
+    "pnpm": {
+        "overrides": {
+            "lodash": "4.17.23",
+            "svgo": "4.0.1"
+        }
     },
     "type": "module",
     "repository": {
