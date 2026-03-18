@@ -16,7 +16,7 @@
         "@uppy/xhr-upload": "^5.0.0",
         "air-datepicker": "^3.5.3",
         "css-loader": "^7.1.2",
-        "css-minimizer-webpack-plugin": "^7.0.0",
+        "css-minimizer-webpack-plugin": "^8.0.0",
         "daisyui": "^5.0.35",
         "htmx-ext-head-support": "^2.0.4",
         "htmx.org": "^2.0.4",
@@ -42,7 +42,8 @@
     },
     "pnpm": {
         "overrides": {
-            "lodash": "4.17.23"
+            "lodash": "4.17.23",
+            "svgo": "4.0.1"
         }
     },
     "type": "module",
