@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  lodash: 4.17.23
+
 importers:
 
   .:
@@ -15,17 +18,17 @@ importers:
         specifier: ^4.1.7
         version: 4.1.12
       '@uppy/core':
-        specifier: ^5.0.0
-        version: 5.0.0
+        specifier: ^5.2.0
+        version: 5.2.0
       '@uppy/dashboard':
-        specifier: ^5.0.0
-        version: 5.0.0(@uppy/core@5.0.0)
+        specifier: ^5.1.1
+        version: 5.1.1(@uppy/core@5.2.0)
       '@uppy/locales':
         specifier: ^5.0.1
         version: 5.0.1
       '@uppy/xhr-upload':
         specifier: ^5.0.0
-        version: 5.0.0(@uppy/core@5.0.0)
+        version: 5.0.0(@uppy/core@5.2.0)
       air-datepicker:
         specifier: ^3.5.3
         version: 3.6.0
@@ -442,35 +445,38 @@ packages:
     peerDependencies:
       '@uppy/core': ^5.0.0
 
-  '@uppy/core@5.0.0':
-    resolution: {integrity: sha512-UfpissvsoT0/tZJCsqLMEjFUEmLtx4wfKI4NHrHY6jLBdbe/YEmGe3OyeATK3n9yLFppwqtrOEDOpR4AodyCww==}
+  '@uppy/core@5.2.0':
+    resolution: {integrity: sha512-uvfNyz4cnaplt7LYJmEZHuqOuav0tKp4a9WKJIaH6iIj7XiqYvS2J5SEByexAlUFlzefOAyjzj4Ja2dd/8aMrw==}
 
-  '@uppy/dashboard@5.0.0':
-    resolution: {integrity: sha512-r10Bxp/DsHzzX6w4NtUw6I4COhOiVviQiOAoKZBJZPR++l6+vABAwgVk4ajohf1mpTuBKS+/LOV7vrBFDcoJ9A==}
+  '@uppy/dashboard@5.1.1':
+    resolution: {integrity: sha512-6H/xVvhhdfwp1+FRMp2C+tudyaedqD5+LMDB8Iw20k9+QCL1eGzOh4wXm6MCqJtNfQ1tLaprGMG1jlo7yS/uyw==}
     peerDependencies:
-      '@uppy/core': ^5.0.0
+      '@uppy/core': ^5.2.0
 
   '@uppy/locales@5.0.1':
     resolution: {integrity: sha512-6VpRGdo4DvGeSINeUtJhwxhK2JsHEn0el+Rgg1JKWFlvm3E6PluZ5nDcIxjOMQODj0iE/0n+ghKdNHbxCVrC/Q==}
 
-  '@uppy/provider-views@5.0.0':
-    resolution: {integrity: sha512-HHr8ttRpxrDSYn8VP+JbfWntbd4swPFeM0Zt9II6oKzUiwwomG5rIN/gDEp3CsmAwQxJFN2a5Is6uj+pPX72Eg==}
+  '@uppy/provider-views@5.2.2':
+    resolution: {integrity: sha512-NAazIJ5sjrAc6++CeJ/u9dB5gDaaAOLHrYeEmWs/HqLlftlIinRZOybnyzJRXwI8jWI/FK5moluzt2HXu6dPQQ==}
     peerDependencies:
-      '@uppy/core': ^5.0.0
+      '@uppy/core': ^5.2.0
 
   '@uppy/store-default@5.0.0':
     resolution: {integrity: sha512-hQtCSQ1yGiaval/wVYUWquYGDJ+bpQ7e4FhUUAsRQz1x1K+o7NBtjfp63O9I4Ks1WRoKunpkarZ+as09l02cPw==}
 
-  '@uppy/thumbnail-generator@5.0.0':
-    resolution: {integrity: sha512-dqnsVOpGR+QtpBKwXYEgiIy1cEl+wfiwm/411gwsAiaYITtEGePsXfTiYNFN/dkCVfrDqWw+r/MFTxRNXZKm9A==}
+  '@uppy/thumbnail-generator@5.1.0':
+    resolution: {integrity: sha512-QAKJHHkMrD/30GOyUb5U9HyJ7Ie3jiMLp4pVdw27PoA4pNV7fDQz0tyDeRPj2H+BWPEB1NsTSSfHI2pjHNI+OQ==}
     peerDependencies:
-      '@uppy/core': ^5.0.0
+      '@uppy/core': ^5.2.0
 
   '@uppy/utils@7.0.0':
     resolution: {integrity: sha512-SJjFZ6PoxekfjXjsf9aPvMkinAkNmnpXELwYUlKglI0GYmLQwWmNtrjoBLHOmzS1UcI2Jeq0MOw0GaeipVppEA==}
 
   '@uppy/utils@7.1.0':
     resolution: {integrity: sha512-yVM1j082QeIh8jB4XvBWDbIRgpvktozwK1vmo9Xe1F4N+7doIDYFyBQmrmmxKJwSUJwAKNDrLmu8uqb+7mMCqQ==}
+
+  '@uppy/utils@7.1.5':
+    resolution: {integrity: sha512-Vz4WGTjef6WebECGur4clWjpkET4o3bdvPMj1m2sD5cL+dTt69m+FIE5h5JD3HBMLEPTXPVkrXGMIFcbOYC12Q==}
 
   '@uppy/xhr-upload@5.0.0':
     resolution: {integrity: sha512-ry/tDULv7xPEkm7VNl6GXV46JYb5lR/BUDo0Nl+S6n3I0EEMRO/sD30yA5BQZo80oZDUEyUGLoJ8HseD0nm4tA==}
@@ -1511,8 +1517,8 @@ packages:
   lodash.uniq@4.5.0:
     resolution: {integrity: sha512-xfBaXQd9ryd9dlSDvnvI0lvxfLJlYAZzXomUYzLKtUeOQvOP5piqAWuGtrhWeqaXK9hhoM/iyJc5AV+XfsX3HQ==}
 
-  lodash@4.17.21:
-    resolution: {integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==}
+  lodash@4.17.23:
+    resolution: {integrity: sha512-LgVTMpQtIopCi79SJeDiP0TfWi5CNEc/L/aRdTh3yIvmZXTnheWpKjSZhnvMl8iXbC1tFg9gdHHDMLoV7CnG+w==}
 
   magic-string@0.30.17:
     resolution: {integrity: sha512-sNPKHvyjVf7gyjwS4xGTaW/mCnF8wnjtifKBEhxfZ7E/S8tQ0rssrwGNn6q8JH/ohItJfSQp9mBtQYuTlH5QnA==}
@@ -2702,33 +2708,33 @@ snapshots:
       '@typescript-eslint/types': 8.52.0
       eslint-visitor-keys: 4.2.1
 
-  '@uppy/companion-client@5.0.0(@uppy/core@5.0.0)':
+  '@uppy/companion-client@5.0.0(@uppy/core@5.2.0)':
     dependencies:
-      '@uppy/core': 5.0.0
+      '@uppy/core': 5.2.0
       '@uppy/utils': 7.0.0
       namespace-emitter: 2.0.1
       p-retry: 6.2.1
 
-  '@uppy/core@5.0.0':
+  '@uppy/core@5.2.0':
     dependencies:
       '@transloadit/prettier-bytes': 0.3.5
       '@uppy/store-default': 5.0.0
-      '@uppy/utils': 7.0.0
-      lodash: 4.17.21
+      '@uppy/utils': 7.1.5
+      lodash: 4.17.23
       mime-match: 1.0.2
       namespace-emitter: 2.0.1
       nanoid: 5.1.5
       preact: 10.27.1
 
-  '@uppy/dashboard@5.0.0(@uppy/core@5.0.0)':
+  '@uppy/dashboard@5.1.1(@uppy/core@5.2.0)':
     dependencies:
       '@transloadit/prettier-bytes': 0.3.5
-      '@uppy/core': 5.0.0
-      '@uppy/provider-views': 5.0.0(@uppy/core@5.0.0)
-      '@uppy/thumbnail-generator': 5.0.0(@uppy/core@5.0.0)
-      '@uppy/utils': 7.0.0
+      '@uppy/core': 5.2.0
+      '@uppy/provider-views': 5.2.2(@uppy/core@5.2.0)
+      '@uppy/thumbnail-generator': 5.1.0(@uppy/core@5.2.0)
+      '@uppy/utils': 7.1.5
       classnames: 2.5.1
-      lodash: 4.17.21
+      lodash: 4.17.23
       nanoid: 5.1.5
       preact: 10.27.1
       shallow-equal: 3.1.0
@@ -2737,37 +2743,43 @@ snapshots:
     dependencies:
       '@uppy/utils': 7.1.0
 
-  '@uppy/provider-views@5.0.0(@uppy/core@5.0.0)':
+  '@uppy/provider-views@5.2.2(@uppy/core@5.2.0)':
     dependencies:
-      '@uppy/core': 5.0.0
-      '@uppy/utils': 7.0.0
+      '@uppy/core': 5.2.0
+      '@uppy/utils': 7.1.5
       classnames: 2.5.1
+      lodash: 4.17.23
       nanoid: 5.1.5
       p-queue: 8.1.0
       preact: 10.27.1
 
   '@uppy/store-default@5.0.0': {}
 
-  '@uppy/thumbnail-generator@5.0.0(@uppy/core@5.0.0)':
+  '@uppy/thumbnail-generator@5.1.0(@uppy/core@5.2.0)':
     dependencies:
-      '@uppy/core': 5.0.0
-      '@uppy/utils': 7.0.0
+      '@uppy/core': 5.2.0
+      '@uppy/utils': 7.1.5
       exifr: 7.1.3
 
   '@uppy/utils@7.0.0':
     dependencies:
-      lodash: 4.17.21
+      lodash: 4.17.23
       preact: 10.27.1
 
   '@uppy/utils@7.1.0':
     dependencies:
-      lodash: 4.17.21
+      lodash: 4.17.23
       preact: 10.27.1
 
-  '@uppy/xhr-upload@5.0.0(@uppy/core@5.0.0)':
+  '@uppy/utils@7.1.5':
     dependencies:
-      '@uppy/companion-client': 5.0.0(@uppy/core@5.0.0)
-      '@uppy/core': 5.0.0
+      lodash: 4.17.23
+      preact: 10.27.1
+
+  '@uppy/xhr-upload@5.0.0(@uppy/core@5.2.0)':
+    dependencies:
+      '@uppy/companion-client': 5.0.0(@uppy/core@5.2.0)
+      '@uppy/core': 5.2.0
       '@uppy/utils': 7.0.0
 
   '@webassemblyjs/ast@1.14.1':
@@ -3906,7 +3918,7 @@ snapshots:
 
   lodash.uniq@4.5.0: {}
 
-  lodash@4.17.21: {}
+  lodash@4.17.23: {}
 
   magic-string@0.30.17:
     dependencies:
