@@ -208,11 +208,7 @@ class ProfileFormsTest(SeleniumLiveServerTestCase):
         province_select = WebDriverWait(driver, 5).until(
             EC.element_to_be_clickable((By.ID, "id_contactinfo-province_or_state"))
         )
-        province_select.click()
-        other_option = WebDriverWait(driver, 5).until(
-            EC.element_to_be_clickable((By.XPATH, "//option[text()='Other']"))
-        )
-        other_option.click()
+        Select(province_select).select_by_visible_text("Other")
 
         # Check that the 'Other' input field is now visible
         other_input = WebDriverWait(driver, 5).until(

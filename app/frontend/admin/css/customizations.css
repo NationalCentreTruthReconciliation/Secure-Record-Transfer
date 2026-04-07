@@ -11,6 +11,23 @@
     border-bottom: 1px solid #c2c2c2;
 }
 
-.theme-toggle {
-    display: none;
+.country-select-container {
+    position: relative;
+    display: inline-block;
+}
+
+.country-select-container select {
+    padding-inline-end: 2.5rem;
+}
+
+.country-select-flag {
+    position: absolute;
+    top: 50%;
+    inset-inline-end: 0.75rem;
+    transform: translateY(-50%);
+    width: 1.25rem;
+    height: auto;
+    border-radius: 2px;
+    box-shadow: 0 0 0 1px rgb(0 0 0 / 0.08);
+    pointer-events: none;
 }
