@@ -33,28 +33,32 @@
                         {% if key != 'sort' and key != 'direction' %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endif %}
                     {% endfor %}
                     <label for="sort-field" class="font-semibold">{% trans "Sort by:" %}</label>
-                    <select name="sort"
-                            id="sort-field"
-                            class="select select-bordered select-sm"
-                            aria-label="{% blocktrans %}Sort by{% endblocktrans %}"
-                            hx-get="{{ paginate_url }}"
-                            hx-target="#{{ target_id }}"
-                            hx-include="closest form">
-                        {% for value, label in sort_options.items %}
-                            <option value="{{ value }}" {% if current_sort == value %}selected{% endif %}>{{ label }}</option>
-                        {% endfor %}
-                    </select>
+                    <div class="select select-bordered select-sm">
+                        <select name="sort"
+                                id="sort-field"
+                                class="focus:outline-none"
+                                aria-label="{% blocktrans %}Sort by{% endblocktrans %}"
+                                hx-get="{{ paginate_url }}"
+                                hx-target="#{{ target_id }}"
+                                hx-include="closest form">
+                            {% for value, label in sort_options.items %}
+                                <option value="{{ value }}" {% if current_sort == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                     <label for="sort-direction" class="font-semibold">{% trans "Direction:" %}</label>
-                    <select name="direction"
-                            id="sort-direction"
-                            class="select select-bordered select-sm"
-                            aria-label="{% blocktrans %}Direction{% endblocktrans %}"
-                            hx-get="{{ paginate_url }}"
-                            hx-target="#{{ target_id }}"
-                            hx-include="closest form">
-                        <option value="asc" {% if current_direction == "asc" %}selected{% endif %}>{% trans "Ascending" %}</option>
-                        <option value="desc" {% if current_direction == "desc" %}selected{% endif %}>{% trans "Descending" %}</option>
-                    </select>
+                    <div class="select select-bordered select-sm">
+                        <select name="direction"
+                                id="sort-direction"
+                                class="focus:outline-none"
+                                aria-label="{% blocktrans %}Direction{% endblocktrans %}"
+                                hx-get="{{ paginate_url }}"
+                                hx-target="#{{ target_id }}"
+                                hx-include="closest form">
+                            <option value="asc" {% if current_direction == "asc" %}selected{% endif %}>{% trans "Ascending" %}</option>
+                            <option value="desc" {% if current_direction == "desc" %}selected{% endif %}>{% trans "Descending" %}</option>
+                        </select>
+                    </div>
                 </form>
             </div>
         </div>

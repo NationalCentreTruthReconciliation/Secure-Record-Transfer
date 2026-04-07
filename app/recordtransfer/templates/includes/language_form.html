@@ -3,19 +3,21 @@
     {% csrf_token %}
     <fieldset class="fieldset w-full md:w-1/2">
         <legend class="fieldset-legend text-sm md:text-md">{% trans "Preferred Language" %}</legend>
-        <select id="profile-language-switcher"
-                name="language"
-                onchange="this.form.submit()"
-                class="select select-bordered select-sm md:select-md w-full bg-gray-50 text-gray-600"
-                required>
-            {% get_current_language as LANGUAGE_CODE %}
-            {% get_available_languages as LANGUAGES %}
-            {% get_language_info_list for LANGUAGES as languages %}
-            {% for language in languages %}
-                <option value="{{ language.code }}"
-                        {% if language.code == LANGUAGE_CODE %}selected{% endif %}
-                        class="bg-base-200 text-primary">{{ language.name_local }} ({{ language.code }})</option>
-            {% endfor %}
-        </select>
+        <div class="select select-bordered select-sm md:select-md w-full bg-gray-50 text-gray-600">
+            <select id="profile-language-switcher"
+                    name="language"
+                    onchange="this.form.submit()"
+                    class="bg-transparent focus:outline-none"
+                    required>
+                {% get_current_language as LANGUAGE_CODE %}
+                {% get_available_languages as LANGUAGES %}
+                {% get_language_info_list for LANGUAGES as languages %}
+                {% for language in languages %}
+                    <option value="{{ language.code }}"
+                            {% if language.code == LANGUAGE_CODE %}selected{% endif %}
+                            class="bg-base-200 text-primary">{{ language.name_local }} ({{ language.code }})</option>
+                {% endfor %}
+            </select>
+        </div>
     </fieldset>
 </form>

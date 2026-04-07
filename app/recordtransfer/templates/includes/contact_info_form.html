@@ -69,15 +69,19 @@
         <div class="flex-1 space-y-3 md:space-y-4">
             <fieldset class="fieldset">
                 <legend class="fieldset-legend text-sm md:text-md">{% trans form.province_or_state.label %}</legend>
-                <select class="select select-bordered select-sm md:select-md w-full bg-gray-50 text-gray-600"
-                        name="{{ form.province_or_state.name }}"
-                        id="{{ form.province_or_state.id_for_label }}"
-                        required>
-                    {% for value, label in form.province_or_state.field.choices %}
-                        <option value="{{ value }}"
-                                {% if form.province_or_state.value == value %}selected{% endif %}>{{ label }}</option>
-                    {% endfor %}
-                </select>
+                <div class="select select-bordered select-sm md:select-md w-full bg-gray-50 text-gray-600">
+                    <select name="{{ form.province_or_state.name }}"
+                            id="{{ form.province_or_state.id_for_label }}"
+                            class="bg-transparent focus:outline-none"
+                            required>
+                        {% for value, label in form.province_or_state.field.choices %}
+                            <option value="{{ value }}"
+                                    {% if form.province_or_state.value == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
                 {% if form.province_or_state.errors %}
                     <p class="text-error text-xs md:text-sm">{% trans form.province_or_state.errors.0 %}</p>
                 {% endif %}
@@ -109,15 +113,17 @@
             </fieldset>
             <fieldset class="fieldset">
                 <legend class="fieldset-legend text-sm md:text-md">{% trans form.country.label %}</legend>
-                <select class="select select-bordered select-sm md:select-md w-full bg-gray-50 text-gray-600"
-                        name="{{ form.country.name }}"
-                        id="{{ form.country.id_for_label }}"
-                        required>
-                    {% for value, label in form.country.field.choices %}
-                        <option value="{{ value }}"
-                                {% if form.country.value == value %}selected{% endif %}>{{ label }}</option>
-                    {% endfor %}
-                </select>
+                <div class="select select-bordered select-sm md:select-md w-full bg-gray-50 text-gray-600">
+                    <select name="{{ form.country.name }}"
+                            id="{{ form.country.id_for_label }}"
+                            class="bg-transparent focus:outline-none"
+                            required>
+                        {% for value, label in form.country.field.choices %}
+                            <option value="{{ value }}"
+                                    {% if form.country.value == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
                 {% if form.country.errors %}
                     <p class="text-error text-xs md:text-sm">{% trans form.country.errors.0 %}</p>
                 {% endif %}
