@@ -31,8 +31,8 @@ importers:
         specifier: ^5.0.0
         version: 5.0.0(@uppy/core@5.2.0)
       air-datepicker:
-        specifier: ^3.5.3
-        version: 3.6.0
+        specifier: 3.5.*
+        version: 3.5.3
       css-loader:
         specifier: ^7.1.2
         version: 7.1.2(webpack@5.105.4)
@@ -540,8 +540,8 @@ packages:
     engines: {node: '>=0.4.0'}
     hasBin: true
 
-  air-datepicker@3.6.0:
-    resolution: {integrity: sha512-+txUkqa949rXBJDmkQAIb/GehZECJYF4rm9XJxVYtEX22C9WvBpE/XwCUQZBopKIkpg4ycAySJ9lH3JOg9qQTw==}
+  air-datepicker@3.5.3:
+    resolution: {integrity: sha512-Elf9gLhv/jidN1+TfeRJYMQRUfYx5apXw2dY5DuAMPRnNtQ4Iw9fTTJK772osmXSUB9xQ2Y8Q1Pt6pgBOQLPQw==}
 
   ajv-formats@2.1.1:
     resolution: {integrity: sha512-Wx0Kx52hxE7C18hkMEggYlEifqWZtYaRgouJor+WMdPnQyEK13vgEWyVNup7SoeeoLMsr4kf5h6dOW11I15MUA==}
@@ -2831,7 +2831,7 @@ snapshots:
 
   acorn@8.16.0: {}
 
-  air-datepicker@3.6.0: {}
+  air-datepicker@3.5.3: {}
 
   ajv-formats@2.1.1(ajv@8.17.1):
     optionalDependencies:

@@ -14,7 +14,7 @@
         "@uppy/dashboard": "^5.1.1",
         "@uppy/locales": "^5.0.1",
         "@uppy/xhr-upload": "^5.0.0",
-        "air-datepicker": "^3.5.3",
+        "air-datepicker": "3.5.*",
         "css-loader": "^7.1.2",
         "css-minimizer-webpack-plugin": "^8.0.0",
         "daisyui": "^5.0.35",
