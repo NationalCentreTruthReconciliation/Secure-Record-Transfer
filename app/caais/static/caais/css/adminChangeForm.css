@@ -81,6 +81,27 @@ input#id_date_of_materials {
     font-weight: bold;
 }
 
+.country-select-container {
+    position: relative;
+    display: inline-block;
+}
+
+.country-select-container select {
+    padding-inline-end: 2.5rem;
+}
+
+.country-select-flag {
+    position: absolute;
+    top: 50%;
+    inset-inline-end: 1.5rem;
+    transform: translateY(-50%);
+    width: 1.25rem;
+    height: auto;
+    border-radius: 2px;
+    box-shadow: 0 0 0 1px rgb(0 0 0 / 0.08);
+    pointer-events: none;
+}
+
 @media screen and (max-width:767px) {
     .date-is-approximate-wrapper {
         margin-left: 0;
