@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-20 19:45-0600\n"
+"POT-Creation-Date: 2026-04-21 21:30-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1807,7 +1807,7 @@ msgstr ""
 
 #: recordtransfer/templates/admin/sitesetting_change_form.html:5
 #: recordtransfer/templates/includes/account_info_form.html:79
-#: recordtransfer/templates/includes/contact_info_form.html:130
+#: recordtransfer/templates/includes/contact_info_form.html:136
 #: recordtransfer/templates/includes/submission_group_edit_form.html:11
 #: recordtransfer/templates/recordtransfer/submission_form_base.html:79
 msgid "Save"
@@ -1876,24 +1876,24 @@ msgstr ""
 msgid "Submission groups"
 msgstr ""
 
-#: recordtransfer/templates/includes/assign_submission_group_modal.html:18
+#: recordtransfer/templates/includes/assign_submission_group_modal.html:19
 msgid "Select a group to see its description"
 msgstr ""
 
-#: recordtransfer/templates/includes/assign_submission_group_modal.html:20
+#: recordtransfer/templates/includes/assign_submission_group_modal.html:21
 msgid "Choose a group"
 msgstr ""
 
-#: recordtransfer/templates/includes/assign_submission_group_modal.html:23
+#: recordtransfer/templates/includes/assign_submission_group_modal.html:24
 msgid "No description available"
 msgstr ""
 
-#: recordtransfer/templates/includes/assign_submission_group_modal.html:26
+#: recordtransfer/templates/includes/assign_submission_group_modal.html:27
 #, python-format
 msgid "%(group_name)s (current)"
 msgstr ""
 
-#: recordtransfer/templates/includes/assign_submission_group_modal.html:40
+#: recordtransfer/templates/includes/assign_submission_group_modal.html:42
 #: recordtransfer/templates/includes/delete_in_progress_submission_modal.html:18
 #: recordtransfer/templates/includes/delete_submission_group_modal.html:16
 #: recordtransfer/templates/includes/new_submission_group_modal.html:13
@@ -1901,15 +1901,15 @@ msgstr ""
 msgid "Cancel"
 msgstr "रद्द करें"
 
-#: recordtransfer/templates/includes/assign_submission_group_modal.html:45
+#: recordtransfer/templates/includes/assign_submission_group_modal.html:47
 msgid "Unassign Group"
 msgstr ""
 
-#: recordtransfer/templates/includes/assign_submission_group_modal.html:49
+#: recordtransfer/templates/includes/assign_submission_group_modal.html:51
 msgid "Change Group"
 msgstr ""
 
-#: recordtransfer/templates/includes/assign_submission_group_modal.html:51
+#: recordtransfer/templates/includes/assign_submission_group_modal.html:53
 msgid "Assign Group"
 msgstr ""
 
@@ -1922,12 +1922,12 @@ msgid "Sort direction:"
 msgstr ""
 
 #: recordtransfer/templates/includes/base_table.html:15
-#: recordtransfer/templates/includes/base_table.html:56
+#: recordtransfer/templates/includes/base_table.html:59
 msgid "Descending"
 msgstr ""
 
 #: recordtransfer/templates/includes/base_table.html:17
-#: recordtransfer/templates/includes/base_table.html:55
+#: recordtransfer/templates/includes/base_table.html:58
 msgid "Ascending"
 msgstr ""
 
@@ -1939,15 +1939,15 @@ msgstr ""
 msgid "Sort by:"
 msgstr ""
 
-#: recordtransfer/templates/includes/base_table.html:39
+#: recordtransfer/templates/includes/base_table.html:40
 msgid "Sort by"
 msgstr ""
 
-#: recordtransfer/templates/includes/base_table.html:47
+#: recordtransfer/templates/includes/base_table.html:49
 msgid "Direction:"
 msgstr ""
 
-#: recordtransfer/templates/includes/base_table.html:51
+#: recordtransfer/templates/includes/base_table.html:54
 msgid "Direction"
 msgstr ""
 
@@ -1967,11 +1967,11 @@ msgstr "अपार्टमेंट, सुइट, आदि."
 msgid "Enter city"
 msgstr "शहर दर्ज करें"
 
-#: recordtransfer/templates/includes/contact_info_form.html:92
+#: recordtransfer/templates/includes/contact_info_form.html:96
 msgid "Enter state/province if not listed above"
 msgstr "यदि ऊपर सूचीबद्ध नहीं है तो राज्य/प्रांत दर्ज करें"
 
-#: recordtransfer/templates/includes/contact_info_form.html:104
+#: recordtransfer/templates/includes/contact_info_form.html:108
 msgid "Enter postal/zip code"
 msgstr "ज़िप कोड दर्ज करें"
 
@@ -2205,7 +2205,7 @@ msgstr ""
 msgid "Save and continue"
 msgstr ""
 
-#: recordtransfer/templates/includes/submission_form_field.html:30
+#: recordtransfer/templates/includes/submission_form_field.html:32
 #: recordtransfer/templates/recordtransfer/header.html:45
 #: recordtransfer/templates/recordtransfer/help.html:4
 #: recordtransfer/templates/recordtransfer/signup_form.html:123
