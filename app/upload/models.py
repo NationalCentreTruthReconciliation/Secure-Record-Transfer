@@ -9,7 +9,7 @@ from typing import Optional
 from django.conf import settings
 from django.core.files import File
 from django.core.files.uploadedfile import UploadedFile
-from django.db import models
+from django.db import models, transaction
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from django.urls import reverse
@@ -52,6 +52,9 @@ class UploadSession(models.Model):
        REMOVING_IN_PROGRESS --> CREATED
     """
 
+    class SessionLimitExceeded(Exception):
+        """Raised when creating a new session would exceed a user's open-session limit."""
+
     class SessionStatus(models.TextChoices):
         """The status of the session."""
 
@@ -78,11 +81,44 @@ class UploadSession(models.Model):
     objects = UploadSessionManager()
 
     @classmethod
-    def new_session(cls, user: Optional[User] = None) -> UploadSession:
-        """Start a new upload session."""
-        return cls.objects.create(
-            token=get_random_string(32), started_at=timezone.now(), user=user
-        )
+    def new_session(
+        cls, user: Optional[User] = None, enforce_limit: bool = False
+    ) -> UploadSession:
+        """Start a new upload session.
+
+        Args:
+            user: The user that will own the session.
+            enforce_limit:
+                If True (and a user is given), atomically check that creating this session
+                will not push the user over the
+                :ref:`UPLOAD_SESSION_MAX_CONCURRENT_OPEN` limit. The check and the insert
+                are performed inside a transaction with the user row locked
+                (``SELECT ... FOR UPDATE``), serializing concurrent attempts for the same
+                user and closing the time-of-check-to-time-of-use race window.
+
+        Raises:
+            UploadSession.SessionLimitExceeded:
+                If ``enforce_limit`` is True and creating this session would exceed the
+                user's open session limit.
+        """
+        if not enforce_limit or user is None:
+            return cls.objects.create(
+                token=get_random_string(32), started_at=timezone.now(), user=user
+            )
+
+        with transaction.atomic():
+            # Lock the user row so concurrent session-creation attempts for this user
+            # are serialized; the limit check below then sees a stable count.
+            # Access via ``_meta.model`` to support SimpleLazyObject-wrapped users
+            # (e.g. ``request.user``).
+            user._meta.model.objects.select_for_update().filter(pk=user.pk).first()
+            if not user.open_sessions_within_limit(will_add_new=True):
+                raise cls.SessionLimitExceeded(
+                    "Creating a new upload session would exceed the user's open-session limit"
+                )
+            return cls.objects.create(
+                token=get_random_string(32), started_at=timezone.now(), user=user
+            )
 
     @property
     def upload_size(self) -> int:
