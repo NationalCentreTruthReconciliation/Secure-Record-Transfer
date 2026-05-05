@@ -388,7 +388,7 @@ class TestInProgressSubmission(TestCase):
         self.in_progress = InProgressSubmission.objects.create(
             user=self.user,
             current_step=SubmissionStep.ACCEPT_LEGAL.value,
-            step_data=b"test data",
+            step_data={"data": "test data"},
             title="Test Submission",
             upload_session=self.upload_session,
         )

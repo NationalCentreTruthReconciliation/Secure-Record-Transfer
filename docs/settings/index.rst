@@ -576,7 +576,7 @@ MAX_SINGLE_UPLOAD_SIZE_MB
         64            int
         ============  =========
 
-    Sets the maximum allowed size a single file can be when uploaded with the transfer form. The
+    Sets the maximum allowed size a single file can be when uploaded with the submission form. The
     size is expressed in **MB**, *not* MiB.
 
     If the :ref:`FILE_UPLOAD_ENABLED` setting is disabled, this option has no effect.
@@ -628,7 +628,7 @@ MAX_TOTAL_UPLOAD_COUNT
         40            int
         ============  =========
 
-    Sets the maximum number of files that can be transferred at one time with the transfer form.
+    Sets the maximum number of files that can be transferred at one time with the submission form.
 
     If the :ref:`FILE_UPLOAD_ENABLED` setting is disabled, this option has no effect.
 

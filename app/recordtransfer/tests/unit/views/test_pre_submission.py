@@ -1,4 +1,3 @@
-import pickle
 from typing import cast
 from unittest.mock import MagicMock, PropertyMock, patch
 
@@ -564,13 +563,11 @@ class SubmissionFormWizardTests(TestCase):
         in_progress = InProgressSubmission.objects.create(
             user=self.user,
             current_step=SubmissionStep.RECORD_DESCRIPTION.value,
-            step_data=pickle.dumps(
-                {
-                    "past": {},
-                    "current": {},
-                    "extra": {},
-                }
-            ),
+            step_data={
+                "past": {},
+                "current": {},
+                "extra": {},
+            },
         )
 
         response = self.client.get(self.url, {"resume": in_progress.uuid}, follow=True)
@@ -597,15 +594,13 @@ class SubmissionFormWizardTests(TestCase):
             user=self.user,
             current_step=SubmissionStep.RECORD_DESCRIPTION.value,
             upload_session=session,
-            step_data=pickle.dumps(
-                {
-                    "past": {},
-                    "current": {},
-                    "extra": {
-                        "session_token": session.token,
-                    },
-                }
-            ),
+            step_data={
+                "past": {},
+                "current": {},
+                "extra": {
+                    "session_token": session.token,
+                },
+            },
         )
 
         response = self.client.get(self.url, {"resume": in_progress.uuid}, follow=True)

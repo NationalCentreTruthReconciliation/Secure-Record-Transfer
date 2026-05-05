@@ -439,7 +439,7 @@ def str_or_default(form_data: dict, field_name: str, default: str = "") -> str:
 
     Args:
         form_data (dict):
-            The cleaned data from the transfer form
+            The cleaned data from the submission form
         field_name (str):
             The name of the field in the form data
         default (str):
@@ -476,7 +476,7 @@ def term_or_default(
 
     Args:
         form_data (dict):
-            The cleaned data from the transfer form
+            The cleaned data from the submission form
         field_name (str):
             The name of the key in the form data
         TermClass (Type[AbstractTerm]):
