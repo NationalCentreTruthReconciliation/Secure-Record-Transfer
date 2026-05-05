@@ -868,7 +868,7 @@ class InProgressSubmission(models.Model):
         null=False,
         help_text="Current step in the transfer wizard process",
     )
-    step_data = models.BinaryField(default=b"")
+    step_data = models.JSONField(default=dict)
     title = models.CharField(max_length=256, null=True)
     upload_session = models.OneToOneField(
         UploadSession, null=True, on_delete=models.SET_NULL, related_name="in_progress_submission"

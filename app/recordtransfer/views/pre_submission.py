@@ -4,7 +4,6 @@ deleting in-progress submissions, as well as handling the final submission.
 
 import dataclasses
 import logging
-import pickle
 import re
 from typing import Any, ClassVar, Optional, OrderedDict, Union, cast
 
@@ -361,7 +360,7 @@ class SubmissionFormWizard(SessionWizardView):
         if not self.in_progress_submission:
             raise ValueError("No in-progress submission to load")
 
-        step_data = pickle.loads(self.in_progress_submission.step_data)
+        step_data = self.in_progress_submission.step_data
 
         self.storage.data = step_data["past"]
         self.storage.extra_data = step_data["extra"]
@@ -492,7 +491,7 @@ class SubmissionFormWizard(SessionWizardView):
 
         self.in_progress_submission.current_step = self.current_step.value
         self.in_progress_submission.user = cast(User, self.request.user)
-        self.in_progress_submission.step_data = pickle.dumps(form_data)
+        self.in_progress_submission.step_data = form_data
 
         self.in_progress_submission.save()
 
@@ -735,7 +734,7 @@ class SubmissionFormWizard(SessionWizardView):
         initial = (self.initial_dict or {}).get(step, {})
 
         if self.in_progress_submission and step == self.in_progress_submission.current_step:
-            initial = pickle.loads(self.in_progress_submission.step_data)["current"]
+            initial = self.in_progress_submission.step_data.get("current", {})
 
         if not self.in_progress_submission and step == SubmissionStep.CONTACT_INFO.value:
             user = cast(User, self.request.user)
@@ -982,6 +981,8 @@ class SubmissionFormWizard(SessionWizardView):
         form_data = {}
         try:
             form_data = self.get_all_cleaned_data()
+
+            import pickle
 
             submission = Submission.objects.create(
                 user=self.request.user, raw_form=pickle.dumps(form_data)
