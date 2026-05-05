@@ -1281,13 +1281,13 @@ class TestAssignSubmissionGroupModalView(TestCase):
         self.submission = Submission.objects.create(
             user=self.user,
             metadata=metadata,
-            raw_form=b"test_form_data",
+            raw_form={"data": "test_form_data"},
             uuid=uuid.uuid4(),
         )
 
         self.other_submission = Submission.objects.create(
             user=self.other_user,
-            raw_form=b"test_form_data",
+            raw_form={"data": "test_form_data"},
             uuid=uuid.uuid4(),
         )
 
@@ -1455,12 +1455,12 @@ class TestAssignSubmissionGroupView(TestCase):
         # Create test submissions
         self.submission = Submission.objects.create(
             user=self.user,
-            raw_form=b"test_form_data",
+            raw_form={"data": "test_form_data"},
             uuid=uuid.uuid4(),
         )
         self.other_submission = Submission.objects.create(
             user=self.other_user,
-            raw_form=b"test_form_data",
+            raw_form={"data": "test_form_data"},
             uuid=uuid.uuid4(),
         )
 

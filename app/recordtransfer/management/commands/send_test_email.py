@@ -118,7 +118,7 @@ class Command(BaseCommand):
         Returns:
             Submission: A Submission instance that has not been saved to the database.
         """
-        return Submission(user=user, raw_form=b"")
+        return Submission(user=user)
 
     def create_test_in_progress_submission(self, user: User) -> InProgressSubmission:
         """Create and return a test InProgressSubmission instance for the given user."""
