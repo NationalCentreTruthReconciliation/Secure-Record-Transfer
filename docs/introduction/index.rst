@@ -18,14 +18,14 @@ and their associated metadata. In this project, we are using the Python implemen
 `bagit-python <https://github.com/LibraryOfCongress/bagit-python>`_.
 
 The Canadian Archival Accession Information Standard (CAAIS) aims to standard the metadata supplied
-for an accession. The main transfer form in this app contains many of the fields in that
+for an accession. The main submission form in this app contains many of the fields in that
 specification, some have been given a new name in the form to make it easier for a user to
 understand, but the metadata and reports generated all use the fields in CAAIS verbatim.
 
 What Does this App Do?
 ######################
 
-For users, this app provides a multi-page transfer form with CAAIS-oriented fields and a file
+For users, this app provides a multi-page submission form with CAAIS-oriented fields and a file
 upload space to facilitate sending records to an institution. Users also have a profile page where
 they can:
 

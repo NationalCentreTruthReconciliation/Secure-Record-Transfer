@@ -530,7 +530,7 @@ class Submission(models.Model):
         user (User):
             The user who submitted the metadata (and optionally, files)
         raw_form (JSONField):
-            A JSON object containing the transfer form data as it was submitted
+            A JSON object containing the submission form data as it was submitted
         metadata (OneToOneField):
             Foreign key to a :py:class:`~caais.models.Metadata` object. The
             metadata object is generated from the form metadata, and any
