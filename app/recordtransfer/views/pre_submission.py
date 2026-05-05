@@ -978,15 +978,14 @@ class SubmissionFormWizard(SessionWizardView):
             HttpResponse: A redirect to the submission sent page, or an error page if there was an
             unexpected issue creating the submission.
         """
-        form_data = {}
+        # This form data contains serializable data types only
+        raw_form_data = self.storage.data
+
+        # This form data contains real model instances
+        form_data = self.get_all_cleaned_data()
+
         try:
-            form_data = self.get_all_cleaned_data()
-
-            import pickle
-
-            submission = Submission.objects.create(
-                user=self.request.user, raw_form=pickle.dumps(form_data)
-            )
+            submission = Submission.objects.create(user=self.request.user, raw_form=raw_form_data)
 
             LOGGER.info("Mapping form data to CAAIS metadata")
             submission.metadata = map_form_to_metadata(form_data)

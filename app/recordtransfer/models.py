@@ -529,8 +529,8 @@ class Submission(models.Model):
             The date and time the submission was made
         user (User):
             The user who submitted the metadata (and optionally, files)
-        raw_form (BinaryField):
-            A pickled object containing the transfer form as it was submitted
+        raw_form (JSONField):
+            A JSON object containing the transfer form data as it was submitted
         metadata (OneToOneField):
             Foreign key to a :py:class:`~caais.models.Metadata` object. The
             metadata object is generated from the form metadata, and any
@@ -546,9 +546,7 @@ class Submission(models.Model):
 
     submission_date = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    raw_form = models.BinaryField(
-        default=b"", null=True
-    )  # A raw capture of the form before submission
+    raw_form = models.JSONField(default=dict, null=False)
     metadata = models.OneToOneField(
         Metadata, on_delete=models.CASCADE, null=True, related_name="submission"
     )
