@@ -560,7 +560,12 @@ class SubmissionFormWizard(SessionWizardView):
             SubmissionStep(self.steps.next) == SubmissionStep.UPLOAD_FILES
             and "session_token" not in self.storage.extra_data
         ):
-            session = UploadSession.new_session(user=cast(User, self.request.user))
+            # Catch when another session would push the user over their limit.
+            try:
+                session = UploadSession.new_session(user, enforce_limit=True)
+            except UploadSession.SessionLimitExceeded:
+                return self._handle_session_limit_reached()
+
             self.storage.extra_data["session_token"] = session.token
 
         # get the form instance based on the data from the storage backend
@@ -579,6 +584,34 @@ class SubmissionFormWizard(SessionWizardView):
         # change the stored current step
         self.storage.current_step = next_step
         return self.render(new_form, **kwargs)
+
+    def _handle_session_limit_reached(self) -> HttpResponse:
+        """Save the in-progress form and redirect when a concurrent request consumed the last
+        available session slot.
+        """
+        redirect_to = reverse("recordtransfer:open_sessions")
+        profile_url = reverse("recordtransfer:user_profile")
+        message = mark_safe(
+            gettext(
+                "Your submission was saved, but you have reached your session limit. Go to "
+                "%(link_start)syour profile%(link_end)s to see your saved submissions."
+            )
+            % {
+                "link_start": mark_safe(
+                    f'<a class="link-primary font-semibold underline" href="{profile_url}">'
+                ),
+                "link_end": mark_safe("</a>"),
+            }
+        )
+
+        try:
+            self.save_form_data(self.request)
+            self.storage.reset()
+            messages.success(self.request, message)
+        except Exception:
+            messages.error(self.request, gettext("There was an error saving the submission."))
+
+        return HttpResponseClientRedirect(redirect_to)
 
     def trigger_contact_info_save_prompt(self, form: forms.ContactInfoForm) -> HttpResponse:
         """Trigger a prompt to save contact info using HTMX."""
