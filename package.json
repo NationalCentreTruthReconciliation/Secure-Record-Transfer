@@ -19,7 +19,7 @@
         "css-minimizer-webpack-plugin": "^8.0.0",
         "daisyui": "^5.0.35",
         "htmx-ext-head-support": "^2.0.4",
-        "htmx.org": "^2.0.4",
+        "htmx.org": "^2.0.10",
         "imask": "^7.6.1",
         "mini-css-extract-plugin": "^2.9.2",
         "postcss": "^8.5.3",
