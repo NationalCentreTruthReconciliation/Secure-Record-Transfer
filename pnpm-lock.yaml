@@ -46,8 +46,8 @@ importers:
         specifier: ^2.0.4
         version: 2.0.4
       htmx.org:
-        specifier: ^2.0.4
-        version: 2.0.6
+        specifier: ^2.0.10
+        version: 2.0.10
       imask:
         specifier: ^7.6.1
         version: 7.6.1
@@ -1188,8 +1188,8 @@ packages:
   htmx-ext-head-support@2.0.4:
     resolution: {integrity: sha512-CGGicOzu3VlHCqjhdHjlU4i4SQ19WwYnl2+1jX3SdOJX1gKOrJrtlED95FMgWyGrlZZ/qo0y/RpOE7KZA2X9kg==}
 
-  htmx.org@2.0.6:
-    resolution: {integrity: sha512-7ythjYneGSk3yCHgtCnQeaoF+D+o7U2LF37WU3O0JYv3gTZSicdEFiI/Ai/NJyC5ZpYJWMpUb11OC5Lr6AfAqA==}
+  htmx.org@2.0.10:
+    resolution: {integrity: sha512-kdeJe7ZVwaS6QMz/ebBIVtZdpwen6L0OQ5GOhPV9MKBb196TCZeZu4yA7ZIQsaLKv7EpXz+So7KSXNuHXhj7Cw==}
 
   icss-utils@5.1.0:
     resolution: {integrity: sha512-soFhflCVWLfRNOPU3iv5Z9VUdT44xFRbzjLsEzSr5AQmgqPMTHdU3PMT1Cf1ssx8fLNJDA1juftYl+PUcv3MqA==}
@@ -3593,9 +3593,9 @@ snapshots:
 
   htmx-ext-head-support@2.0.4:
     dependencies:
-      htmx.org: 2.0.6
+      htmx.org: 2.0.10
 
-  htmx.org@2.0.6: {}
+  htmx.org@2.0.10: {}
 
   icss-utils@5.1.0(postcss@8.5.6):
     dependencies:

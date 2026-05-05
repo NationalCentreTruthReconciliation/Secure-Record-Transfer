@@ -8,9 +8,10 @@ from typing import Optional
 from unittest.mock import MagicMock, Mock, patch
 
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models.manager import BaseManager
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.utils import timezone
 from upload.models import PermUploadedFile, TempUploadedFile, UploadSession
 
@@ -80,7 +81,7 @@ class TestUploadSession(TestCase):
 
     def setUp(self) -> None:
         """Set up test."""
-        self.session = UploadSession.new_session()
+        self.session = UploadSession.new_session(enforce_limit=False)
 
         self.test_temp_file = get_mock_temp_uploaded_file(
             "test.pdf", size=1000, session=self.session
@@ -909,6 +910,97 @@ class TestUploadSession(TestCase):
         """Restore logging settings."""
         super().tearDownClass()
         logging.disable(logging.NOTSET)
+
+
+class TestNewSessionLimitEnforcement(TestCase):
+    """Tests for the ``enforce_limit`` behaviour of :meth:`UploadSession.new_session`."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        """Set up test class."""
+        super().setUpClass()
+        logging.disable(logging.CRITICAL)
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        """Restore logging settings."""
+        super().tearDownClass()
+        logging.disable(logging.NOTSET)
+
+    def setUp(self) -> None:
+        """Create a test user for each test."""
+        self.user = get_user_model().objects.create_user(
+            username="limituser", password="1X<ISRUkw+tuK"
+        )
+
+    @override_settings(UPLOAD_SESSION_MAX_CONCURRENT_OPEN=2)
+    def test_new_session_default_does_not_enforce_limit(self) -> None:
+        """Without ``enforce_limit``, ``new_session`` should create sessions even when the user is
+        already at or past the limit.
+        """
+        for _ in range(3):
+            UploadSession.new_session(user=self.user)
+        self.assertEqual(self.user.open_upload_sessions().count(), 3)
+
+    @override_settings(UPLOAD_SESSION_MAX_CONCURRENT_OPEN=2)
+    def test_new_session_enforce_limit_within_limit(self) -> None:
+        """Should create the session when the user is below the limit."""
+        UploadSession.new_session(user=self.user)
+        session = UploadSession.new_session(user=self.user, enforce_limit=True)
+        self.assertIsInstance(session, UploadSession)
+        self.assertEqual(self.user.open_upload_sessions().count(), 2)
+
+    @override_settings(UPLOAD_SESSION_MAX_CONCURRENT_OPEN=2)
+    def test_new_session_enforce_limit_exceeded_raises(self) -> None:
+        """``SessionLimitExceeded`` should be raised and a new session should not be created."""
+        for _ in range(2):
+            UploadSession.new_session(user=self.user)
+
+        with self.assertRaises(UploadSession.SessionLimitExceeded):
+            UploadSession.new_session(user=self.user, enforce_limit=True)
+
+        self.assertEqual(self.user.open_upload_sessions().count(), 2)
+
+    @override_settings(UPLOAD_SESSION_MAX_CONCURRENT_OPEN=1)
+    def test_new_session_enforce_limit_no_user_skips_check(self) -> None:
+        """``enforce_limit=True`` with ``user=None`` should skip the per-user check and always
+        create the session, since the limit is per-user.
+        """
+        session = UploadSession.new_session(user=None, enforce_limit=True)
+        self.assertIsInstance(session, UploadSession)
+        self.assertIsNone(session.user)
+
+    @override_settings(UPLOAD_SESSION_MAX_CONCURRENT_OPEN=-1)
+    def test_new_session_enforce_limit_disabled_via_setting(self) -> None:
+        """When ``UPLOAD_SESSION_MAX_CONCURRENT_OPEN`` is -1 the limit is disabled, and
+        ``enforce_limit=True`` should never raise.
+        """
+        for _ in range(5):
+            session = UploadSession.new_session(user=self.user, enforce_limit=True)
+            self.assertIsInstance(session, UploadSession)
+        self.assertEqual(self.user.open_upload_sessions().count(), 5)
+
+    @override_settings(UPLOAD_SESSION_MAX_CONCURRENT_OPEN=2)
+    def test_new_session_enforce_limit_ignores_non_open_sessions(self) -> None:
+        """Only sessions in the "open" statuses count towards the limit. Closed sessions (e.g.
+        STORED, EXPIRED) should not block creation when ``enforce_limit=True``.
+        """
+        stored = UploadSession.new_session(user=self.user)
+        stored.status = UploadSession.SessionStatus.STORED
+        stored.save()
+
+        expired = UploadSession.new_session(user=self.user)
+        expired.status = UploadSession.SessionStatus.EXPIRED
+        expired.save()
+
+        # Two non-open sessions plus two open should still fit within the limit of 2
+        UploadSession.new_session(user=self.user)
+        session = UploadSession.new_session(user=self.user, enforce_limit=True)
+        self.assertIsInstance(session, UploadSession)
+
+        # And a third open session should now be rejected
+        with self.assertRaises(UploadSession.SessionLimitExceeded):
+            UploadSession.new_session(user=self.user, enforce_limit=True)
 
 
 class TestPermUploadedFile(TestCase):
