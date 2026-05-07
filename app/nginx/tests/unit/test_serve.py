@@ -33,3 +33,12 @@ class ServeMediaFileTests(TestCase):
         )
         self.assertEqual(response["Content-Disposition"], 'attachment; filename="file.zip"')
         self.assertEqual(response["X-Accel-Redirect"], file_url)
+
+    @override_settings(DEBUG=False)
+    def test_svg_not_rendered_inline(self) -> None:
+        """Test that image/svg+xml files are not rendered inline."""
+        file_url = "/media/temp/aaa/xss.svg"
+        response = serve_media_file(file_url)
+        self.assertEqual(response["Content-Type"], "image/svg+xml")
+        self.assertEqual(response["Content-Disposition"], 'attachment; filename="xss.svg"')
+        self.assertEqual(response["X-Accel-Redirect"], file_url)
