@@ -15,7 +15,6 @@ MIME_RENDER_INLINE = {
     "image/gif",
     "image/jpeg",
     "image/png",
-    "image/svg+xml",
     "image/webp",
     "image/tiff",
     "audio/aac",
