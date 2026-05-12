@@ -9,7 +9,7 @@ from django.contrib import admin, messages
 from django.contrib.admin import display
 from django.contrib.admin.options import InlineModelAdmin
 from django.contrib.admin.utils import unquote
-from django.contrib.auth.admin import UserAdmin, sensitive_post_parameters_m
+from django.contrib.auth.admin import UserAdmin
 from django.db.models import Model, QuerySet
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
@@ -17,10 +17,12 @@ from django.forms import ModelForm
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import path, reverse
+from django.utils.decorators import method_decorator
 from django.utils.html import format_html
 from django.utils.safestring import SafeText, mark_safe
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext_lazy
+from django.views.decorators.debug import sensitive_post_parameters
 
 from recordtransfer.constants import HtmlIds, OtherValues
 from recordtransfer.emails import send_user_account_updated
@@ -640,7 +642,7 @@ class CustomUserAdmin(UserAdmin):
 
         return super().changeform_view(request, object_id, form_url or "", extra_context)
 
-    @sensitive_post_parameters_m
+    @method_decorator(sensitive_post_parameters())
     def user_change_password(
         self, request: HttpRequest, id: str, form_url: str = ""
     ) -> HttpResponse:
