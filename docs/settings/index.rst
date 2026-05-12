@@ -503,7 +503,6 @@ ACCEPTED_FILE_FORMATS
         - odt
         - pdf
         - txt
-        - html
     - Image
         - jpg
         - jpeg
@@ -542,6 +541,16 @@ ACCEPTED_FILE_FORMATS
 
         Consider carefully whether you need to accept compressed file formats, and if possible, restrict uploads to uncompressed file types only.
 
+
+    .. warning::
+
+        **Security Warning: HTML Files**
+
+        Including HTML files in your accepted file formats may pose security risks. HTML files are
+        not sanitized for script tags which can expose you to XSS attacks. Be careful when enabling
+        HTML files.
+
+
     Here are some examples based on what you might want to accept (note that you can only specify
     the ACCEPTED_FILE_FORMATS variable *once*):
 
@@ -559,7 +568,7 @@ ACCEPTED_FILE_FORMATS
         ACCEPTED_FILE_FORMATS="Excel Workbook:xlsx|Excel Macro Workbook:xlsm|Excel 1997-2003 Workbook:xls"
 
         # Images and documents
-        ACCEPTED_FILE_FORMATS="PDF:pdf,docx,txt|Image:jpeg,jpg,png,gif,tif,tiff"
+        ACCEPTED_FILE_FORMATS="Document:pdf,docx,txt|Image:jpeg,jpg,png,gif,tif,tiff"
 
 
 
