@@ -2,7 +2,7 @@ import logging
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
-from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.files.uploadedfile import SimpleUploadedFile, UploadedFile
 from django.forms import ValidationError
 from django.test import TestCase, override_settings
 from django.urls import reverse
@@ -137,6 +137,33 @@ class TestUploadFilesView(TestCase):
         self.assertEqual(self.session.file_count, 1)
         # Check that no error is raised if the uploaded file is looked up within the session
         self.session.get_file_by_name("File.pdf")
+
+    def test_html_file_is_sanitized_after_malware_scan(self) -> None:
+        """Test that HTML files are sanitized after malware scanning and before saving."""
+        html_content = b'<html><body><script>alert("xss")</script><p>Safe</p></body></html>'
+
+        def assert_unsanitized_during_malware_scan(file: UploadedFile) -> None:
+            """Assert malware scanning sees the original file content."""
+            file.seek(0)
+            self.assertIn(b"<script>", file.read())
+            file.seek(0)
+
+        self.patch_check_for_malware.side_effect = assert_unsanitized_during_malware_scan
+        response = self.client.post(
+            self.url,
+            {"file": SimpleUploadedFile("File.html", html_content, content_type="text/html")},
+        )
+
+        self.session.refresh_from_db()
+        uploaded_file = self.session.get_file_by_name("File.html")
+        uploaded_file.file_upload.open()
+        saved_content = uploaded_file.file_upload.read()
+        uploaded_file.file_upload.close()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(b"<script>", saved_content)
+        self.assertNotIn(b"alert", saved_content)
+        self.assertIn(b"<p>Safe</p>", saved_content)
 
     def test_error_from_invalid_token(self) -> None:
         """Test that a 400 error is received if the token is invalid."""
