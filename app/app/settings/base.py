@@ -2,6 +2,7 @@ import os
 
 from configuration import AcceptedFileTypes
 from decouple import Csv, config
+from django.utils.csp import CSP
 from django.utils.translation import gettext_lazy as _
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -39,6 +40,46 @@ INSTALLED_APPS = [
 
 X_FRAME_OPTIONS = "SAMEORIGIN"
 
+SECURE_CSP_POLICY = {
+    "default-src": [CSP.SELF],
+    "base-uri": [CSP.SELF],
+    "connect-src": [CSP.SELF],
+    "font-src": [
+        CSP.SELF,
+        "https://cdnjs.cloudflare.com",
+        "https://fonts.gstatic.com",
+    ],
+    "form-action": [CSP.SELF],
+    "frame-ancestors": [CSP.SELF],
+    "frame-src": [
+        CSP.SELF,
+        "https://www.google.com",
+        "https://www.recaptcha.net",
+    ],
+    "img-src": [
+        CSP.SELF,
+        "data:",
+        "https://www.google.com",
+        "https://www.gstatic.com",
+    ],
+    "object-src": [CSP.NONE],
+    "script-src": [
+        CSP.SELF,
+        # Required by current templates that include reCAPTCHA and inline event handlers.
+        CSP.UNSAFE_INLINE,
+        "https://www.google.com",
+        "https://www.gstatic.com",
+        "https://www.recaptcha.net",
+    ],
+    "style-src": [
+        CSP.SELF,
+        # Required by current templates, Django admin, and third-party widgets with inline styles.
+        CSP.UNSAFE_INLINE,
+        "https://cdnjs.cloudflare.com",
+        "https://fonts.googleapis.com",
+    ],
+}
+
 AUTHENTICATION_BACKENDS = [
     # AxesBackend should be the first backend in the AUTHENTICATION_BACKENDS list.
     "axes.backends.AxesBackend",
@@ -48,6 +89,7 @@ AUTHENTICATION_BACKENDS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "django.middleware.csp.ContentSecurityPolicyMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",

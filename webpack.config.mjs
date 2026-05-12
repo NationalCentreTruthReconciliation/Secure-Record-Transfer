@@ -14,7 +14,7 @@ const __dirname = dirname(__filename);
 
 export default {
     mode: mode,
-    devtool: process.env.WEBPACK_MODE === "production" ? false : "eval-source-map",
+    devtool: mode === "production" ? false : "source-map",
     watchOptions: {
         aggregateTimeout: 500,
         poll: 1000,
@@ -78,4 +78,3 @@ export default {
         },
     }
 };
-
