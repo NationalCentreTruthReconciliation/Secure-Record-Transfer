@@ -347,14 +347,20 @@ def _check_for_html_files(inverted_formats: dict) -> None:
     Args:
         inverted_formats: Dictionary mapping extensions to their group names.
     """
-    if "html" in inverted_formats:
+    found_html = []
+
+    for html_extension in ("htm", "html"):
+        if html_extension in inverted_formats:
+            found_html.append(html_extension)
+
+    if found_html:
         warning_msg = """
 ********************************************************************************
 ******* !! WARNING !!
 ******* You've enabled uploads of HTML files.
 ******* Allowing users to upload HTML files can expose you to Cross-Site-
 ******* Scripting (XSS) attacks.
-******* Consider removing this file type (html) from ACCEPTED_FILE_FORMATS
+******* Consider removing this file type (htm, html) from ACCEPTED_FILE_FORMATS
 ********************************************************************************
 """
         LOGGER.warning(warning_msg)
