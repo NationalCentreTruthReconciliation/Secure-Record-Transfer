@@ -432,7 +432,7 @@ CACHE_MIDDLEWARE_SECONDS
     This setting does not have any effect on the dev container, it is only used in the production
     configuration.
 
-    Changing this variable changes `the CACHE_MIDDLEWARE_SECONDS Django setting <https://docs.djangoproject.com/en/5.2/ref/settings/#std-setting-CACHE_MIDDLEWARE_SECONDS>`_.
+    Changing this variable changes `the CACHE_MIDDLEWARE_SECONDS Django setting <https://docs.djangoproject.com/en/6.0/ref/settings/#std-setting-CACHE_MIDDLEWARE_SECONDS>`_.
 
     By default, pages are cached for a day.
 
@@ -460,7 +460,7 @@ CACHE_MIDDLEWARE_KEY_PREFIX
     You can ignore this setting if you do not have multiple instances of the application each
     sharing a cache.
 
-    Changing this variable changes `the CACHE_MIDDLEWARE_KEY_PREFIX Django setting <https://docs.djangoproject.com/en/5.2/ref/settings/#std-setting-CACHE_MIDDLEWARE_KEY_PREFIX>`_.
+    Changing this variable changes `the CACHE_MIDDLEWARE_KEY_PREFIX Django setting <https://docs.djangoproject.com/en/6.0/ref/settings/#std-setting-CACHE_MIDDLEWARE_KEY_PREFIX>`_.
 
     You should use a different prefix for each instance of the application so that there are no
     cache collisions across different instances of the application.

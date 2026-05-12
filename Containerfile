@@ -1,4 +1,4 @@
-FROM docker.io/python:3.11-slim AS base
+FROM docker.io/python:3.14-slim AS base
 
 ENV PYTHONUNBUFFERED=1
 ENV PROJ_DIR="/opt/secure-record-transfer/"
@@ -114,7 +114,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 RUN uv run python "${APP_DIR}/manage.py" compilemessages --ignore .venv
 
 
-FROM docker.io/python:3.11-slim AS prod
+FROM docker.io/python:3.14-slim AS prod
 
 ENV PYTHONUNBUFFERED=1
 ENV PROJ_DIR="/opt/secure-record-transfer/"

@@ -1,4 +1,5 @@
 # Minimal settings for either testing, or building docs with Sphinx
+# ruff: noqa: F403, F405
 import os
 import tempfile
 from pathlib import Path
@@ -17,6 +18,8 @@ ALLOWED_HOSTS = [
 ]
 
 EMAIL_BASE_URL = "http://localhost:8000"
+
+SECURE_CSP_REPORT_ONLY = SECURE_CSP_POLICY
 
 DATABASES = {
     "default": {

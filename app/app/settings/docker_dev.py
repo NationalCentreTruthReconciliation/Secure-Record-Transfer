@@ -1,5 +1,4 @@
-# pylint: disable=wildcard-import
-# pylint: disable=unused-wildcard-import
+# ruff: noqa: F403, F405
 import os
 
 from decouple import config
@@ -39,7 +38,11 @@ DEBUG_TOOLBAR_CONFIG = {
     "SHOW_TOOLBAR_CALLBACK": lambda request: True,
 }
 
-# MySQL Database
+# Report-only CSP for local development. This mirrors the production policy without
+# blocking resources
+SECURE_CSP_REPORT_ONLY = SECURE_CSP_POLICY
+
+# SQLite Database
 
 DEV_DATABASE_NAME = config("DEV_DATABASE_NAME", default="development_database.sqlite3")
 DATABASES = {

@@ -183,7 +183,7 @@ Ensure you follow the instructions in the [Local Python Environment Setup](#loca
 There are three ways to run tests locally:
 
 1. Using [pytest](https://docs.pytest.org/en/stable/how-to/usage.html) (this uses [settings in the `pyproject.toml` file](https://pytest-django.readthedocs.io/en/latest/#example-using-pyproject-toml))
-2. Using the [Django test runner](https://docs.djangoproject.com/en/5.2/ref/django-admin/#test)
+2. Using the [Django test runner](https://docs.djangoproject.com/en/6.0/ref/django-admin/#test)
 3. Using the [VS Code test runner](https://code.visualstudio.com/docs/python/testing#_run-tests). See here for information on [running and debugging tests with VS Code](https://code.visualstudio.com/docs/python/testing#_run-tests).
 
 To run all tests with Pytest or the Django test runner:

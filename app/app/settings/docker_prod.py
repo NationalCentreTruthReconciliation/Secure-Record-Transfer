@@ -1,3 +1,4 @@
+# ruff: noqa: F403, F405
 from decouple import Csv, config
 
 from .base import *
@@ -9,6 +10,9 @@ ALLOWED_HOSTS = config("ALLOWED_HOSTS", cast=Csv())
 CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", cast=Csv())
 
 SECRET_KEY = config("SECRET_KEY", cast=str)
+
+# Enforce the shared Content Security Policy in production.
+SECURE_CSP = SECURE_CSP_POLICY
 
 # Extra Middleware for caching
 
