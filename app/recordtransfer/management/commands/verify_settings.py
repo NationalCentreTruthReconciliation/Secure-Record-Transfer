@@ -308,6 +308,7 @@ def verify_accepted_file_formats() -> None:
             inverted_formats[extension] = group_name
 
     _check_for_compressed_files(inverted_formats)
+    _check_for_html_files(inverted_formats)
 
 
 def _check_for_compressed_files(inverted_formats: dict) -> None:
@@ -338,6 +339,25 @@ def _check_for_compressed_files(inverted_formats: dict) -> None:
         ]
 
         LOGGER.warning("\n".join(warning_msg))
+
+
+def _check_for_html_files(inverted_formats: dict) -> None:
+    """Check for HTML files in uploads.
+
+    Args:
+        inverted_formats: Dictionary mapping extensions to their group names.
+    """
+    if "html" in inverted_formats:
+        warning_msg = """
+********************************************************************************
+******* !! WARNING !!
+******* You've enabled uploads of HTML files.
+******* Allowing users to upload HTML files can expose you to Cross-Site-
+******* Scripting (XSS) attacks.
+******* Consider removing this file type (html) from ACCEPTED_FILE_FORMATS
+********************************************************************************
+"""
+        LOGGER.warning(warning_msg)
 
 
 def _validate_cron(cron_str: str) -> None:
