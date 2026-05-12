@@ -15,6 +15,7 @@ from nginx.serve import serve_media_file
 
 from .check import accept_file, accept_session
 from .clam import check_for_malware
+from .html import sanitize_html_file
 from .models import UploadSession
 
 User = settings.AUTH_USER_MODEL
@@ -134,6 +135,20 @@ def _handle_upload_file(request: HttpRequest, session: UploadSession) -> JsonRes
                 "accepted": False,
                 "uploadSessionToken": session.token,
                 "error": gettext("Unable to scan file for malware due to scanner error"),
+            },
+            status=500,
+        )
+
+    try:
+        _file = sanitize_html_file(_file)
+    except Exception as exc:
+        LOGGER.error("Error sanitizing HTML file %s", _file.name, exc_info=exc)
+        return JsonResponse(
+            {
+                "file": _file.name,
+                "accepted": False,
+                "uploadSessionToken": session.token,
+                "error": gettext("There was an error processing the file"),
             },
             status=500,
         )

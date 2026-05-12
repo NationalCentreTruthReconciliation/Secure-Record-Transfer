@@ -546,9 +546,9 @@ ACCEPTED_FILE_FORMATS
 
         **Security Warning: HTML Files**
 
-        Including HTML files in your accepted file formats may pose security risks. HTML files are
-        not sanitized for script tags which can expose you to XSS attacks. Be careful when enabling
-        HTML files.
+        Including HTML files in your accepted file formats may expose you to cross-site scripting
+        attacks. Note that HTML files *are* sanitized for script tags when uploaded. Use your
+        discretion when deciding to enable HTML uploads.
 
 
     Here are some examples based on what you might want to accept (note that you can only specify
