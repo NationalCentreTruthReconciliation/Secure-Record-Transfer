@@ -347,13 +347,7 @@ def _check_for_html_files(inverted_formats: dict) -> None:
     Args:
         inverted_formats: Dictionary mapping extensions to their group names.
     """
-    found_html = []
-
-    for html_extension in ("htm", "html"):
-        if html_extension in inverted_formats:
-            found_html.append(html_extension)
-
-    if found_html:
+    if any(ext in inverted_formats for ext in ("htm", "html")):
         warning_msg = """
 ********************************************************************************
 ******* !! WARNING !!
