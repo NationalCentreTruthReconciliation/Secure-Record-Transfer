@@ -6,7 +6,6 @@ from typing import Any, Optional, cast
 from caais.export import ExportVersion
 from caais.models import Metadata
 from django.contrib import messages
-from django.core.exceptions import BadRequest
 from django.db.models import QuerySet
 from django.forms import BaseModelForm
 from django.http import (
@@ -25,7 +24,7 @@ from django.views.decorators.http import require_http_methods
 from django.views.generic import DetailView, UpdateView
 from django_htmx.http import trigger_client_event
 
-from recordtransfer.constants import HeaderNames, HtmlIds, QueryParameters
+from recordtransfer.constants import HtmlIds, QueryParameters
 from recordtransfer.forms.submission_group_form import SubmissionGroupForm
 from recordtransfer.models import Submission, SubmissionGroup, User
 
@@ -215,9 +214,6 @@ class SubmissionGroupDetailView(UpdateView):
 @require_http_methods(["GET"])
 def get_user_submission_groups(request: HttpRequest) -> JsonResponse:
     """Return a JSON response containing all submission groups created by the specified user."""
-    if not request.headers.get(HeaderNames.FRONTEND_REQUEST):
-        raise BadRequest(_("Direct access is not allowed."))
-
     user: User = cast(User, request.user)
     submission_groups = SubmissionGroup.objects.filter(created_by=user)
     groups = [

@@ -75,12 +75,7 @@ const updateGroupDescription = (selectField, groupDescDisplay) => {
  * @param {object} context - The context object containing the URL to fetch group descriptions.
  */
 const fetchSubmissionGroups = async (context) => {
-    const response = await fetch(context["fetch_group_descriptions_url"], {
-        method: "GET",
-        headers: {
-            [context["FRONTEND_REQUEST_HEADER"]]: "true"
-        }
-    });
+    const response = await fetch(context["fetch_group_descriptions_url"], { method: "GET" });
 
     if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
