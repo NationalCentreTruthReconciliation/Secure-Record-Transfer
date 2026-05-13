@@ -1,3 +1,4 @@
+import nh3
 from django import forms
 from django.utils.translation import gettext_lazy as _
 from django_countries.fields import CountryField
@@ -6,6 +7,23 @@ from django_recaptcha.widgets import ReCaptchaV2Checkbox, ReCaptchaV2Invisible
 
 from recordtransfer.constants import HtmlIds, OtherValues
 from recordtransfer.widgets import CustomCountrySelectWidget
+
+NO_HTML_ERROR = _("HTML is not allowed in this field.")
+
+
+def validate_no_html_in_text_fields(form: forms.BaseForm) -> None:
+    """Add an error to any text-based field whose cleaned value contains HTML.
+
+    Iterates over all ``CharField`` (and subclass) fields on the form and uses :func:`nh3.is_html`
+    to detect HTML in the cleaned value. If HTML is found, an error is added to the field so the
+    form is marked invalid.
+    """
+    for field_name, field in form.fields.items():
+        if not isinstance(field, forms.CharField):
+            continue
+        value = form.cleaned_data.get(field_name)
+        if isinstance(value, str) and value and nh3.is_html(value):
+            form.add_error(field_name, NO_HTML_ERROR)
 
 
 class ContactInfoFormMixin(forms.Form):

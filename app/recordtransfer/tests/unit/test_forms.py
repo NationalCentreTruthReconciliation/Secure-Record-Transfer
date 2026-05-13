@@ -5,7 +5,7 @@ from caais.models import SourceRole, SourceType
 from django import forms
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
-from upload.models import TempUploadedFile, UploadSession
+from upload.models import UploadSession
 
 from recordtransfer.forms import UserAccountInfoForm
 from recordtransfer.forms.submission_forms import (
@@ -538,6 +538,23 @@ class RecordDescriptionFormTest(TestCase):
         self.assertTrue(form.is_valid())
         self.assertEqual(form.cleaned_data["date_of_materials"], "2020-01-01")
 
+    def test_form_rejects_html_in_text_fields(self) -> None:
+        """Test that HTML in any text input is rejected."""
+        html_fields = {
+            "accession_title": "<b>Test Records</b>",
+            "language_of_material": "English<script>alert('x')</script>",
+            "preliminary_scope_and_content": "<p>Description</p>",
+            "preliminary_custodial_history": "<a href='#'>history</a>",
+        }
+        for field_name, html_value in html_fields.items():
+            with self.subTest(field=field_name):
+                data = dict(self.form_data)
+                data[field_name] = html_value
+                form = RecordDescriptionForm(data=data)
+                self.assertFalse(form.is_valid())
+                self.assertIn(field_name, form.errors)
+                self.assertIn("HTML is not allowed in this field.", form.errors[field_name])
+
 
 class SourceInfoFormTest(TestCase):
     """Tests the SourceInformationForm (part of the submission form)."""
@@ -718,6 +735,27 @@ class SourceInfoFormTest(TestCase):
         self.assertFalse(form.is_valid())
         self.assertEqual(1, len(form.errors))
         self.assertIn("other_source_role", form.errors)
+
+    def test_form_rejects_html_in_text_fields(self) -> None:
+        """Test that HTML in source info text inputs is rejected."""
+        new_source_type = SourceType.objects.get_or_create(name="New Source Type")[0]
+        new_source_role = SourceRole.objects.get_or_create(name="New Source Role")[0]
+
+        form = SourceInfoForm(
+            data={
+                "enter_manual_source_info": "yes",
+                "source_name": "<b>Bad Name</b>",
+                "source_type": new_source_type.pk,
+                "source_role": new_source_role.pk,
+                "source_note": "<script>alert('x')</script>",
+            },
+            defaults=self.form_defaults,
+        )
+        self.assertFalse(form.is_valid())
+        self.assertIn("source_name", form.errors)
+        self.assertIn("source_note", form.errors)
+        self.assertIn("HTML is not allowed in this field.", form.errors["source_name"])
+        self.assertIn("HTML is not allowed in this field.", form.errors["source_note"])
 
 
 class OtherIdentifiersFormTest(TestCase):
@@ -930,6 +968,27 @@ class OtherIdentifiersFormTest(TestCase):
             "Must enter a value for this identifier", form.errors["other_identifier_value"]
         )
 
+    def test_form_rejects_html_in_text_fields(self) -> None:
+        """Test that HTML in any other identifier text input is rejected."""
+        html_fields = {
+            "other_identifier_type": "<b>Receipt number</b>",
+            "other_identifier_value": "<i>12345</i>",
+            "other_identifier_note": "<p>A note</p>",
+        }
+        base_data = {
+            "other_identifier_type": "Receipt number",
+            "other_identifier_value": "12345",
+            "other_identifier_note": "A note",
+        }
+        for field_name, html_value in html_fields.items():
+            with self.subTest(field=field_name):
+                data = dict(base_data)
+                data[field_name] = html_value
+                form = OtherIdentifiersForm(data=data)
+                self.assertFalse(form.is_valid())
+                self.assertIn(field_name, form.errors)
+                self.assertIn("HTML is not allowed in this field.", form.errors[field_name])
+
 
 class UploadFilesFormTest(TestCase):
     """Tests for the UploadFilesForm."""
@@ -1095,7 +1154,29 @@ class SubmissionGroupFormTest(TestCase):
         }
         form = SubmissionGroupForm(data=form_data, instance=self.existing_group, user=self.user)
         form.save()
-        self.existing_group.refresh_from_db()
+        self.existing_group.refresh_from_db()  # type: ignore
         # Check that the fields were not modified
         self.assertEqual(self.existing_group.created_by, original_created_by)
         self.assertEqual(self.existing_group.uuid, original_uuid)
+
+    def test_form_rejects_html_in_name(self) -> None:
+        """Case where the group name contains HTML."""
+        form_data = {
+            "name": "<b>New Group</b>",
+            "description": "A new submission group",
+        }
+        form = SubmissionGroupForm(data=form_data, user=self.user)
+        self.assertFalse(form.is_valid())
+        self.assertIn("name", form.errors)
+        self.assertIn("HTML is not allowed in this field.", form.errors["name"])
+
+    def test_form_rejects_html_in_description(self) -> None:
+        """Case where the group description contains HTML."""
+        form_data = {
+            "name": "New Group",
+            "description": "<script>alert('x')</script>",
+        }
+        form = SubmissionGroupForm(data=form_data, user=self.user)
+        self.assertFalse(form.is_valid())
+        self.assertIn("description", form.errors)
+        self.assertIn("HTML is not allowed in this field.", form.errors["description"])

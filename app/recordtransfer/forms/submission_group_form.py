@@ -4,6 +4,7 @@ from django import forms
 from django.utils.translation import gettext_lazy as _
 
 from recordtransfer.constants import HtmlIds
+from recordtransfer.forms.mixins import validate_no_html_in_text_fields
 from recordtransfer.models import SubmissionGroup
 
 
@@ -49,6 +50,7 @@ class SubmissionGroupForm(forms.ModelForm):
             raise forms.ValidationError(_("Form is empty."))
 
         cleaned_data = super().clean()
+        validate_no_html_in_text_fields(self)
         name = cleaned_data.get("name")
 
         if not name:
