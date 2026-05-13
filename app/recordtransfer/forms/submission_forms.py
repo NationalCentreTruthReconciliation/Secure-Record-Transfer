@@ -21,7 +21,11 @@ from recordtransfer.constants import (
     HtmlIds,
 )
 from recordtransfer.enums import SubmissionStep
-from recordtransfer.forms.mixins import ContactInfoFormMixin, HiddenCaptchaMixin
+from recordtransfer.forms.mixins import (
+    ContactInfoFormMixin,
+    HiddenCaptchaMixin,
+    validate_no_html_in_text_fields,
+)
 from recordtransfer.models import SubmissionGroup, User
 
 LOGGER = logging.getLogger(__name__)
@@ -48,6 +52,12 @@ class SubmissionForm(forms.Form):
     """Base form for all submission forms."""
 
     required_css_class = "required-field"
+
+    def clean(self) -> dict:
+        """Run shared validation, including rejecting HTML in text inputs."""
+        cleaned_data = super().clean() or {}
+        validate_no_html_in_text_fields(self)
+        return cleaned_data
 
 
 class AcceptLegal(SubmissionForm):
