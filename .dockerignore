@@ -1,9 +1,8 @@
 **/*.sqlite3
 **/__pycache__
 .dockerignore
-docker-compose*
-Dockerfile
 example.dev.env
 example.prod.env
 node_modules
-./static/
+app/static
+app/media
