@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-05 21:44-0500\n"
+"POT-Creation-Date: 2026-05-12 21:56-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,15 +18,15 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: app/settings/base.py:144
+#: app/settings/base.py:186
 msgid "English"
 msgstr ""
 
-#: app/settings/base.py:145
+#: app/settings/base.py:187
 msgid "French"
 msgstr ""
 
-#: app/settings/base.py:146
+#: app/settings/base.py:188
 msgid "Hindi"
 msgstr ""
 
@@ -793,41 +793,41 @@ msgstr ""
 msgid "No other details listed"
 msgstr ""
 
-#: recordtransfer/admin.py:218
+#: recordtransfer/admin.py:220
 msgid ""
 "The selected submission group(s) do not contain any submissions to export."
 msgstr ""
 
-#: recordtransfer/admin.py:229
+#: recordtransfer/admin.py:231
 msgctxt "\"Selected\" refers to one or more Submission Group objects."
 msgid "Export CAAIS 1.0 CSV for Submissions in Selected"
 msgstr ""
 
-#: recordtransfer/admin.py:239
+#: recordtransfer/admin.py:241
 msgctxt "\"Selected\" refers to one or more Submission Group objects."
 msgid "Export AtoM 2.6 Accession CSV for Submissions in Selected"
 msgstr ""
 
-#: recordtransfer/admin.py:249
+#: recordtransfer/admin.py:251
 msgctxt "\"Selected\" refers to one or more Submission Group objects."
 msgid "Export AtoM 2.3 Accession CSV for Submissions in Selected"
 msgstr ""
 
-#: recordtransfer/admin.py:259
+#: recordtransfer/admin.py:261
 msgctxt "\"Selected\" refers to one or more Submission Group objects."
 msgid "Export AtoM 2.2 Accession CSV for Submissions in Selected"
 msgstr ""
 
-#: recordtransfer/admin.py:269
+#: recordtransfer/admin.py:271
 msgctxt "\"Selected\" refers to one or more Submission Group objects."
 msgid "Export AtoM 2.1 Accession CSV for Submissions in Selected"
 msgstr ""
 
-#: recordtransfer/admin.py:388
+#: recordtransfer/admin.py:390
 msgid "Click link to view uploaded files"
 msgstr ""
 
-#: recordtransfer/admin.py:412
+#: recordtransfer/admin.py:414
 #, python-format
 msgid ""
 "A downloadable bag is being generated. Visit the %(link_start)sjobs "
@@ -835,119 +835,119 @@ msgid ""
 "Submission page for a download link"
 msgstr ""
 
-#: recordtransfer/admin.py:428
+#: recordtransfer/admin.py:430
 msgid ""
 "There are no files associated with this submission, it is not possible to "
 "create a Bag"
 msgstr ""
 
-#: recordtransfer/admin.py:437
+#: recordtransfer/admin.py:439
 #, python-format
 msgid "Submission with ID '%(id)s' doesn't exist. Perhaps it was deleted?"
 msgstr ""
 
-#: recordtransfer/admin.py:447
+#: recordtransfer/admin.py:449
 msgctxt "\"Selected\" refers to one or more Submission objects."
 msgid "Export CAAIS 1.0 CSV for Metadata in Selected"
 msgstr ""
 
-#: recordtransfer/admin.py:459
+#: recordtransfer/admin.py:461
 msgctxt "\"Selected\" refers to one or more Submission objects."
 msgid "Export AtoM 2.6 Accession CSV for Metadata in Selected"
 msgstr ""
 
-#: recordtransfer/admin.py:471
+#: recordtransfer/admin.py:473
 msgctxt "\"Selected\" refers to one or more Submission objects."
 msgid "Export AtoM 2.3 Accession CSV for Metadata in Selected"
 msgstr ""
 
-#: recordtransfer/admin.py:483
+#: recordtransfer/admin.py:485
 msgctxt "\"Selected\" refers to one or more Submission objects."
 msgid "Export AtoM 2.2 Accession CSV for Metadata in Selected"
 msgstr ""
 
-#: recordtransfer/admin.py:495
+#: recordtransfer/admin.py:497
 msgctxt "\"Selected\" refers to one or more Submission objects."
 msgid "Export AtoM 2.1 Accession CSV for Metadata in Selected"
 msgstr ""
 
-#: recordtransfer/admin.py:545 upload/admin.py:54
+#: recordtransfer/admin.py:547 upload/admin.py:54
 msgid "File Link"
 msgstr "फ़ाइल लिंक"
 
-#: recordtransfer/admin.py:551
+#: recordtransfer/admin.py:553
 msgid "No file attached"
 msgstr "कोई फ़ाइल अटैच नहीं है"
 
-#: recordtransfer/admin.py:578
+#: recordtransfer/admin.py:580
 #: recordtransfer/templates/includes/profile_forms.html:18
 #: recordtransfer/views/pre_submission.py:181
 msgid "Contact Information"
 msgstr ""
 
-#: recordtransfer/admin.py:593
+#: recordtransfer/admin.py:595
 msgid "Language Preferences"
 msgstr ""
 
-#: recordtransfer/admin.py:599
+#: recordtransfer/admin.py:601
 msgid "Email Updates"
 msgstr ""
 
-#: recordtransfer/admin.py:653 recordtransfer/views/account.py:324
+#: recordtransfer/admin.py:655 recordtransfer/views/account.py:324
 msgid "Password updated"
 msgstr "पासवर्ड अपडेट हो गया है"
 
-#: recordtransfer/admin.py:654 recordtransfer/views/account.py:325
+#: recordtransfer/admin.py:656 recordtransfer/views/account.py:325
 #: recordtransfer/views/account.py:366
 msgid "password"
 msgstr "कूटशब्द"
 
-#: recordtransfer/admin.py:655 recordtransfer/admin.py:685
+#: recordtransfer/admin.py:657 recordtransfer/admin.py:687
 #: recordtransfer/management/commands/send_test_email.py:178
 #: recordtransfer/views/account.py:326
 msgid "updated"
 msgstr ""
 
-#: recordtransfer/admin.py:666
+#: recordtransfer/admin.py:668
 msgid "Non-superusers cannot modify superuser accounts."
 msgstr ""
 
-#: recordtransfer/admin.py:677
+#: recordtransfer/admin.py:679
 msgid "Account Deactivated"
 msgstr ""
 
-#: recordtransfer/admin.py:678 recordtransfer/admin.py:684
+#: recordtransfer/admin.py:680 recordtransfer/admin.py:686
 #: recordtransfer/management/commands/send_test_email.py:177
 msgid "account"
 msgstr ""
 
-#: recordtransfer/admin.py:679
+#: recordtransfer/admin.py:681
 msgid "deactivated"
 msgstr ""
 
-#: recordtransfer/admin.py:683
+#: recordtransfer/admin.py:685
 #: recordtransfer/management/commands/send_test_email.py:176
 msgid "Account updated"
 msgstr "खाता अपडेट हो गया है"
 
-#: recordtransfer/admin.py:696
+#: recordtransfer/admin.py:698
 msgid "Superuser privileges have been added to your account."
 msgstr ""
 
-#: recordtransfer/admin.py:698
+#: recordtransfer/admin.py:700
 msgid "Superuser privileges have been removed from your account."
 msgstr ""
 
-#: recordtransfer/admin.py:701
+#: recordtransfer/admin.py:703
 #: recordtransfer/management/commands/send_test_email.py:179
 msgid "Staff privileges have been added to your account."
 msgstr ""
 
-#: recordtransfer/admin.py:703
+#: recordtransfer/admin.py:705
 msgid "Staff privileges have been removed from your account."
 msgstr ""
 
-#: recordtransfer/admin.py:760
+#: recordtransfer/admin.py:762
 #, python-format
 msgid "Setting \"%(key)s\" has been reset to its default value of %(value)s."
 msgstr ""
@@ -4627,49 +4627,53 @@ msgstr ""
 msgid "%(name)s Removed! | %(session)s"
 msgstr ""
 
-#: upload/tests/unit/test_views.py:437 upload/views.py:225
+#: upload/tests/unit/test_views.py:464 upload/views.py:240
 msgid "Invalid filename or upload session token"
 msgstr ""
 
-#: upload/views.py:50
+#: upload/views.py:51
 msgid "Invalid upload session token"
 msgstr ""
 
-#: upload/views.py:64
+#: upload/views.py:65
 msgid "There was an internal server error. Please try again."
 msgstr ""
 
-#: upload/views.py:84
+#: upload/views.py:85
 msgid "No file was uploaded"
 msgstr ""
 
-#: upload/views.py:112
+#: upload/views.py:113
 #, python-format
 msgid "Malware was detected in the file \"%(name)s\""
 msgstr ""
 
-#: upload/views.py:124
+#: upload/views.py:125
 #, python-format
 msgid "File \"%(name)s\" is too large to scan for malware"
 msgstr ""
 
-#: upload/views.py:136
+#: upload/views.py:137
 msgid "Unable to scan file for malware due to scanner error"
 msgstr ""
 
-#: upload/views.py:150
+#: upload/views.py:151
+msgid "There was an error processing the file"
+msgstr ""
+
+#: upload/views.py:165
 msgid "There was an error uploading the file"
 msgstr ""
 
-#: upload/views.py:233
+#: upload/views.py:248
 msgid "File not found in upload session"
 msgstr ""
 
-#: upload/views.py:238
+#: upload/views.py:253
 msgid "Cannot remove file from upload session"
 msgstr ""
 
-#: upload/views.py:246
+#: upload/views.py:261
 msgid "The uploaded file could not be found"
 msgstr ""
 
