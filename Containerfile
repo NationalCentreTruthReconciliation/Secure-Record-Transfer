@@ -1,6 +1,7 @@
 FROM docker.io/python:3.14-slim AS base
 
 ENV PYTHONUNBUFFERED=1
+ENV DEBIAN_FRONTEND=noninteractive
 ENV PROJ_DIR="/opt/secure-record-transfer/"
 ENV APP_DIR="/opt/secure-record-transfer/app/"
 ENV NVM_VERSION=0.40.3
@@ -10,7 +11,7 @@ ENV PNPM_VERSION=10.27.0
 WORKDIR ${PROJ_DIR}
 
 # 🔧 Install curl for downloading files, gettext for for internationalization and libmagic for MIME type detection
-RUN apt-get update && \
+RUN apt-get update -y && \
     apt-get install -y --no-install-recommends \
     curl \
     gettext \
@@ -94,11 +95,12 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 FROM base AS builder
 
+ENV DEBIAN_FRONTEND=noninteractive
 ENV UV_LINK_MODE=copy
 ENV APP_DIR="/opt/secure-record-transfer/app/"
 
 # Install build tools for production dependencies
-RUN apt-get update && \
+RUN apt-get update -y && \
     apt-get install -y --no-install-recommends \
     build-essential \
     default-libmysqlclient-dev \
@@ -117,6 +119,7 @@ RUN uv run python "${APP_DIR}/manage.py" compilemessages --ignore .venv
 FROM docker.io/python:3.14-slim AS prod
 
 ENV PYTHONUNBUFFERED=1
+ENV DEBIAN_FRONTEND=noninteractive
 ENV PROJ_DIR="/opt/secure-record-transfer/"
 ENV APP_DIR="/opt/secure-record-transfer/app/"
 
@@ -127,7 +130,7 @@ RUN useradd --create-home --uid 1000 myuser && \
 
 # Install required dependencies for mysqlclient and curl for health checks
 # Allow myuser to fix permissions on static and media volumes with sudo
-RUN apt-get update && \
+RUN apt-get update -y && \
     apt-get install -y --no-install-recommends \
     default-mysql-client \
     curl \
