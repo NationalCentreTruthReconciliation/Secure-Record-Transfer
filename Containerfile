@@ -15,7 +15,8 @@ RUN apt-get update -y && \
     apt-get install -y --no-install-recommends \
     curl \
     gettext \
-    libmagic1
+    libmagic1 && \
+    rm -rf /var/lib/apt/lists/*
 
 # Install nvm (Node Version Manager) and install NodeJS
 # This does not activate nvm for use in the container. To do that, you need to run ". /nvm/nvm.sh"
@@ -135,6 +136,7 @@ RUN apt-get update -y && \
     curl \
     sudo \
     libmagic1 && \
+    rm -rf /var/lib/apt/lists/* && \
     echo "myuser ALL=(ALL) NOPASSWD: /usr/bin/chown -R myuser\\:myuser /opt/secure-record-transfer/app/static/" >> /etc/sudoers && \
     echo "myuser ALL=(ALL) NOPASSWD: /usr/bin/chown -R myuser\\:myuser /opt/secure-record-transfer/app/media/" >> /etc/sudoers
 
