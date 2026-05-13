@@ -6,7 +6,6 @@ from typing import Any, Optional, cast
 from caais.export import ExportVersion
 from caais.models import Metadata
 from django.contrib import messages
-from django.core.exceptions import BadRequest
 from django.db.models import QuerySet
 from django.forms import BaseModelForm
 from django.http import (
