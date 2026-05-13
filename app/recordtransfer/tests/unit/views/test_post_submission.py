@@ -4,7 +4,6 @@ from django.http import HttpResponse
 from django.test import TestCase
 from django.urls import reverse
 
-from recordtransfer.constants import HeaderNames
 from recordtransfer.models import Submission, SubmissionGroup, User
 
 
@@ -306,7 +305,6 @@ class TestGetUserSubmissionGroups(TestCase):
             name="Other Group", created_by=cls.other_user
         )
         cls.submission_groups_url = reverse("recordtransfer:get_user_submission_groups")
-        cls.header = {HeaderNames.FRONTEND_REQUEST: "true"}
 
     def setUp(self) -> None:
         """Set up test environment for each test."""
