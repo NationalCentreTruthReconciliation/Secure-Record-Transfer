@@ -29,6 +29,37 @@ LOGGER = logging.getLogger(__name__)
 UPLOAD_HANDLE_HEADER = "X-Upload-Handle"
 
 
+class FileUploadResponse(JsonResponse):
+    """Structured JSON response to send to a client when a file is uploaded."""
+
+    def __init__(
+        self,
+        accepted: bool,
+        error: str | None = None,
+        verbose_error: str | None = None,
+        file: str | None = None,
+        url: str | None = None,
+        status: int = 200,
+        **kwargs,
+    ):
+        if accepted:
+            content = {
+                "accepted": accepted,
+                "file": file,
+                "url": url,
+            }
+        else:
+            content = {
+                "accepted": accepted,
+                "error": error,
+                "verboseError": verbose_error or error,
+                "file": file,
+                "url": url,
+            }
+
+        super().__init__(content, status=status, **kwargs)
+
+
 @require_http_methods(["GET", "POST"])
 def upload_or_list_files(request: HttpRequest) -> JsonResponse:
     """Upload a single file to the server list the files uploaded in a given upload session.
@@ -45,16 +76,19 @@ def upload_or_list_files(request: HttpRequest) -> JsonResponse:
         session_token: The upload session token from the URL
 
     Returns:
-        JsonResponse: If the list or upload operation was successful, the session token
-        `uploadSessionToken` is included in the response. If not successful, the error description
-        `error` is included.
+        JsonResponse:
+            If the response is not successful, the error message ``error`` is included in the
+            response. When getting files, the ``files`` key is returned. When uploading files, the
+            ``file`` and ``url`` keys are returned when successful, along with ``accepted``, which
+            indicates whether the file was accepted.
     """
     try:
         session = resolve_handle(request, request.headers.get(UPLOAD_HANDLE_HEADER, ""))
 
         if not session:
-            return JsonResponse(
-                {"error": gettext("Invalid or expired upload session")},
+            return FileUploadResponse(
+                accepted=False,
+                error=gettext("Invalid or expired upload session"),
                 status=400,
             )
 
@@ -81,28 +115,32 @@ def _handle_list_files(session: UploadSession) -> JsonResponse:
     return JsonResponse({"files": file_metadata}, status=200)
 
 
-def _handle_upload_file(request: HttpRequest, session: UploadSession) -> JsonResponse:
+def _handle_upload_file(request: HttpRequest, session: UploadSession) -> FileUploadResponse:
     _file = request.FILES.get("file")
     if not _file:
-        return JsonResponse(
-            {
-                "uploadSessionToken": session.token,
-                "error": gettext("No file was uploaded"),
-            },
+        return FileUploadResponse(
+            accepted=False,
+            error=gettext("No file was uploaded"),
             status=400,
         )
 
     file_check = accept_file(_file.name, _file.size, _file)
     if not file_check["accepted"]:
-        return JsonResponse(
-            {"file": _file.name, "uploadSessionToken": session.token, **file_check},
+        return FileUploadResponse(
+            accepted=False,
+            error=file_check.get("error") or gettext("The file was not accepted"),
+            verbose_error=file_check.get("verboseError"),
+            file=_file.name,
             status=400,
         )
 
     session_check = accept_session(_file.name, _file.size, session)
     if not session_check["accepted"]:
-        return JsonResponse(
-            {"file": _file.name, "uploadSessionToken": session.token, **session_check},
+        return FileUploadResponse(
+            accepted=False,
+            error=session_check.get("error") or gettext("The file was not accepted in session"),
+            verbose_error=session_check.get("verboseError"),
+            file=_file.name,
             status=400,
         )
 
@@ -110,37 +148,26 @@ def _handle_upload_file(request: HttpRequest, session: UploadSession) -> JsonRes
         check_for_malware(_file)
     except ValidationError as exc:
         LOGGER.error("Malware was found in the file %s", _file.name, exc_info=exc)
-        return JsonResponse(
-            {
-                "file": _file.name,
-                "accepted": False,
-                "uploadSessionToken": session.token,
-                "error": gettext('Malware was detected in the file "%(name)s"')
-                % {"name": _file.name},
-            },
+        return FileUploadResponse(
+            accepted=False,
+            error=gettext("Malware was detected in the file"),
+            file=_file.name,
             status=400,
         )
     except ValueError as exc:
         LOGGER.error("File too large for malware scanning: %s", _file.name, exc_info=exc)
-        return JsonResponse(
-            {
-                "file": _file.name,
-                "accepted": False,
-                "uploadSessionToken": session.token,
-                "error": gettext('File "%(name)s" is too large to scan for malware')
-                % {"name": _file.name},
-            },
+        return FileUploadResponse(
+            accepted=False,
+            error=gettext("The file was too large to be scanned for malware"),
+            file=_file.name,
             status=400,
         )
     except ConnectionError as exc:
         LOGGER.error("ClamAV connection error for file %s", _file.name, exc_info=exc)
-        return JsonResponse(
-            {
-                "file": _file.name,
-                "accepted": False,
-                "uploadSessionToken": session.token,
-                "error": gettext("Unable to scan file for malware due to scanner error"),
-            },
+        return FileUploadResponse(
+            accepted=False,
+            error=gettext("There was an error while scanning the file. Please try again later."),
+            file=_file.name,
             status=500,
         )
 
@@ -148,13 +175,10 @@ def _handle_upload_file(request: HttpRequest, session: UploadSession) -> JsonRes
         _file = sanitize_html_file(_file)
     except Exception as exc:
         LOGGER.error("Error sanitizing HTML file %s", _file.name, exc_info=exc)
-        return JsonResponse(
-            {
-                "file": _file.name,
-                "accepted": False,
-                "uploadSessionToken": session.token,
-                "error": gettext("There was an error processing the file"),
-            },
+        return FileUploadResponse(
+            accepted=False,
+            error=gettext("There was an error processing the file. Please try again later."),
+            file=_file.name,
             status=500,
         )
 
@@ -162,25 +186,19 @@ def _handle_upload_file(request: HttpRequest, session: UploadSession) -> JsonRes
         uploaded_file = session.add_temp_file(_file)
     except ValueError as exc:
         LOGGER.error("Error adding file to session: %s", str(exc), exc_info=exc)
-        return JsonResponse(
-            {
-                "file": _file.name,
-                "accepted": False,
-                "uploadSessionToken": session.token,
-                "error": gettext("There was an error uploading the file"),
-            },
+        return FileUploadResponse(
+            accepted=False,
+            error=gettext("There was an error uploading the file. Please try again later."),
+            file=_file.name,
             status=500,
         )
 
-    file_url = uploaded_file.get_file_access_url()
-
-    return JsonResponse(
-        {
-            "file": _file.name,
-            "accepted": True,
-            "uploadSessionToken": session.token,
-            "url": file_url,
-        },
+    # All OK!
+    return FileUploadResponse(
+        accepted=True,
+        error=None,
+        file=_file.name,
+        url=uploaded_file.get_file_access_url(),
         status=200,
     )
 
