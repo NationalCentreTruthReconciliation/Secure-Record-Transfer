@@ -272,27 +272,6 @@ def uploaded_file_by_name(request: HttpRequest, file_name: str) -> HttpResponse:
     return _handle_uploaded_file_get(session, file_name)
 
 
-@require_http_methods(["GET"])
-def uploaded_file_by_name_readonly(request: HttpRequest, file_name: str) -> HttpResponse:
-    """Get a file that has been uploaded in a given upload session.
-
-    This view is suitable for viewing files when file uploads are disabled. Otherwise, not having a
-    DELETE request will make it so that users can't remove files from the upload files part of the
-    form. Use ``uploaded_file_by_name`` for that instead.
-
-    Args:
-        request: The HTTP request
-        file_name: The name of the file to retrieve
-
-    Returns:
-        HttpResponse:
-            Redirects to the file's media path in development, or returns an X-Accel-Redirect to
-            the file's media path if in production.
-    """
-    session = resolve_handle(request, request.headers.get(UPLOAD_HANDLE_HEADER, ""))
-    return _handle_uploaded_file_get(session, file_name)
-
-
 def _handle_uploaded_file_delete(session: Optional[UploadSession], file_name: str) -> HttpResponse:
     if not session:
         return JsonResponse(
