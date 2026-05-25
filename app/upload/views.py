@@ -1,5 +1,6 @@
 import logging
-from typing import Optional, cast
+from typing import Optional
+from uuid import UUID
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -15,22 +16,29 @@ from nginx.serve import serve_media_file
 
 from .check import accept_file, accept_session
 from .clam import check_for_malware
+from .handles import resolve_handle
 from .html import sanitize_html_file
-from .models import UploadSession
+from .models import PermUploadedFile, TempUploadedFile, UploadSession
 
 User = settings.AUTH_USER_MODEL
 
 LOGGER = logging.getLogger(__name__)
 
+#: HTTP header used to convey the opaque per-wizard upload handle for the
+#: session-token-less upload endpoints.
+UPLOAD_HANDLE_HEADER = "X-Upload-Handle"
+
 
 @require_http_methods(["GET", "POST"])
-def upload_or_list_files(request: HttpRequest, session_token: str) -> JsonResponse:
-    """Upload a single file to the server list the files uploaded in a given upload session. The
-    file is added to the upload session using the session token passed as a parameter in the
-    request. If a session token is invalid, an error message is returned.
+def upload_or_list_files(request: HttpRequest) -> JsonResponse:
+    """Upload a single file to the server list the files uploaded in a given upload session.
 
-    The file type is checked against this application's :ref:`ACCEPTED_FILE_FORMATS` setting, if
-    the file is not an accepted type, an error message is returned.
+    The proper upload session is retrieved by way of accessing the request's session data. This
+    must contain a valid upload handle to list or upload files. This ID is set by the form wizard.
+
+    When uploading, the file type is checked against this application's
+    :ref:`ACCEPTED_FILE_FORMATS` setting, if the file is not an accepted type, an error message is
+    returned.
 
     Args:
         request: The HTTP GET or POST request
@@ -42,14 +50,11 @@ def upload_or_list_files(request: HttpRequest, session_token: str) -> JsonRespon
         `error` is included.
     """
     try:
-        user: User = cast(User, request.user)
-        session = UploadSession.objects.filter(token=session_token, user=user).first()
+        session = resolve_handle(request, request.headers.get(UPLOAD_HANDLE_HEADER, ""))
+
         if not session:
             return JsonResponse(
-                {
-                    "uploadSessionToken": session_token,
-                    "error": gettext("Invalid upload session token"),
-                },
+                {"error": gettext("Invalid or expired upload session")},
                 status=400,
             )
 
@@ -181,76 +186,124 @@ def _handle_upload_file(request: HttpRequest, session: UploadSession) -> JsonRes
 
 
 @require_http_methods(["GET"])
-def readonly_uploaded_file(
-    request: HttpRequest, session_token: str, file_name: str
-) -> HttpResponse:
+def uploaded_file_by_uuid(request: HttpRequest, file_uuid: UUID) -> HttpResponse:
+    """Serve an uploaded file looked up by its opaque per-file UUID.
+
+    Args:
+        request: The HTTP request.
+        file_uuid: The per-file UUID generated when the file was uploaded.
+
+    Returns:
+        HttpResponse: Redirects to the file's media path in development, or returns an
+        X-Accel-Redirect in production. 404 if the file does not exist or is not accessible to the
+        requester.
+    """
+    uploaded_file = (
+        TempUploadedFile.objects.filter(uuid=file_uuid).first()
+        or PermUploadedFile.objects.filter(uuid=file_uuid).first()
+    )
+    if uploaded_file is None:
+        raise Http404(gettext("The uploaded file could not be found"))
+
+    # Owners may access their own files; staff may access any file.
+    if not request.user.is_staff and uploaded_file.session.user_id != request.user.id:
+        LOGGER.error(
+            "A non-staff user tried to access a file they do not have ownership over! User %s "
+            "(id: %d) requested the file '%s' that they do not own.",
+            request.user.username,
+            request.user.pk,
+            file_uuid,
+        )
+        raise Http404(gettext("The uploaded file could not be found"))
+
+    try:
+        file_url = uploaded_file.get_file_media_url()
+    except FileNotFoundError as exc:
+        LOGGER.error(
+            "Tried to get a non-existent file '%s'",
+            file_uuid,
+            exc_info=exc,
+        )
+        raise Http404(gettext("The uploaded file could not be found")) from exc
+
+    return serve_media_file(file_url)
+
+
+@require_http_methods(["DELETE", "GET"])
+def uploaded_file_by_name(request: HttpRequest, file_name: str) -> HttpResponse:
+    """Get or delete a previously-uploaded file identified by the name and the upload handle.
+
+    The upload session is resolved from the X-Upload-Handle header.
+
+    Args:
+        request: The HTTP DELETE or GET request. The header ``X-Upload-Handle`` must contain a
+            valid handle previously registered by the form wizard.
+        file_name: The name of the file to retrieve or delete
+
+    Returns:
+        HttpResponse:
+            204 on successful DELETE; for GET, redirects to the file's media path in development,
+            or returns an X-Accel-Redirect to the file's media path in production. 404 if the file
+            or session cannot be resolved.
+    """
+    session = resolve_handle(request, request.headers.get(UPLOAD_HANDLE_HEADER, ""))
+
+    if request.method == "DELETE":
+        return _handle_uploaded_file_delete(session, file_name)
+
+    return _handle_uploaded_file_get(session, file_name)
+
+
+@require_http_methods(["GET"])
+def uploaded_file_by_name_readonly(request: HttpRequest, file_name: str) -> HttpResponse:
     """Get a file that has been uploaded in a given upload session.
 
     This view is suitable for viewing files when file uploads are disabled. Otherwise, not having a
     DELETE request will make it so that users can't remove files from the upload files part of the
-    form. Use ``uploaded_file`` for that instead.
+    form. Use ``uploaded_file_by_name`` for that instead.
 
     Args:
         request: The HTTP request
-        session_token: The upload session token from the URL
-        file_name: The name of the file to delete
+        file_name: The name of the file to retrieve
 
     Returns:
         HttpResponse:
             Redirects to the file's media path in development, or returns an X-Accel-Redirect to
             the file's media path if in production.
     """
-    if request.user.is_staff:
-        session = UploadSession.objects.filter(token=session_token).first()
-    else:
-        session = UploadSession.objects.filter(token=session_token, user=request.user).first()
-
+    session = resolve_handle(request, request.headers.get(UPLOAD_HANDLE_HEADER, ""))
     return _handle_uploaded_file_get(session, file_name)
-
-
-@require_http_methods(["DELETE", "GET"])
-def uploaded_file(request: HttpRequest, session_token: str, file_name: str) -> HttpResponse:
-    """Get or delete a file that has been uploaded in a given upload session.
-
-    Args:
-        request: The HTTP request
-        session_token: The upload session token from the URL
-        file_name: The name of the file to delete
-
-    Returns:
-        HttpResponse:
-            In the case of deletion, returns a 204 response when successfully deleted. In the case
-            of getting a file, redirects to the file's media path in development, or returns an
-            X-Accel-Redirect to the file's media path if in production.
-    """
-    if request.user.is_staff:
-        session = UploadSession.objects.filter(token=session_token).first()
-    else:
-        session = UploadSession.objects.filter(token=session_token, user=request.user).first()
-
-    if request.method == "DELETE":
-        return _handle_uploaded_file_delete(session, file_name)
-    else:
-        return _handle_uploaded_file_get(session, file_name)
 
 
 def _handle_uploaded_file_delete(session: Optional[UploadSession], file_name: str) -> HttpResponse:
     if not session:
         return JsonResponse(
-            {"error": gettext("Invalid filename or upload session token")},
+            {"error": gettext("Invalid upload session")},
             status=404,
         )
 
     try:
         session.remove_temp_file_by_name(file_name)
-    except FileNotFoundError:
+    except FileNotFoundError as exc:
+        LOGGER.error(
+            "Tried to remove a non-existent file '%s' from session '%s'",
+            file_name,
+            session.token,
+            exc_info=exc,
+        )
         return JsonResponse(
-            {"error": gettext("File not found in upload session")},
+            {"error": gettext("The uploaded file could not be found")},
             status=404,
         )
-    except ValueError:
+    except ValueError as exc:
+        LOGGER.error(
+            "An error occurred while trying to remove the file '%s' from session '%s'",
+            file_name,
+            session.token,
+            exc_info=exc,
+        )
         return JsonResponse(
-            {"error": gettext("Cannot remove file from upload session")},
+            {"error": gettext("The uploaded file could not be deleted")},
             status=400,
         )
     return HttpResponse(status=204)
@@ -262,8 +315,32 @@ def _handle_uploaded_file_get(session: Optional[UploadSession], file_name: str) 
 
     try:
         uploaded_file = session.get_file_by_name(file_name)
-    except (FileNotFoundError, ValueError) as exc:
-        raise Http404("The uploaded file could not be found") from exc
+    except FileNotFoundError as exc:
+        LOGGER.error(
+            "Tried to get a non-existent file '%s' from session '%s'",
+            file_name,
+            session.token,
+            exc_info=exc,
+        )
+        raise Http404(gettext("The uploaded file could not be found")) from exc
+    except ValueError as exc:
+        LOGGER.error(
+            "An error occurred while trying to get the file '%s' from session '%s'",
+            file_name,
+            session.token,
+            exc_info=exc,
+        )
+        raise Http404(gettext("The uploaded file could not be found")) from exc
 
-    file_url = uploaded_file.get_file_media_url()
+    try:
+        file_url = uploaded_file.get_file_media_url()
+    except FileNotFoundError as exc:
+        LOGGER.error(
+            "Tried to get a non-existent file '%s' from session '%s'",
+            file_name,
+            session.token,
+            exc_info=exc,
+        )
+        raise Http404(gettext("The uploaded file could not be found")) from exc
+
     return serve_media_file(file_url)
