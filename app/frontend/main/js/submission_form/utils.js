@@ -23,18 +23,26 @@ export const getCookie = (name) => {
  * Fetches the list of uploaded files for the current upload session.
  * This function sends a GET request to the server to retrieve the list of uploaded files.
  * Uses exponential backoff to retry a total of 3 times if getting a 500 or more status.
- * @param {string} token - The upload session token
+ * @param {string} uploadHandle - The opaque per-wizard upload handle
  * @returns {Promise<object|null>} - A promise that resolves to the JSON response containing the
- * list of uploaded files, or null if the request fails or the session token is not available.
+ * list of uploaded files, or null if the request fails or the upload handle is not available.
  */
-export const fetchUploadedFiles = async (token) => {
+export const fetchUploadedFiles = async (uploadHandle) => {
+    if (!uploadHandle) {
+        console.error("Cannot fetch uploaded files: missing upload handle");
+        return null;
+    }
+
     const maxRetries = 3;
     let attempt = 0;
     let response;
 
     while (attempt < maxRetries) {
-        response = await fetch(`/upload-session/${token}/files/`, {
+        response = await fetch("/upload-session/files/", {
             method: "GET",
+            headers: {
+                "X-Upload-Handle": uploadHandle,
+            },
         });
 
         if (response.ok) {
@@ -72,16 +80,24 @@ export const makeMockBlob = (size) => {
 
 /**
  * Sends a DELETE request to remove an uploaded file from the server.
+ *
+ * The upload session is identified server-side via the opaque per-wizard
+ * upload handle passed in the X-Upload-Handle header.
  * @param {string} filename - The name of the file to delete.
- * @param {string} token - The upload session token
+ * @param {string} uploadHandle - The opaque per-wizard upload handle
  * @returns {Promise<Response|null>} - A promise that resolves to the response of the request or
- * null if the session token was not found.
+ * null if the upload handle was not found.
  */
-export const sendDeleteRequestForFile = async (filename, token) => {
-    const response = await fetch(`/upload-session/${token}/files/${filename}/`, {
+export const sendDeleteRequestForFile = async (filename, uploadHandle) => {
+    if (!uploadHandle) {
+        console.error("Cannot delete file: missing upload handle");
+        return null;
+    }
+    const response = await fetch(`/upload-session/files/${encodeURIComponent(filename)}/`, {
         method: "DELETE",
         headers: {
             "X-CSRFToken": getCookie("csrftoken"),
+            "X-Upload-Handle": uploadHandle,
         },
     });
     if (!response.ok) {
