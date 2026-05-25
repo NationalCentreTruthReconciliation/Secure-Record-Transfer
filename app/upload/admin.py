@@ -105,6 +105,7 @@ class UploadedFileAdmin(BaseUploadedFileAdmin):
 
     fields: Sequence[str | Sequence[str]] = [
         "id",
+        "uuid",
         "name",
         "formatted_upload_size",
         "exists",
