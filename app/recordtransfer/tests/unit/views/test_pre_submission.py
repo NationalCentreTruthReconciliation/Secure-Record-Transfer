@@ -1,17 +1,33 @@
+import time
 from typing import cast
 from unittest.mock import MagicMock, PropertyMock, patch
 
 from caais.models import RightsType, SourceRole, SourceType
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.http import HttpResponse
-from django.test import RequestFactory, TestCase, override_settings
+from django.test import Client, RequestFactory, TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
+from upload.handles import SESSION_KEY
 from upload.models import UploadSession
 
 from recordtransfer.constants import QueryParameters
 from recordtransfer.enums import SubmissionStep
 from recordtransfer.models import InProgressSubmission, SubmissionGroup, User
+
+
+def _set_handle(
+    client: Client,
+    handle: str,
+    upload_session: UploadSession,
+    ts: float | None = None,
+) -> None:
+    """Inject a handle -> upload_session mapping into the test client's session."""
+    session = client.session
+    handles = session.get(SESSION_KEY, {})
+    handles[handle] = {"sid": upload_session.pk, "ts": ts if ts is not None else time.time()}
+    session[SESSION_KEY] = handles
+    session.save()
 
 
 class OpenSessionsTests(TestCase):
@@ -256,6 +272,8 @@ class SubmissionFormWizardTests(TestCase):
             started_at=timezone.now(),
             user=self.user,
         )
+        self.handle = "abcdabcd" * 4
+        _set_handle(self.client, self.handle, self.session)
 
         self.test_data = [
             (SubmissionStep.ACCEPT_LEGAL.value, {"agreement_accepted": "on"}),
@@ -342,10 +360,11 @@ class SubmissionFormWizardTests(TestCase):
         return super().tearDown()
 
     def _upload_test_file(self) -> None:
-        """Upload a test file to the server using the provided session token."""
+        """Upload a test file to the server using the provided upload handle."""
         response = self.client.post(
-            reverse("upload:upload_files", kwargs={"session_token": "1234567890abcdef"}),
+            reverse("upload:upload_files"),
             {"file": SimpleUploadedFile("test_file.txt", b"contents", content_type="text/plain")},
+            HTTP_X_UPLOAD_HANDLE=self.handle,
         )
         self.assertEqual(200, response.status_code)
 

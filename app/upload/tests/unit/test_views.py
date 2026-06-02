@@ -7,10 +7,8 @@ from django.core.files.uploadedfile import SimpleUploadedFile, UploadedFile
 from django.forms import ValidationError
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
-from django.utils.translation import gettext
 from upload.handles import HANDLE_TTL_SECONDS, SESSION_KEY
 from upload.models import TempUploadedFile, UploadSession
-from upload.views import UPLOAD_HANDLE_HEADER
 
 
 def _set_handle(
