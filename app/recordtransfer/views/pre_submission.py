@@ -796,6 +796,28 @@ class SubmissionFormWizard(SessionWizardView):
             )
         return final_forms
 
+    def get_upload_handle(self) -> str | None:
+        """Get a handle to enable uploading files.
+
+        The front-end should send the X-Upload-Handle header to this handle to be able to upload
+        files.
+        """
+        session_token = self.storage.extra_data.get("session_token", "")
+
+        # Create a fresh upload handle for this session to send to the user
+        if not session_token:
+            return None
+
+        upload_session = UploadSession.objects.filter(
+            token=session_token,
+            user=self.request.user,
+        ).first()
+
+        if not upload_session:
+            return None
+
+        return register_handle(self.request, upload_session)
+
     @property
     def review_step_reached(self) -> bool:
         """Check if the user has reached the review step at some point throughout this form. This
@@ -950,22 +972,11 @@ class SubmissionFormWizard(SessionWizardView):
                 },
             )
         elif step == SubmissionStep.UPLOAD_FILES:
-            session_token = self.storage.extra_data.get("session_token", "")
-            upload_handle = ""
-
-            # Create a fresh upload handle for this session to send to the user
-            if session_token:
-                upload_session = UploadSession.objects.filter(
-                    token=session_token, user=self.request.user
-                ).first()
-                if upload_session:
-                    upload_handle = register_handle(self.request, upload_session)
-
             js_context.update(
                 {
                     # UPLOAD_HANDLE is the opaque per-wizard identifier the frontend sends in the
                     # X-Upload-Handle header.
-                    "UPLOAD_HANDLE": upload_handle,
+                    "UPLOAD_HANDLE": self.get_upload_handle() or "",
                     "MAX_TOTAL_UPLOAD_SIZE_MB": settings.MAX_TOTAL_UPLOAD_SIZE_MB,
                     "MAX_SINGLE_UPLOAD_SIZE_MB": settings.MAX_SINGLE_UPLOAD_SIZE_MB,
                     "MAX_TOTAL_UPLOAD_COUNT": settings.MAX_TOTAL_UPLOAD_COUNT,
