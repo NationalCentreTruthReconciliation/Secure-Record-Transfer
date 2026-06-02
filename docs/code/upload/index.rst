@@ -10,6 +10,8 @@ The ``upload`` app is responsible for accepting file uploads, and validating tho
     check
     clam
     constants
+    handles
+    html
     managers
     mime
     models
