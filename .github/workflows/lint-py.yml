@@ -3,12 +3,12 @@ name: PR Python Lint Check
 on:
   pull_request:
     paths:
-      - '**.py'
+      - "**.py"
       - ruff.toml
 
     branches:
       - master
-      - 'feat-*'
+      - "feat-*"
 
     types: [opened, synchronize, reopened]
 
@@ -20,7 +20,7 @@ jobs:
     name: Lint Django Apps
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: astral-sh/ruff-action@v3
         with:
           src: >-
