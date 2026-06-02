@@ -1,23 +1,144 @@
 import logging
+import time
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile, UploadedFile
 from django.forms import ValidationError
-from django.test import TestCase, override_settings
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
-from django.utils.translation import gettext
+from upload.handles import HANDLE_TTL_SECONDS, SESSION_KEY
 from upload.models import TempUploadedFile, UploadSession
+
+
+def _set_handle(
+    client: Client,
+    handle: str,
+    upload_session: UploadSession,
+    ts: float | None = None,
+) -> None:
+    """Inject a handle -> upload_session mapping into the test client's session."""
+    session = client.session
+    handles = session.get(SESSION_KEY, {})
+    handles[handle] = {"sid": upload_session.pk, "ts": ts if ts is not None else time.time()}
+    session[SESSION_KEY] = handles
+    session.save()
+
+
+def _del_handle(
+    client: Client,
+    handle: str,
+) -> None:
+    """Delete a handle previously set in _set_handle()."""
+    session = client.session
+    handles = session.get(SESSION_KEY, {})
+    if handle in handles:
+        del handles[handle]
+    session[SESSION_KEY] = handles
+    session.save()
+
+
+@override_settings(
+    FILE_UPLOAD_ENABLED=True,
+)
+class TestListFilesView(TestCase):
+    """Tests for listing uploaded files view."""
+
+    @classmethod
+    def setUpTestData(cls) -> None:
+        """Set up test data."""
+        cls.one_kib = bytearray([1] * 1024)
+        cls.test_user_1 = get_user_model().objects.create_user(
+            username="testuser1", password="1X<ISRUkw+tuK"
+        )
+
+    def setUp(self) -> None:
+        """Set up test environment."""
+        self.client.login(username="testuser1", password="1X<ISRUkw+tuK")
+        self.session = UploadSession.new_session(self.test_user_1)
+        self.handle = "deadbeef" * 4  # 32-char opaque handle for tests
+        _set_handle(self.client, self.handle, self.session)
+
+    def test_list_files_with_valid_handle(self) -> None:
+        """List endpoint returns the session's files when handle is valid."""
+        self.session.add_temp_file(SimpleUploadedFile("a.pdf", self.one_kib))
+        response = self.client.get(
+            reverse("upload:upload_files"),
+            HTTP_X_UPLOAD_HANDLE=self.handle,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json()["files"]), 1)
+
+    def test_list_files_missing_handle(self) -> None:
+        """Endpoint returns 400 if no handle is sent."""
+        response = self.client.get(reverse("upload:upload_files"))
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("error", response.json())
+        self.assertNotIn("uploadSessionToken", response.json())
+
+    def test_list_files_unknown_handle(self) -> None:
+        """Endpoint returns 400 if the handle is not registered."""
+        response = self.client.get(
+            reverse("upload:upload_files"),
+            HTTP_X_UPLOAD_HANDLE="00000000" * 4,
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_list_other_users_files(self) -> None:
+        """Test that a user cannot list another user's files."""
+        self.client.logout()
+
+        # Create a second user, log them in, register a handle in their session,
+        # then attempt to use that same handle while logged in as user 1.
+        other_user = get_user_model().objects.create_user(
+            username="testuser2", password="1X<ISRUkw+tuK"
+        )
+        other_session = UploadSession.new_session(user=other_user)
+        other_handle = "11112222" * 4
+        self.client.login(username="testuser2", password="1X<ISRUkw+tuK")
+        _set_handle(self.client, other_handle, other_session)
+        self.client.logout()
+
+        # Log back in as the original user, but now try to use testuser2's handle
+        self.client.login(username="testuser1", password="1X<ISRUkw+tuK")
+
+        response = self.client.get(
+            reverse("upload:upload_files"),
+            HTTP_X_UPLOAD_HANDLE=other_handle,
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_expired_handle_is_rejected(self) -> None:
+        """Test that a handle with a timestamp older than the TTL is not resolvable."""
+        stale_handle = "aaaabbbb" * 4
+        _set_handle(
+            self.client,
+            stale_handle,
+            self.session,
+            ts=time.time() - (HANDLE_TTL_SECONDS + 5),
+        )
+        response = self.client.get(
+            reverse("upload:upload_files"),
+            HTTP_X_UPLOAD_HANDLE=stale_handle,
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def tearDown(self) -> None:
+        """Tear down test environment."""
+        TempUploadedFile.objects.all().delete()
+        UploadSession.objects.all().delete()
+        self.client.logout()
 
 
 @override_settings(
     ACCEPTED_FILE_FORMATS={"Document": ["docx", "pdf"], "Spreadsheet": ["xlsx"]},
+    FILE_UPLOAD_ENABLED=True,
     MAX_TOTAL_UPLOAD_SIZE_MB=3,
     MAX_SINGLE_UPLOAD_SIZE_MB=1,
     MAX_TOTAL_UPLOAD_COUNT=4,
 )
 class TestUploadFilesView(TestCase):
-    """Tests for upload:upload_files view."""
+    """Test uploading files."""
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -42,101 +163,105 @@ class TestUploadFilesView(TestCase):
         self.patch__accept_file.return_value = {"accepted": True}
         self.patch__accept_session.return_value = {"accepted": True}
 
-        # Create a new upload session token
         self.session = UploadSession.new_session(user=self.test_user_1)
-        self.token = self.session.token
-        self.url = reverse("upload:upload_files", args=[self.token])
+        self.handle = "deadbeef" * 4  # 32-char opaque handle for tests
+        _set_handle(self.client, self.handle, self.session)
 
-    def tearDown(self) -> None:
-        """Tear down test environment."""
-        TempUploadedFile.objects.all().delete()
-        UploadSession.objects.all().delete()
-        self.client.logout()
-
-    @classmethod
-    def tearDownClass(cls) -> None:
-        """Tear down test class."""
-        super().tearDownClass()
-        logging.disable(logging.NOTSET)
-        patch.stopall()
-
-    ## --- GET Request Tests --- ##
-    def test_list_uploaded_files_invalid_session_token(self) -> None:
-        """Invalid session token."""
-        response = self.client.get(reverse("upload:upload_files", args=["invalid_token"]))
-        self.assertEqual(response.status_code, 400)
-        response_json = response.json()
-        self.assertIn("error", response_json)
-
-    def test_list_uploaded_files_invalid_user(self) -> None:
-        """Invalid user for the session."""
-        # Create a new session with a different user
-        other_session = UploadSession.new_session(
-            user=get_user_model().objects.create_user(
-                username="testuser2", password="1X<ISRUkw+tuK"
-            )
+    def test_upload_file_with_valid_handle(self) -> None:
+        """POST uploads a file when the handle is valid."""
+        response = self.client.post(
+            reverse("upload:upload_files"),
+            {"file": SimpleUploadedFile("File.pdf", self.one_kib)},
+            HTTP_X_UPLOAD_HANDLE=self.handle,
         )
-        # Try to access other user's session's files
-        response = self.client.get(reverse("upload:upload_files", args=[other_session.token]))
-        self.assertEqual(response.status_code, 400)
-        response_json = response.json()
-        self.assertIn("error", response_json)
-
-    def test_list_uploaded_files_empty_session(self) -> None:
-        """Session has no files."""
-        response = self.client.get(self.url)
+        self.session.refresh_from_db()
         self.assertEqual(response.status_code, 200)
-        response_json = response.json()
-        self.assertEqual(response_json.get("files"), [])
+        self.assertEqual(self.session.file_count, 1)
 
-    def test_list_uploaded_files_with_files(self) -> None:
-        """Session has one file."""
-        file_to_upload = SimpleUploadedFile("testfile.txt", self.one_kib)
-        temp_file = self.session.add_temp_file(file_to_upload)
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-        response_json = response.json()
-        response_files = response_json.get("files")
-        self.assertEqual(len(response_files), 1)
-        self.assertEqual(response_files[0]["name"], "testfile.txt")
-        self.assertEqual(response_files[0]["size"], file_to_upload.size)
-        self.assertEqual(response_files[0]["url"], temp_file.get_file_access_url())
-
-    ## --- POST Request Tests --- ##
-
-    def test_logged_out_error(self) -> None:
-        """Test that a 302 is returned if the user is not logged in."""
+    def test_cant_upload_if_not_logged_in(self) -> None:
+        """Files should not be uploaded if the user is not logged in."""
         self.client.logout()
-        response = self.client.post(self.url, {})
+        response = self.client.post(
+            reverse("upload:upload_files"),
+            {"file": SimpleUploadedFile("File.pdf", self.one_kib)},
+            HTTP_X_UPLOAD_HANDLE=self.handle,
+        )
         self.assertEqual(response.status_code, 302)
+        self.assertEqual(self.session.file_count, 0)
+
+    def test_cant_upload_without_handle(self) -> None:
+        """Test that an error is received if there is no session handle."""
+        response = self.client.post(
+            reverse("upload:upload_files"),
+            {"file": SimpleUploadedFile("File.pdf", self.one_kib)},
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(self.session.file_count, 0)
+
+    def test_cant_upload_with_invalid_handle(self) -> None:
+        """Test that an error is received if there is no session handle."""
+        _del_handle(self.client, self.handle)
+        response = self.client.post(
+            reverse("upload:upload_files"),
+            {"file": SimpleUploadedFile("File.pdf", self.one_kib)},
+            HTTP_X_UPLOAD_HANDLE=self.handle,
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(self.session.file_count, 0)
 
     def test_500_error_caught(self) -> None:
         """Test that a 500 is returned if an error is raised."""
         self.patch__accept_file.side_effect = ValueError("err")
         response = self.client.post(
-            self.url,
+            reverse("upload:upload_files"),
             {"file": SimpleUploadedFile("File.PDF", self.one_kib)},
+            HTTP_X_UPLOAD_HANDLE=self.handle,
         )
         self.assertEqual(response.status_code, 500)
+        self.assertIn("error", response.json())
 
     def test_no_files_uploaded(self) -> None:
         """Test that a 400 is returned if no files are uploaded."""
-        response = self.client.post(self.url, {})
+        response = self.client.post(
+            reverse("upload:upload_files"),
+            {},
+            HTTP_X_UPLOAD_HANDLE=self.handle,
+        )
         self.assertEqual(response.status_code, 400)
 
-    def test_same_session_used(self) -> None:
-        """Test that the same session is used if the token is provided."""
+    def test_cant_upload_with_other_user_handle(self) -> None:
+        """Test that an error is received when a user tries to upload with another's token."""
+        self.client.logout()
+
+        # Start a new session as a different user
+        other_user = get_user_model().objects.create_user(
+            username="testuser2", password="1X<ISRUkw+tuK"
+        )
+        self.client.login(username="testuser2", password="1X<ISRUkw+tuK")
+
+        # First try before making our own session for the new user
         response = self.client.post(
-            self.url,
-            {"file": SimpleUploadedFile("File.pdf", self.one_kib)},
+            reverse("upload:upload_files"),
+            {"file": SimpleUploadedFile("File.PDF", self.one_kib)},
+            HTTP_X_UPLOAD_HANDLE=self.handle,
         )
 
-        self.session.refresh_from_db()
+        self.assertEqual(response.status_code, 400)
 
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(self.session.file_count, 1)
-        # Check that no error is raised if the uploaded file is looked up within the session
-        self.session.get_file_by_name("File.pdf")
+        # Try again after making our own session
+        other_user_session = UploadSession.new_session(user=other_user)
+        other_handle = "00001111" * 4
+        _set_handle(self.client, other_handle, other_user_session)
+
+        response = self.client.post(
+            reverse("upload:upload_files"),
+            {"file": SimpleUploadedFile("File.PDF", self.one_kib)},
+            HTTP_X_UPLOAD_HANDLE=self.handle,
+        )
+
+        self.assertEqual(response.status_code, 400)
+
+        self.assertEqual(self.session.file_count, 0)
 
     def test_html_file_is_sanitized_after_malware_scan(self) -> None:
         """Test that HTML files are sanitized after malware scanning and before saving."""
@@ -150,11 +275,12 @@ class TestUploadFilesView(TestCase):
 
         self.patch_check_for_malware.side_effect = assert_unsanitized_during_malware_scan
         response = self.client.post(
-            self.url,
+            reverse("upload:upload_files"),
             {"file": SimpleUploadedFile("File.html", html_content, content_type="text/html")},
+            HTTP_X_UPLOAD_HANDLE=self.handle,
         )
 
-        self.session.refresh_from_db()
+        self.session.refresh_from_db()  # type: ignore
         uploaded_file = self.session.get_file_by_name("File.html")
         uploaded_file.file_upload.open()
         saved_content = uploaded_file.file_upload.read()
@@ -165,39 +291,14 @@ class TestUploadFilesView(TestCase):
         self.assertNotIn(b"alert", saved_content)
         self.assertIn(b"<p>Safe</p>", saved_content)
 
-    def test_error_from_invalid_token(self) -> None:
-        """Test that a 400 error is received if the token is invalid."""
-        response = self.client.post(
-            reverse("upload:upload_files", args=["invalid_token"]),
-            {"file": SimpleUploadedFile("File.PDF", self.one_kib)},
-        )
-
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(self.session.file_count, 0)
-
-    def test_new_session_made_token_mismatch_user(self) -> None:
-        """Test that a 400 error is received if the token does not match the user."""
-        other_user = get_user_model().objects.create_user(
-            username="testuser2", password="1X<ISRUkw+tuK"
-        )
-        other_user_session = UploadSession.new_session(user=other_user)
-
-        response = self.client.post(
-            reverse("upload:upload_files", args=[other_user_session.token]),
-            {"file": SimpleUploadedFile("File.PDF", self.one_kib)},
-        )
-        other_user_session.refresh_from_db()
-
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(other_user_session.file_count, 0)
-
     def test_file_issue_flagged(self) -> None:
         """Test that an issue is flagged if the file is not accepted."""
         self.patch__accept_file.return_value = {"accepted": False, "error": "ISSUE"}
 
         response = self.client.post(
-            self.url,
+            reverse("upload:upload_files"),
             {"file": SimpleUploadedFile("File.PDF", self.one_kib)},
+            HTTP_X_UPLOAD_HANDLE=self.handle,
         )
 
         response_json = response.json()
@@ -213,8 +314,9 @@ class TestUploadFilesView(TestCase):
         self.patch__accept_session.return_value = {"accepted": False, "error": "ISSUE"}
 
         response = self.client.post(
-            self.url,
+            reverse("upload:upload_files"),
             {"file": SimpleUploadedFile("File.PDF", self.one_kib)},
+            HTTP_X_UPLOAD_HANDLE=self.handle,
         )
 
         response_json = response.json()
@@ -229,15 +331,16 @@ class TestUploadFilesView(TestCase):
         """Test that malware is flagged if the file contains malware."""
         self.patch_check_for_malware.side_effect = ValidationError("Malware found")
         response = self.client.post(
-            self.url,
+            reverse("upload:upload_files"),
             {"file": SimpleUploadedFile("File.PDF", self.one_kib)},
+            HTTP_X_UPLOAD_HANDLE=self.handle,
         )
 
         response_json = response.json()
         self.session.refresh_from_db()
 
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response_json.get("error"), 'Malware was detected in the file "File.PDF"')
+        self.assertEqual(response_json.get("error"), "Malware was detected in the file")
         self.assertEqual(response_json.get("accepted"), False)
         self.assertEqual(self.session.file_count, 0)
 
@@ -247,8 +350,9 @@ class TestUploadFilesView(TestCase):
             "File is too large to scan for malware"
         )
         response = self.client.post(
-            self.url,
+            reverse("upload:upload_files"),
             {"file": SimpleUploadedFile("File.PDF", self.one_kib)},
+            HTTP_X_UPLOAD_HANDLE=self.handle,
         )
 
         response_json = response.json()
@@ -256,7 +360,7 @@ class TestUploadFilesView(TestCase):
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(
-            response_json.get("error"), 'File "File.PDF" is too large to scan for malware'
+            response_json.get("error"), "The file was too large to be scanned for malware"
         )
         self.assertEqual(response_json.get("accepted"), False)
         self.assertEqual(self.session.file_count, 0)
@@ -269,8 +373,9 @@ class TestUploadFilesView(TestCase):
             "Unable to scan file for malware due to scanner error"
         )
         response = self.client.post(
-            self.url,
+            reverse("upload:upload_files"),
             {"file": SimpleUploadedFile("File.PDF", self.one_kib)},
+            HTTP_X_UPLOAD_HANDLE=self.handle,
         )
 
         response_json = response.json()
@@ -278,22 +383,141 @@ class TestUploadFilesView(TestCase):
 
         self.assertEqual(response.status_code, 500)
         self.assertEqual(
-            response_json.get("error"), "Unable to scan file for malware due to scanner error"
+            response_json.get("error"),
+            "There was an error while scanning the file. Please try again later.",
         )
         self.assertEqual(response_json.get("accepted"), False)
         self.assertEqual(self.session.file_count, 0)
 
+    def tearDown(self) -> None:
+        """Tear down test environment."""
+        self.client.logout()
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        """Tear down test class."""
+        super().tearDownClass()
+        logging.disable(logging.NOTSET)
+        patch.stopall()
+
 
 @override_settings(
     DEBUG=True,
-    FILE_UPLOAD_ENABLED=False,
-    ROOT_URLCONF="upload.urls_readonly",
+    FILE_UPLOAD_ENABLED=True,
 )
-class TestReadOnlyUploadedFileView(TestCase):
-    """Tests for uploaded_file view.
+class TestGetUploadedFileByUUID(TestCase):
+    """Test accessing files by UUID."""
 
-    Since the default GET + DELETE uploaded_file view is included when testing, we override the URL
-    config in this class to include the read-only view.
+    @classmethod
+    def setUpClass(cls) -> None:
+        """Disable logging."""
+        super().setUpClass()
+        logging.disable(logging.CRITICAL)
+
+    @classmethod
+    def setUpTestData(cls) -> None:
+        """Set up test data."""
+        cls.one_kib = bytearray([1] * 1024)
+        User = get_user_model()
+        cls.test_user_1 = User.objects.create_user(
+            username="testuser1",
+            password="1X<ISRUkw+tuK",
+        )
+        cls.admin_user = User.objects.create_user(
+            username="admin",
+            password="3&SAjfTYZQ",
+            is_staff=True,
+        )
+
+    def setUp(self) -> None:
+        """Set up test environment."""
+        _ = self.client.login(username="testuser1", password="1X<ISRUkw+tuK")
+        self.session = UploadSession.new_session(user=self.test_user_1)
+        file_to_upload = SimpleUploadedFile("testfile.txt", self.one_kib)
+        self.temp_file = self.session.add_temp_file(file_to_upload)
+
+    def test_temp_file_access_ok(self) -> None:
+        """Test a successful temp file access request."""
+        response = self.client.get(
+            reverse("upload:uploaded_file_by_uuid", args=[self.temp_file.uuid])
+        )
+        url = self.temp_file.get_file_media_url()
+        self.assertEqual(response.url, url)
+
+    @override_settings(DEBUG=False)
+    def test_temp_file_access_prod_ok(self) -> None:
+        """Test a successful temp file access request in production."""
+        response = self.client.get(
+            reverse("upload:uploaded_file_by_uuid", args=[self.temp_file.uuid])
+        )
+        self.assertEqual(response["X-Accel-Redirect"], self.temp_file.get_file_media_url())
+
+    def test_perm_file_access_ok(self) -> None:
+        """Test a succesful file access request for a perm file."""
+        self.session.make_uploads_permanent()
+        perm_file = self.session.permuploadedfile_set.first()
+        response = self.client.get(
+            reverse(
+                "upload:uploaded_file_by_uuid",
+                args=[perm_file.uuid],
+            )
+        )
+        self.assertEqual(response.url, perm_file.get_file_media_url())
+
+    @override_settings(DEBUG=False)
+    def test_perm_file_access_prod_ok(self) -> None:
+        """Test a succesful file access request for a perm file in production."""
+        self.session.make_uploads_permanent()
+        perm_file = self.session.permuploadedfile_set.first()
+        response = self.client.get(
+            reverse(
+                "upload:uploaded_file_by_uuid",
+                args=[perm_file.uuid],
+            )
+        )
+        self.assertEqual(response["X-Accel-Redirect"], perm_file.get_file_media_url())
+
+    def test_regular_user_cant_access_other_files(self) -> None:
+        """Test that a regular non-staff user cannotget access another user's files."""
+        self.client.logout()
+
+        # Log in as a different user, and try to get the original user's file
+        _ = get_user_model().objects.create_user(username="testuser2", password="8ASbruPeZma8$")
+
+        self.client.login(username="testuser2", password="8ASbruPeZma8$")
+
+        response = self.client.get(
+            reverse(
+                "upload:uploaded_file_by_uuid",
+                args=[self.temp_file.uuid],
+            )
+        )
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_admin_user_can_access_other_files(self) -> None:
+        """Test that a staff user can access other users' files."""
+        self.client.logout()
+
+        self.client.login(username="admin", password="3&SAjfTYZQ")
+
+        response = self.client.get(
+            reverse(
+                "upload:uploaded_file_by_uuid",
+                args=[self.temp_file.uuid],
+            ),
+        )
+        self.assertEqual(response.url, self.temp_file.get_file_media_url())
+
+
+@override_settings(
+    DEBUG=True,
+    FILE_UPLOAD_ENABLED=True,
+)
+class TestGetAndDeleteUploadedFileByName(TestCase):
+    """Tests accessing and deleting files by name.
+
+    This file access method works using upload session handles.
     """
 
     @classmethod
@@ -307,9 +531,13 @@ class TestReadOnlyUploadedFileView(TestCase):
         """Set up test data."""
         cls.one_kib = bytearray([1] * 1024)
         User = get_user_model()
-        cls.test_user_1 = User.objects.create_user(username="testuser1", password="1X<ISRUkw+tuK")
+        cls.test_user_1 = User.objects.create_user(
+            username="testuser1",
+            password="1X<ISRUkw+tuK",
+        )
         cls.admin_user = User.objects.create_user(
-            username="admin", password="3&SAjfTYZQ", is_staff=True
+            username="admin",
+            password="3&SAjfTYZQ",
         )
 
     def setUp(self) -> None:
@@ -317,186 +545,188 @@ class TestReadOnlyUploadedFileView(TestCase):
         _ = self.client.login(username="testuser1", password="1X<ISRUkw+tuK")
         self.session = UploadSession.new_session(user=self.test_user_1)
 
-        file_to_upload = SimpleUploadedFile("testfile.txt", self.one_kib)
-        self.temp_file = self.session.add_temp_file(file_to_upload)
-        self.url = reverse("uploaded_file", args=[self.session.token, file_to_upload.name])
+        self.handle = "deadbeef" * 4  # 32-char opaque handle for tests
+        _set_handle(self.client, self.handle, self.session)
 
-    def test_readonly_uploaded_file_session_not_found(self) -> None:
-        """Invalid session token returns 404."""
-        response = self.client.get(
-            reverse("uploaded_file", args=["invalid_token", "testfile.txt"])
-        )
-        self.assertEqual(response.status_code, 404)
-
-    def test_readonly_uploaded_file_not_found(self) -> None:
-        """Invalid file name in a valid session."""
-        response = self.client.get(
-            reverse(
-                "uploaded_file",
-                args=[self.session.token, "invalid_file.txt"],
-            )
-        )
-        self.assertEqual(response.status_code, 404)
-
-    def test_readonly_uploaded_file_invalid_user(self) -> None:
-        """Invalid user for the session."""
-        self.session.user = get_user_model().objects.create_user(
-            username="testuser2", password="1X<ISRUkw+tuK"
-        )
-        self.session.save()
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 404)
-
-    @override_settings(DEBUG=True)
-    def test_get_readonly_uploaded_file_in_debug(self) -> None:
-        """Test getting the file in DEBUG mode."""
-        response = self.client.get(self.url)
-        self.assertEqual(response.url, self.temp_file.get_file_media_url())
-
-    @override_settings(DEBUG=False)
-    def test_get_readonly_uploaded_file_in_production(self) -> None:
-        """Test getting the file in production mode."""
-        response = self.client.get(self.url)
-        self.assertIn("X-Accel-Redirect", response.headers)
-        self.assertEqual(response.headers["X-Accel-Redirect"], self.temp_file.get_file_media_url())
-
-    def test_admin_can_get_any_readonly_uploaded_file(self) -> None:
-        """Test that admin users can get uploaded files from any session."""
-        # Login as admin
-        self.client.logout()
-        self.client.login(username="admin", password="3&SAjfTYZQ")
-
-        # Try to access the file from another user's session
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 302)
-
-    def test_delete_not_allowed_for_uploader(self) -> None:
-        """Test that the user who uploaded the file cannot DELETE it."""
-        response = self.client.delete(self.url)
-        self.assertEqual(response.status_code, 405)
-
-    def test_delete_not_allowed_for_admin(self) -> None:
-        """Test that the admins cannot DELETE uploaded files."""
-        # Login as admin
-        self.client.logout()
-        self.client.login(username="admin", password="3&SAjfTYZQ")
-
-        response = self.client.delete(self.url)
-        self.assertEqual(response.status_code, 405)
-
-    def tearDown(self) -> None:
-        """Tear down test environment."""
-        TempUploadedFile.objects.all().delete()
-        UploadSession.objects.all().delete()
-
-
-class TestUploadedFileView(TestCase):
-    """Tests for upload:uploaded_file view."""
-
-    @classmethod
-    def setUpClass(cls) -> None:
-        """Set logging level."""
-        super().setUpClass()
-        logging.disable(logging.CRITICAL)
-
-    @classmethod
-    def setUpTestData(cls) -> None:
-        """Set up test data."""
-        cls.one_kib = bytearray([1] * 1024)
-        User = get_user_model()
-        cls.test_user_1 = User.objects.create_user(username="testuser1", password="1X<ISRUkw+tuK")
-        cls.admin_user = User.objects.create_user(
-            username="admin", password="3&SAjfTYZQ", is_staff=True
-        )
-
-    def setUp(self) -> None:
-        """Set up test environment."""
-        _ = self.client.login(username="testuser1", password="1X<ISRUkw+tuK")
-        self.session = UploadSession.new_session(user=self.test_user_1)
-
-        file_to_upload = SimpleUploadedFile("testfile.txt", self.one_kib)
         self.temp_file = self.session.add_temp_file(
             SimpleUploadedFile("testfile.txt", self.one_kib)
         )
-        self.url = reverse("upload:uploaded_file", args=[self.session.token, file_to_upload.name])
 
-    def test_uploaded_file_session_not_found(self) -> None:
-        """Invalid session token returns default 404 page (not JSON)."""
+    def test_get_invalid_handle(self) -> None:
+        """Test that getting from a non-existent session handle returns a 404.
+
+        This can happen if a session handle expires, for example.
+        """
+        _del_handle(self.client, self.handle)
         response = self.client.get(
-            reverse("upload:uploaded_file", args=["invalid_token", "testfile.txt"])
+            reverse(
+                "upload:uploaded_file_by_name",
+                args=["testfile.txt"],
+            ),
+            HTTP_X_UPLOAD_HANDLE=self.handle,
         )
         self.assertEqual(response.status_code, 404)
 
-    def test_uploaded_file_not_found(self) -> None:
-        """Invalid file name in a valid session."""
+    def test_delete_invalid_handle(self) -> None:
+        """Test that deleting from a non-existent session handle returns a 404."""
+        _del_handle(self.client, self.handle)
+        response = self.client.delete(
+            reverse(
+                "upload:uploaded_file_by_name",
+                args=["testfile.txt"],
+            ),
+            HTTP_X_UPLOAD_HANDLE=self.handle,
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_get_file_not_found(self) -> None:
+        """Test that getting a non-existent file returns a 404."""
         response = self.client.get(
-            reverse("upload:uploaded_file", args=[self.session.token, "invalid_file.txt"])
+            reverse(
+                "upload:uploaded_file_by_name",
+                args=["invalid_file.mp3"],
+            ),
+            HTTP_X_UPLOAD_HANDLE=self.handle,
         )
         self.assertEqual(response.status_code, 404)
 
-    def test_uploaded_file_invalid_user(self) -> None:
-        """Invalid user for the session."""
-        self.session.user = get_user_model().objects.create_user(
-            username="testuser2", password="1X<ISRUkw+tuK"
+    def test_delete_file_not_found(self) -> None:
+        """Test that deleting a non-existent file returns a 404."""
+        response = self.client.delete(
+            reverse(
+                "upload:uploaded_file_by_name",
+                args=["invalid_file.mp3"],
+            ),
+            HTTP_X_UPLOAD_HANDLE=self.handle,
         )
-        self.session.save()
-        response = self.client.get(self.url)
         self.assertEqual(response.status_code, 404)
 
-    def test_delete_uploaded_file(self) -> None:
-        """Delete an uploaded file."""
-        response = self.client.delete(self.url)
-        self.assertEqual(response.status_code, 204)
-        self.assertFalse(TempUploadedFile.objects.filter(name="testfile.txt").exists())
+    def test_cant_get_other_users_file(self) -> None:
+        """Test that a user cannot access another user's files."""
+        self.client.logout()
 
-    def test_delete_uploaded_file_invalid_user(self) -> None:
-        """Test delete with an invalid user for the session."""
-        self.session.user = get_user_model().objects.create_user(
-            username="testuser2", password="1X<ISRUkw+tuK"
+        # Log in as a different user, and upload a different file
+        other_user = get_user_model().objects.create_user(
+            username="testuser2", password="8ASbruPeZma8$"
         )
-        self.session.save()
-        response = self.client.delete(self.url)
+        self.client.login(username="testuser2", password="8ASbruPeZma8$")
+        other_session = UploadSession.new_session(other_user)
+        other_handle = "abababab" * 4
+        _set_handle(self.client, other_handle, other_session)
+        other_session.add_temp_file(SimpleUploadedFile("otheruserfile.pdf", self.one_kib))
+        self.client.logout()
+
+        # Log back in as the original user, try to access the other file
+        self.client.login(username="testuser1", password="1X<ISRUkw+tuK")
+        response = self.client.get(
+            reverse(
+                "upload:uploaded_file_by_name",
+                args=["otheruserfile.txt"],
+            ),
+            HTTP_X_UPLOAD_HANDLE=other_handle,
+        )
         self.assertEqual(response.status_code, 404)
-        self.assertTrue(TempUploadedFile.objects.filter(name="testfile.txt").exists())
-        response_json = response.json()
-        self.assertIn("error", response_json)
-        self.assertEqual(
-            response_json["error"], gettext("Invalid filename or upload session token")
+
+    def test_cant_delete_other_users_file(self) -> None:
+        """Test that a user cannot delete another user's files."""
+        self.client.logout()
+
+        # Log in as a different user, and upload a different file
+        other_user = get_user_model().objects.create_user(
+            username="testuser2", password="8ASbruPeZma8$"
         )
+        self.client.login(username="testuser2", password="8ASbruPeZma8$")
+        other_session = UploadSession.new_session(other_user)
+        other_handle = "abababab" * 4
+        _set_handle(self.client, other_handle, other_session)
+        other_session.add_temp_file(SimpleUploadedFile("otheruserfile.pdf", self.one_kib))
+        self.client.logout()
+
+        # Log back in as the original user, try to delete the other file
+        self.client.login(username="testuser1", password="1X<ISRUkw+tuK")
+        response = self.client.delete(
+            reverse(
+                "upload:uploaded_file_by_name",
+                args=["otheruserfile.txt"],
+            ),
+            HTTP_X_UPLOAD_HANDLE=other_handle,
+        )
+        self.assertEqual(response.status_code, 404)
 
     @override_settings(DEBUG=True)
-    def test_get_uploaded_file_in_debug(self) -> None:
+    def test_get_temp_file_ok(self) -> None:
         """Test getting the file in DEBUG mode."""
-        response = self.client.get(self.url)
+        response = self.client.get(
+            reverse(
+                "upload:uploaded_file_by_name",
+                args=["testfile.txt"],
+            ),
+            HTTP_X_UPLOAD_HANDLE=self.handle,
+        )
         self.assertEqual(response.url, self.temp_file.get_file_media_url())
 
     @override_settings(DEBUG=False)
-    def test_get_uploaded_file_in_production(self) -> None:
+    def test_get_temp_file_ok_in_prod(self) -> None:
         """Test getting the file in production mode."""
-        response = self.client.get(self.url)
-        self.assertIn("X-Accel-Redirect", response.headers)
-        self.assertEqual(response.headers["X-Accel-Redirect"], self.temp_file.get_file_media_url())
+        response = self.client.get(
+            reverse(
+                "upload:uploaded_file_by_name",
+                args=["testfile.txt"],
+            ),
+            HTTP_X_UPLOAD_HANDLE=self.handle,
+        )
+        self.assertIn("X-Accel-Redirect", response)
+        self.assertEqual(response["X-Accel-Redirect"], self.temp_file.get_file_media_url())
 
-    def test_admin_can_get_any_uploaded_file(self) -> None:
-        """Test that admin users can get uploaded files from any session."""
-        # Login as admin
-        self.client.logout()
-        self.client.login(username="admin", password="3&SAjfTYZQ")
-
-        # Try to access the file from another user's session
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-
-    def test_admin_can_delete_any_uploaded_file(self) -> None:
-        """Test that admin users can delete uploaded files from any session."""
-        # Login as admin
-        self.client.logout()
-        self.client.login(username="admin", password="3&SAjfTYZQ")
-
-        # Try to delete the file from another user's session
-        response = self.client.delete(self.url)
+    @override_settings(DEBUG=True)
+    def test_delete_temp_file_ok(self) -> None:
+        """Test that temp files can be deleted while uploading files."""
+        response = self.client.delete(
+            reverse(
+                "upload:uploaded_file_by_name",
+                args=["testfile.txt"],
+            ),
+            HTTP_X_UPLOAD_HANDLE=self.handle,
+        )
         self.assertEqual(response.status_code, 204)
-        self.assertFalse(TempUploadedFile.objects.filter(name="testfile.txt").exists())
+
+    @override_settings(DEBUG=False)
+    def test_delete_temp_file_ok_in_prod(self) -> None:
+        """Test getting the file in production mode."""
+        response = self.client.delete(
+            reverse(
+                "upload:uploaded_file_by_name",
+                args=["testfile.txt"],
+            ),
+            HTTP_X_UPLOAD_HANDLE=self.handle,
+        )
+        self.assertEqual(response.status_code, 204)
+
+    def test_admin_cannot_tamper_with_files(self) -> None:
+        """Test that the admins cannot GET or DELETE uploaded files other users are uploading."""
+        # Login as admin
+        self.client.logout()
+        self.client.login(username="admin", password="3&SAjfTYZQ")
+
+        # Try to delete it
+        response = self.client.delete(
+            reverse(
+                "upload:uploaded_file_by_name",
+                args=["testfile.txt"],
+            ),
+            HTTP_X_UPLOAD_HANDLE=self.handle,
+        )
+        self.assertEqual(response.status_code, 404)
+
+        # Try to get it
+        response = self.client.get(
+            reverse(
+                "upload:uploaded_file_by_name",
+                args=["testfile.txt"],
+            ),
+            HTTP_X_UPLOAD_HANDLE=self.handle,
+        )
+        self.assertEqual(response.status_code, 404)
 
     def tearDown(self) -> None:
         """Tear down test environment."""

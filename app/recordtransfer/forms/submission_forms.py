@@ -15,7 +15,6 @@ from django.conf import settings
 from django.db.models import Case, CharField, Value, When
 from django.forms import BaseForm, BaseFormSet
 from django.utils.translation import gettext_lazy as _
-from upload.models import UploadSession
 
 from recordtransfer.constants import (
     HtmlIds,
@@ -747,7 +746,10 @@ class GroupSubmissionForm(SubmissionForm):
 
 
 class UploadFilesForm(SubmissionForm):
-    """The form where users upload their files and write any final notes."""
+    """The form where users upload their files and write any final notes.
+
+    The upload session is supplied by the view.
+    """
 
     class Meta:
         """Meta information for the form."""
@@ -756,7 +758,10 @@ class UploadFilesForm(SubmissionForm):
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop("user", None)
-        self.correct_session_token = kwargs.pop("correct_session_token", None)
+        # The view is responsible for resolving the active UploadSession and
+        # passing it in. May be None during construction; clean() will surface
+        # an error in that case.
+        self.upload_session = kwargs.pop("upload_session", None)
         super().__init__(*args, **kwargs)
 
     general_note = forms.CharField(
@@ -776,39 +781,22 @@ class UploadFilesForm(SubmissionForm):
         label=_("Other notes"),
     )
 
-    session_token = forms.CharField(
-        required=True,
-        widget=forms.HiddenInput(),
-        label="hidden",
-        error_messages={"required": _("Upload session token is required")},
-    )
-
     def clean(self) -> dict:
-        """Check that the session token is valid and that at least one file has been uploaded."""
+        """Check that the upload session is valid and that at least one file was uploaded."""
         cleaned_data = super().clean()
-        token = cleaned_data.get("session_token")
 
-        upload_session = UploadSession.objects.filter(token=token, user=self.user).first()
-
-        if not upload_session:
-            self.add_error("session_token", _("Invalid upload session state. Please try again."))
+        if not self.upload_session or self.upload_session.user_id != getattr(
+            self.user, "id", None
+        ):
+            self.add_error(None, _("Invalid upload session state. Please try again."))
             return cleaned_data
 
-        if upload_session.token != self.correct_session_token:
-            LOGGER.warning(
-                "**SUSPICIOUS OPERATION**: hidden session_token input was changed by %s in the "
-                "upload files form",
-                self.user.username if self.user else "unknown user",
-            )
-            self.add_error("session_token", _("Invalid upload session state. Please try again."))
-            return cleaned_data
-
-        if upload_session.file_count == 0:
-            self.add_error("session_token", _("You must upload at least one file"))
+        if self.upload_session.file_count == 0:
+            self.add_error(None, _("You must upload at least one file"))
             return cleaned_data
 
         cleaned_data["quantity_and_unit_of_measure"] = (
-            upload_session.get_quantity_and_unit_of_measure()
+            self.upload_session.get_quantity_and_unit_of_measure()
         )
 
         return cleaned_data
@@ -865,13 +853,9 @@ class ReviewForm(SubmissionForm):
     def _get_file_upload_fields_data(form: UploadFilesForm, user: User) -> dict[str, Any]:
         """Handle file upload specific field processing."""
         fields_data = ReviewForm._get_base_fields_data(form)
-        session_token = form.cleaned_data.get("session_token")
+        session = form.upload_session
 
-        if not (session_token and user):
-            return fields_data
-
-        session = UploadSession.objects.filter(token=session_token, user=user).first()
-        if not session:
+        if not session or not user or session.user_id != user.id:
             return fields_data
 
         # Adds on links to access uploaded files

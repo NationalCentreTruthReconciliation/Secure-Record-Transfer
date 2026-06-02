@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import shutil
+import uuid
 from itertools import chain
 from pathlib import Path
 from typing import Optional
@@ -590,6 +591,7 @@ def session_upload_location(instance: TempUploadedFile, filename: str) -> str:
 class BaseUploadedFile(models.Model):
     """Base class for uploaded files with shared methods."""
 
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     name = models.CharField(max_length=256, null=True, default="-")
     session = models.ForeignKey(UploadSession, on_delete=models.CASCADE, null=False)
     file_upload = models.FileField(null=True)
@@ -633,14 +635,12 @@ class BaseUploadedFile(models.Model):
         raise FileNotFoundError(f"{self.name} does not exist in session {self.session.token}")
 
     def get_file_access_url(self) -> str:
-        """Generate URL to request access for this file."""
-        return reverse(
-            "upload:uploaded_file",
-            kwargs={
-                "session_token": self.session.token,
-                "file_name": self.name,
-            },
-        )
+        """Generate URL to request access for this file.
+
+        The URL is keyed by the file's opaque :attr:`uuid` so the underlying upload session token
+        never appears in URLs exposed to the client.
+        """
+        return reverse("upload:uploaded_file_by_uuid", kwargs={"file_uuid": self.uuid})
 
     def __str__(self):
         """Return a string representation of this object."""

@@ -35,6 +35,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView
 from django_htmx.http import HttpResponseClientRedirect, trigger_client_event
 from formtools.wizard.views import SessionWizardView
+from upload.handles import register_handle
 from utility import is_deployed_environment
 
 from recordtransfer import forms
@@ -744,9 +745,6 @@ class SubmissionFormWizard(SessionWizardView):
             initial["postal_or_zip_code"] = user.postal_or_zip_code or ""
             initial["country"] = user.country or ""
 
-        if SubmissionStep(step) == SubmissionStep.UPLOAD_FILES:
-            initial["session_token"] = self.storage.extra_data.get("session_token", "")
-
         return initial
 
     def get_form_kwargs(self, step: Optional[str] = None) -> dict:
@@ -758,7 +756,13 @@ class SubmissionFormWizard(SessionWizardView):
 
         elif step == SubmissionStep.UPLOAD_FILES.value:
             kwargs["user"] = self.request.user
-            kwargs["correct_session_token"] = self.storage.extra_data["session_token"]
+            # The active upload session is resolved server-side from the
+            # wizard's stored token; the form itself sees only the resolved
+            # UploadSession instance, not a client-supplied identifier.
+            kwargs["upload_session"] = UploadSession.objects.filter(
+                token=self.storage.extra_data.get("session_token"),
+                user=self.request.user,
+            ).first()
 
         elif step == SubmissionStep.SOURCE_INFO.value:
             source_type, _ = SourceType.objects.get_or_create(name="Individual")
@@ -791,6 +795,28 @@ class SubmissionFormWizard(SessionWizardView):
                 form_obj
             )
         return final_forms
+
+    def get_upload_handle(self) -> str | None:
+        """Get a handle to enable uploading files.
+
+        The front-end should send the X-Upload-Handle header to this handle to be able to upload
+        files.
+        """
+        session_token = self.storage.extra_data.get("session_token", "")
+
+        # Create a fresh upload handle for this session to send to the user
+        if not session_token:
+            return None
+
+        upload_session = UploadSession.objects.filter(
+            token=session_token,
+            user=self.request.user,
+        ).first()
+
+        if not upload_session:
+            return None
+
+        return register_handle(self.request, upload_session)
 
     @property
     def review_step_reached(self) -> bool:
@@ -948,7 +974,9 @@ class SubmissionFormWizard(SessionWizardView):
         elif step == SubmissionStep.UPLOAD_FILES:
             js_context.update(
                 {
-                    "SESSION_TOKEN": self.storage.extra_data.get("session_token", ""),
+                    # UPLOAD_HANDLE is the opaque per-wizard identifier the frontend sends in the
+                    # X-Upload-Handle header.
+                    "UPLOAD_HANDLE": self.get_upload_handle() or "",
                     "MAX_TOTAL_UPLOAD_SIZE_MB": settings.MAX_TOTAL_UPLOAD_SIZE_MB,
                     "MAX_SINGLE_UPLOAD_SIZE_MB": settings.MAX_SINGLE_UPLOAD_SIZE_MB,
                     "MAX_TOTAL_UPLOAD_COUNT": settings.MAX_TOTAL_UPLOAD_COUNT,

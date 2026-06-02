@@ -31,7 +31,7 @@ const UPPY_LOCALE_MAP = {
 export async function setupUppy(context) {
     const reviewButton = document.getElementById("form-review-button");
     const submissionForm = document.getElementById("submission-form");
-    const token = context["SESSION_TOKEN"];
+    const uploadHandle = context["UPLOAD_HANDLE"];
     const issueFileIds = [];
 
     /**
@@ -89,9 +89,12 @@ export async function setupUppy(context) {
         })
         .use(XHR, {
             method: "POST",
-            endpoint: `/upload-session/${token}/files/`,
+            endpoint: "/upload-session/files/",
             formData: true,
-            headers: { "X-CSRFToken": getCookie("csrftoken") },
+            headers: {
+                "X-CSRFToken": getCookie("csrftoken"),
+                "X-Upload-Handle": uploadHandle,
+            },
             bundle: false,
             timeout: 180000,
             limit: 2,
@@ -144,7 +147,7 @@ export async function setupUppy(context) {
             const index = issueFileIds.indexOf(file.id);
             issueFileIds.splice(index, 1);
         }
-        sendDeleteRequestForFile(file.name, token);
+        sendDeleteRequestForFile(file.name, uploadHandle);
     });
 
     reviewButton.addEventListener("click", async (event) => {
@@ -176,7 +179,7 @@ export async function setupUppy(context) {
     });
 
     // Add mock files to represent files that have already been uploaded to the upload session
-    const uploadedFiles = await fetchUploadedFiles(token);
+    const uploadedFiles = await fetchUploadedFiles(uploadHandle);
 
     if (uploadedFiles) {
         uploadedFiles.forEach((file) => {

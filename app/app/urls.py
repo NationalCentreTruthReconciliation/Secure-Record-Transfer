@@ -80,6 +80,6 @@ if settings.DEBUG and not settings.TESTING:
     urlpatterns += debug_toolbar_urls()
 
 if settings.TESTING or settings.FILE_UPLOAD_ENABLED:
-    urlpatterns += [path("", include("upload.urls"))]
+    urlpatterns += [path("", include("upload.urls", namespace="upload"))]
 elif not settings.FILE_UPLOAD_ENABLED:
-    urlpatterns += [path("", include("upload.urls_readonly"))]
+    urlpatterns += [path("", include("upload.urls_readonly", namespace="upload"))]
