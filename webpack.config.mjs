@@ -53,6 +53,9 @@ export default {
             },
         ]
     },
+    resolve: {
+        extensions: [".ts", ".js"],
+    },
     plugins: [
         new MiniCssExtractPlugin({
             filename: "css/[name].[contenthash:8].css",
