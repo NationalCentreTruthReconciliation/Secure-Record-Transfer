@@ -46,17 +46,17 @@
                                                             +{{ value|length|add:'-5' }} {% trans "more" %}
                                                         </button>
                                                         <div class="hidden" id="more-files-{{ forloop.parentloop.counter }}">
-                                                        {% endif %}
-                                                        {% if forloop.counter > 5 %}
-                                                            <div class="file-entry mb-2 flex items-center gap-2">
-                                                                <i class="fas fa-file text-primary/60"></i>
-                                                                <a class="non-nav-link text-primary/60 font-medium underline hover:text-primary transition break-all max-w-full block"
-                                                                   href="{{ file.url }}"
-                                                                   target="_blank">{{ file.name }}</a>
-                                                            </div>
-                                                        {% endif %}
-                                                        {% if forloop.last and forloop.counter > 5 %}
-                                                        </div>
+                                                {% endif %}
+                                                {% if forloop.counter > 5 %}
+                                                    <div class="file-entry mb-2 flex items-center gap-2">
+                                                        <i class="fas fa-file text-primary/60"></i>
+                                                        <a class="non-nav-link text-primary/60 font-medium underline hover:text-primary transition break-all max-w-full block"
+                                                           href="{{ file.url }}"
+                                                           target="_blank">{{ file.name }}</a>
+                                                    </div>
+                                                {% endif %}
+                                                {% if forloop.last and forloop.counter > 5 %}
+                                                    </div>
                                                     </div>
                                                 {% endif %}
                                             {% endfor %}

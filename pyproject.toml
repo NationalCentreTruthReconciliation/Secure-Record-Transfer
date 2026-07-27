@@ -46,7 +46,7 @@ dev = [
     "sphinxcontrib-mermaid>=1.0.0,<2",
     "sphinx-rtd-theme>=2.0.0,<3",
     "ruff>=0.13.0,<0.14",
-    "djlint>=1.36.4",
+    "djlint==1.42.3",
 ]
 podman = ["podman-compose>=1.3.0"]
 
