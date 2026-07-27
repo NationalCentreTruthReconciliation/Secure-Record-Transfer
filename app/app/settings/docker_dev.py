@@ -107,6 +107,11 @@ LOGGING = {
             "level": "INFO",
             "propagate": True,
         },
+        "upload": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": True,
+        },
         "rq.worker": {
             "handlers": ["console"],
             "level": "INFO",
