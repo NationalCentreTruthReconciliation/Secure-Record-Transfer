@@ -12,7 +12,9 @@ from freezegun import freeze_time
 from recordtransfer.jobs import (
     check_expiring_in_progress_submissions,
     cleanup_expired_sessions,
+    cleanup_pristine_in_progress_submissions,
     create_downloadable_bag,
+    delete_pristine_in_progress_submission_if_eligible,
     delete_upload_session_if_eligible,
     expire_upload_session_if_eligible,
     get_deletable_upload_sessions,
@@ -20,6 +22,7 @@ from recordtransfer.jobs import (
     move_uploads_and_send_emails,
 )
 from recordtransfer.models import InProgressSubmission, Job, Submission, UploadSession, User
+from recordtransfer.wizard_storage import initial_wizard_data
 
 
 class TestCreateDownloadableBag(TestCase):
@@ -637,3 +640,67 @@ class TestCleanupExpiredSessions(TestCase):
         # Verify the exception is re-raised
         with self.assertRaises(RuntimeError):
             cleanup_expired_sessions()
+
+
+class TestCleanupPristineInProgressSubmissions(TestCase):
+    """Tests for removing untouched automatic drafts after their short retention period."""
+
+    @override_settings(IN_PROGRESS_SUBMISSION_PRISTINE_RETENTION_MINUTES=60)
+    def test_cleanup_deletes_only_stale_pristine_drafts(self) -> None:
+        """Delete old untouched drafts without deleting recent, interacted, or legacy drafts."""
+        user = User.objects.create_user(username="draft-owner", password="password")
+        first_step = "acceptlegal"
+        stale_pristine = InProgressSubmission.objects.create(
+            user=user,
+            current_step=first_step,
+            step_data=initial_wizard_data(first_step),
+        )
+        recent_pristine = InProgressSubmission.objects.create(
+            user=user,
+            current_step=first_step,
+            step_data=initial_wizard_data(first_step),
+        )
+        interacted_data = initial_wizard_data(first_step)
+        interacted_data["wizard"]["step_data"] = {first_step: {"field": ["value"]}}
+        stale_interacted = InProgressSubmission.objects.create(
+            user=user,
+            current_step=first_step,
+            step_data=interacted_data,
+        )
+        stale_legacy = InProgressSubmission.objects.create(
+            user=user,
+            current_step=first_step,
+            step_data={"version": 1, "past": {}},
+        )
+        InProgressSubmission.objects.filter(
+            pk__in=[stale_pristine.pk, stale_interacted.pk, stale_legacy.pk]
+        ).update(last_updated=timezone.now() - timedelta(minutes=61))
+
+        cleanup_pristine_in_progress_submissions()
+
+        self.assertFalse(InProgressSubmission.objects.filter(pk=stale_pristine.pk).exists())
+        self.assertTrue(InProgressSubmission.objects.filter(pk=recent_pristine.pk).exists())
+        self.assertTrue(InProgressSubmission.objects.filter(pk=stale_interacted.pk).exists())
+        self.assertTrue(InProgressSubmission.objects.filter(pk=stale_legacy.pk).exists())
+
+    @override_settings(IN_PROGRESS_SUBMISSION_PRISTINE_RETENTION_MINUTES=60)
+    def test_recheck_skips_draft_interacted_with_after_selection(self) -> None:
+        """A stale candidate is preserved if the user has since submitted wizard data."""
+        user = User.objects.create_user(username="active-draft-owner", password="password")
+        first_step = "acceptlegal"
+        submission = InProgressSubmission.objects.create(
+            user=user,
+            current_step=first_step,
+            step_data=initial_wizard_data(first_step),
+        )
+        InProgressSubmission.objects.filter(pk=submission.pk).update(
+            last_updated=timezone.now() - timedelta(minutes=61)
+        )
+        candidate_id = InProgressSubmission.objects.get_stale_pristine().get().pk
+        submission.step_data["wizard"]["step_data"] = {first_step: {"field": ["value"]}}
+        submission.save(update_fields=["step_data"])
+
+        deleted = delete_pristine_in_progress_submission_if_eligible(candidate_id)
+
+        self.assertFalse(deleted)
+        self.assertTrue(InProgressSubmission.objects.filter(pk=submission.pk).exists())

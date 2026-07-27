@@ -81,6 +81,29 @@ class UploadSessionManager(models.Manager):
 class InProgressSubmissionManager(models.Manager):
     """Custom manager for InProgressSubmission model."""
 
+    def get_interacted(self) -> query.QuerySet:
+        """Return drafts where the user has submitted at least one wizard step.
+
+        Legacy drafts predate automatic draft creation, so they represent an explicit save and
+        are always considered interacted.
+        """
+        pristine_ids = self.filter(
+            step_data__version=2,
+            step_data__wizard__step_data={},
+        ).values("pk")
+        return self.exclude(pk__in=pristine_ids)
+
+    def get_stale_pristine(self) -> query.QuerySet:
+        """Return untouched automatic drafts older than the configured retention period."""
+        cutoff_time = timezone.now() - timezone.timedelta(
+            minutes=settings.IN_PROGRESS_SUBMISSION_PRISTINE_RETENTION_MINUTES
+        )
+        return self.filter(
+            last_updated__lt=cutoff_time,
+            step_data__version=2,
+            step_data__wizard__step_data={},
+        )
+
     def get_expiring_without_reminder(self) -> query.QuerySet:
         """Return all in-progress submissions with upload sessions that are about to expire and
         have not had a reminder email sent.

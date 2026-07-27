@@ -4,7 +4,11 @@ import django_rq
 from django.conf import settings
 from django_rq.management.commands import rqscheduler
 
-from recordtransfer.jobs import check_expiring_in_progress_submissions, cleanup_expired_sessions
+from recordtransfer.jobs import (
+    check_expiring_in_progress_submissions,
+    cleanup_expired_sessions,
+    cleanup_pristine_in_progress_submissions,
+)
 
 scheduler = django_rq.get_scheduler()
 LOGGER = logging.getLogger(__name__)
@@ -19,6 +23,23 @@ def clear_scheduled_jobs() -> None:
 
 def register_scheduled_jobs() -> None:
     """Register jobs to be run on a schedule."""
+    pristine_cleanup_schedule = settings.IN_PROGRESS_SUBMISSION_PRISTINE_CLEANUP_SCHEDULE
+    if pristine_cleanup_schedule:
+        LOGGER.info(
+            "Scheduling pristine draft cleanup job (schedule: %s)",
+            pristine_cleanup_schedule,
+        )
+        scheduler.cron(
+            pristine_cleanup_schedule,
+            func=cleanup_pristine_in_progress_submissions,
+            queue_name="default",
+        )
+    else:
+        LOGGER.info(
+            "IN_PROGRESS_SUBMISSION_PRISTINE_CLEANUP_SCHEDULE is not set; not scheduling "
+            "pristine draft cleanup"
+        )
+
     if (
         not settings.FILE_UPLOAD_ENABLED
         or settings.UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES == -1

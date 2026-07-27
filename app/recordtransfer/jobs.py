@@ -254,6 +254,38 @@ def cleanup_expired_sessions() -> None:
         raise e
 
 
+def delete_pristine_in_progress_submission_if_eligible(submission_id: int) -> bool:
+    """Delete an untouched draft after locking and rechecking its age and contents."""
+    with transaction.atomic():
+        submission = (
+            InProgressSubmission.objects.select_for_update().filter(pk=submission_id).first()
+        )
+        if not submission:
+            return False
+        if not InProgressSubmission.objects.get_stale_pristine().filter(pk=submission_id).exists():
+            return False
+        submission.delete()
+        return True
+
+
+@django_rq.job
+def cleanup_pristine_in_progress_submissions() -> None:
+    """Delete automatic drafts that were never changed and have exceeded their retention."""
+    LOGGER.info("Cleaning up pristine in-progress submissions ...")
+    try:
+        candidate_ids = list(
+            InProgressSubmission.objects.get_stale_pristine().values_list("pk", flat=True)
+        )
+        deleted_count = sum(
+            delete_pristine_in_progress_submission_if_eligible(submission_id)
+            for submission_id in candidate_ids
+        )
+        LOGGER.info("Deleted %d pristine in-progress submissions", deleted_count)
+    except Exception as e:
+        LOGGER.exception("Error cleaning up pristine in-progress submissions: %s", str(e))
+        raise
+
+
 @django_rq.job
 def check_expiring_in_progress_submissions() -> None:
     """Check for in-progress submissions that are about to expire for which reminder emails have
