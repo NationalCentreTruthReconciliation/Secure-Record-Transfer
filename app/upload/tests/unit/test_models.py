@@ -710,38 +710,20 @@ class TestUploadSession(TestCase):
             mock_get_temporary.assert_not_called()
             mock_get_permanent.assert_not_called()
 
-    @patch("upload.models.UploadSession.permuploadedfile_set")
-    @patch("upload.models.UploadSession.tempuploadedfile_set")
-    def test_remove_temp_uploads(
-        self, mock_temp_files: BaseManager, mock_perm_files: BaseManager
-    ) -> None:
+    def test_remove_temp_uploads(self) -> None:
         """Test the remove_temp_uploads method of UploadSession."""
-        # Setup mock files
-        mock_file1 = Mock()
-        mock_file2 = Mock()
-        mock_temp_files.all = MagicMock(return_value=[mock_file1, mock_file2])
+        # Set up files
+        temp_file_1 = self.session.add_temp_file(self.test_file_1)
+        temp_file_2 = self.session.add_temp_file(self.test_file_2)
+        temp_file_dir = Path(temp_file_1.file_upload.path).parent.resolve()
 
         self.session.status = UploadSession.SessionStatus.UPLOADING
         self.session.remove_temp_uploads()
 
-        mock_file1.remove.assert_called_once()
-        mock_file2.remove.assert_called_once()
+        self.assertFalse(temp_file_1.exists)
+        self.assertFalse(temp_file_2.exists)
+        self.assertFalse(temp_file_dir.exists())
         self.assertEqual(self.session.status, UploadSession.SessionStatus.CREATED)
-
-        # Reset mock files
-        mock_file1.reset_mock()
-        mock_file2.reset_mock()
-
-        valid_unchanged_statuses = [
-            UploadSession.SessionStatus.CREATED,
-            UploadSession.SessionStatus.REMOVING_IN_PROGRESS,
-        ]
-        for status in valid_unchanged_statuses:
-            self.session.status = status
-            self.session.remove_temp_uploads()
-            mock_file1.remove.assert_not_called()
-            mock_file2.remove.assert_not_called()
-            self.assertEqual(self.session.status, status)
 
         # Test invalid states
         invalid_states = [
@@ -753,6 +735,36 @@ class TestUploadSession(TestCase):
             self.session.status = status
             with self.assertRaises(ValueError):
                 self.session.remove_temp_uploads()
+
+    def test_remove_perm_uploads(self) -> None:
+        """Test removing permanent uploads."""
+        # Upload some files
+        temp_file_1 = self.session.add_temp_file(self.test_file_1)
+        temp_file_2 = self.session.add_temp_file(self.test_file_2)
+        temp_file_dir = Path(temp_file_1.file_upload.path).parent.resolve()
+
+        # Move uploads to permanent storage
+        self.session.status = UploadSession.SessionStatus.UPLOADING
+        self.session.make_uploads_permanent()
+        perm_file_1, perm_file_2 = self.session.get_permanent_uploads()
+        perm_file_dir = Path(perm_file_1.file_upload.path).parent.resolve()
+
+        # Temp files should not exist
+        self.assertFalse(temp_file_1.exists)
+        self.assertFalse(temp_file_2.exists)
+        self.assertFalse(temp_file_dir.exists())
+        self.assertEqual(self.session.status, UploadSession.SessionStatus.STORED)
+
+        # Perm files should exist
+        self.assertTrue(perm_file_1.exists)
+        self.assertTrue(perm_file_2.exists)
+        self.assertTrue(perm_file_dir.exists())
+
+        # After removing, the perm files should not exist
+        self.session.remove_perm_uploads()
+        self.assertFalse(perm_file_1.exists)
+        self.assertFalse(perm_file_2.exists)
+        self.assertFalse(perm_file_dir.exists())
 
     @patch("upload.models.UploadSession.tempuploadedfile_set", spec=BaseManager)
     def test_make_uploads_permanent(self, tempuploadedfile_set_mock: BaseManager) -> None:
