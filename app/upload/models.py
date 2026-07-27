@@ -373,6 +373,32 @@ class UploadSession(models.Model):
                 f"{self.SessionStatus.STORED}"
             )
 
+    def _remove_files_and_dir(
+        self, files: list[TempUploadedFile] | list[PermUploadedFile]
+    ) -> None:
+        """Remove all files in a list and remove the directory."""
+        if not files:
+            return
+
+        dirs: set[Path] = set()
+
+        for f in files:
+            parent = Path(f.file_upload.path).parent.resolve()
+            dirs.add(parent)
+            f.remove()
+
+        # Remove directory(ies) of files
+        for d in dirs:
+            if len(list(d.iterdir())) > 0:
+                name = "temp" if isinstance(files[0], TempUploadedFile) else "permanent"
+                LOGGER.warning(
+                    "Could not remove %s directory '%d' because there are untracked files in that directory.",
+                    name,
+                    str(d),
+                )
+            else:
+                d.rmdir()
+
     def remove_temp_uploads(self, save: bool = True) -> None:
         """Remove all temp uploaded files associated with this session."""
         if self.status == self.SessionStatus.REMOVING_IN_PROGRESS:
@@ -401,22 +427,7 @@ class UploadSession(models.Model):
         self.status = self.SessionStatus.REMOVING_IN_PROGRESS
         self.save()
 
-        temp_dirs: set[Path] = set()
-
-        for f in self.tempuploadedfile_set.all():  # type: ignore
-            parent = Path(f.file_upload.path).parent.resolve()
-            temp_dirs.add(parent)
-            f.remove()
-
-        # Remove directory(ies) of temp files
-        for d in temp_dirs:
-            if len(list(d.iterdir())) > 0:
-                LOGGER.warning(
-                    "Could not remove temp directory '%d' because there are untracked files in that directory.",
-                    str(d),
-                )
-            else:
-                d.rmdir()
+        self._remove_files_and_dir(self.get_temporary_uploads())
 
         if initial_status == self.SessionStatus.UPLOADING:
             self.status = self.SessionStatus.CREATED
@@ -434,22 +445,7 @@ class UploadSession(models.Model):
                 "session's state is not STORED"
             )
 
-        perm_dirs: set[Path] = set()
-
-        for f in self.permuploadedfile_set.all():
-            parent = Path(f.file_upload.path).parent.resolve()
-            perm_dirs.add(parent)
-            f.remove()
-
-        # Remove directory(ies) of perm files
-        for d in perm_dirs:
-            if len(list(d.iterdir())) > 0:
-                LOGGER.warning(
-                    "Could not remove perm directory '%d' because there are untracked files in that directory.",
-                    str(d),
-                )
-            else:
-                d.rmdir()
+        self._remove_files_and_dir(self.get_permanent_uploads())
 
         if save:
             self.save()
@@ -481,12 +477,11 @@ class UploadSession(models.Model):
         )
 
         try:
-            temp_dir_path = None
+            dirs: set[Path] = set()
 
             for uploaded_file in files:
-                # Get temp directory from first file
-                if temp_dir_path is None:
-                    temp_dir_path = Path(uploaded_file.file_upload.path).parent
+                temp_dir_path = Path(uploaded_file.file_upload.path).parent.resolve()
+                dirs.add(temp_dir_path)
 
                 LOGGER.info(
                     'Moving file "%s" (size: %d bytes) to permanent storage...',
@@ -496,9 +491,10 @@ class UploadSession(models.Model):
                 uploaded_file.move_to_permanent_storage()
 
             # Remove the temporary directory after all files have been moved
-            if temp_dir_path and temp_dir_path.exists():
-                LOGGER.info("Removing temporary directory: %s", temp_dir_path)
-                shutil.rmtree(temp_dir_path)
+            for d in dirs:
+                if d.exists():
+                    LOGGER.info("Removing temporary directory: %s", d)
+                    shutil.rmtree(d)
 
         except Exception as e:
             LOGGER.error(
@@ -507,6 +503,7 @@ class UploadSession(models.Model):
             self.status = self.SessionStatus.COPYING_FAILED
             self.save()
             return
+
         self.status = self.SessionStatus.STORED
         self.save()
 
