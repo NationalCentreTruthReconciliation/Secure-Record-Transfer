@@ -10,6 +10,7 @@ from typing import Any, ClassVar, Optional, OrderedDict, Union, cast
 from caais.models import RightsType, SourceRole, SourceType
 from django.conf import settings
 from django.contrib import messages
+from django.core.exceptions import ValidationError
 from django.db.models import Case, Count, Value, When
 from django.forms import (
     BaseForm,
@@ -34,7 +35,7 @@ from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView
 from django_htmx.http import HttpResponseClientRedirect, trigger_client_event
-from formtools.wizard.views import SessionWizardView
+from formtools.wizard.views import WizardView
 from upload.handles import register_handle
 from utility import is_deployed_environment
 
@@ -50,11 +51,16 @@ from recordtransfer.jobs import move_uploads_and_send_emails
 from recordtransfer.models import (
     InProgressSubmission,
     Submission,
+    SubmissionGroup,
     UploadSession,
     User,
 )
 from recordtransfer.views.table import paginated_table_view
-from recordtransfer.wizard_storage import LEGACY_WIZARD_DATA_VERSION
+from recordtransfer.wizard_storage import (
+    LEGACY_WIZARD_DATA_VERSION,
+    InProgressSubmissionStorage,
+    initial_wizard_data,
+)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -151,7 +157,7 @@ def open_session_table(request: HttpRequest) -> HttpResponse:
     )
 
 
-class SubmissionFormWizard(SessionWizardView):
+class SubmissionFormWizard(WizardView):
     """A multi-page form for collecting user metadata and uploading files. Uses a form wizard. For
     more info, visit this link: https://django-formtools.readthedocs.io/en/latest/wizard.html.
     """
@@ -272,6 +278,7 @@ class SubmissionFormWizard(SessionWizardView):
     form_list: ClassVar[list[tuple]] = [
         (step.value, step_metadata.form) for step, step_metadata in _TEMPLATES.items()
     ]
+    storage_name = "recordtransfer.wizard_storage.InProgressSubmissionStorage"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -290,35 +297,73 @@ class SubmissionFormWizard(SessionWizardView):
             raise Http404(_("Invalid step name")) from exc
 
     def dispatch(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        """Dispatch the request to the appropriate handler method."""
+        """Create a canonical draft URL, or dispatch an existing owner-scoped draft."""
         self.in_progress_uuid = request.GET.get("resume")
 
         if not self.in_progress_uuid:
-            self.submission_group_uuid = request.GET.get(
+            if request.method != "GET":
+                raise Http404(_("In-progress submission not found"))
+
+            user = cast(User, request.user)
+            limit_reached = settings.FILE_UPLOAD_ENABLED and not user.open_sessions_within_limit(
+                will_add_new=True
+            )
+            if limit_reached:
+                messages.error(
+                    request,
+                    message=gettext(
+                        "Can't create a new submission because it will put you over the maximum "
+                        "concurrent session limit."
+                    ),
+                )
+                return redirect("recordtransfer:open_sessions")
+
+            extra_data = {}
+            requested_group_uuid = request.GET.get(
                 QueryParameters.SUBMISSION_GROUP_QUERY_NAME
             )
-            return super().dispatch(request, *args, **kwargs)
+            try:
+                requested_group_exists = requested_group_uuid and SubmissionGroup.objects.filter(
+                    created_by=user,
+                    uuid=requested_group_uuid,
+                ).exists()
+            except (ValidationError, ValueError):
+                requested_group_exists = False
 
-        self.in_progress_submission = InProgressSubmission.objects.filter(
-            user=request.user, uuid=self.in_progress_uuid
-        ).first()
+            if requested_group_exists:
+                extra_data[QueryParameters.SUBMISSION_GROUP_QUERY_NAME] = requested_group_uuid
 
-        # Redirect user to a fresh submission form if the in-progress submission is not found
-        if not self.in_progress_submission:
-            return redirect("recordtransfer:submit")
-
-        # Check if associated upload session is expired or not
-        if self.in_progress_submission.upload_session_expired:
-            return redirect("recordtransfer:in_progress_submission_expired")
+            first_step = SubmissionStep.ACCEPT_LEGAL.value
+            self.in_progress_submission = InProgressSubmission.objects.create(
+                user=user,
+                current_step=first_step,
+                step_data=initial_wizard_data(first_step, extra_data),
+            )
+            return redirect(self.in_progress_submission.get_resume_url())
 
         return super().dispatch(request, *args, **kwargs)
 
-    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        """Handle GET request to load a submission."""
-        if self.in_progress_submission:
-            self.load_form_data()
+    def _bind_in_progress_submission(self) -> InProgressSubmission:
+        """Bind the draft loaded by the storage backend to the wizard view."""
+        storage = cast(InProgressSubmissionStorage, self.storage)
+        self.in_progress_submission = storage.in_progress_submission
+        self.in_progress_uuid = str(self.in_progress_submission.uuid)
+        self.submission_group_uuid = storage.extra_data.get(
+            QueryParameters.SUBMISSION_GROUP_QUERY_NAME
+        )
+        return self.in_progress_submission
 
-        would_assign_token = not bool(self.storage.extra_data.get("session_token", None))
+    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        """Render a persisted submission without resetting formtools storage."""
+        in_progress_submission = self._bind_in_progress_submission()
+
+        if in_progress_submission.upload_session_expired:
+            return redirect("recordtransfer:in_progress_submission_expired")
+
+        would_assign_token = not (
+            in_progress_submission.upload_session
+            or self.storage.extra_data.get("session_token", None)
+        )
 
         # The limit may be exceeded if a new session token had to be assigned
         # Tokens are only assigned if file uploading is enabled
@@ -327,41 +372,17 @@ class SubmissionFormWizard(SessionWizardView):
             will_add_new=would_assign_token
         )
 
-        if self.in_progress_submission and not limit_reached:
+        if not limit_reached:
             return self.render(self.get_form())
 
-        elif self.in_progress_submission and limit_reached:
-            messages.error(
-                request,
-                message=gettext(
-                    "Can't load this in-progress submission because it will put you over the "
-                    "maximum concurrent session limit."
-                ),
-            )
-            return redirect("recordtransfer:open_sessions")
-
-        elif limit_reached:
-            messages.error(
-                request,
-                message=gettext(
-                    "Can't create a new submission because it will put you over the maximum "
-                    "concurrent session limit."
-                ),
-            )
-            return redirect("recordtransfer:open_sessions")
-
-        return super().get(request, *args, **kwargs)
-
-    def load_form_data(self) -> None:
-        """Load form data from an InProgressSubmission instance."""
-        if not self.in_progress_submission:
-            raise ValueError("No in-progress submission to load")
-
-        step_data = self.in_progress_submission.step_data
-
-        self.storage.data = step_data["past"]
-        self.storage.extra_data = step_data["extra"]
-        self.storage.current_step = self.in_progress_submission.current_step
+        messages.error(
+            request,
+            message=gettext(
+                "Can't load this in-progress submission because it will put you over the "
+                "maximum concurrent session limit."
+            ),
+        )
+        return redirect("recordtransfer:open_sessions")
 
     def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         """Handle POST request to save a submission.
@@ -369,7 +390,14 @@ class SubmissionFormWizard(SessionWizardView):
         If the session limit is reached, save the current submission, and re-direct to the session
         limit page.
         """
-        would_assign_token = not bool(self.storage.extra_data.get("session_token", None))
+        in_progress_submission = self._bind_in_progress_submission()
+        if in_progress_submission.upload_session_expired:
+            return redirect("recordtransfer:in_progress_submission_expired")
+
+        would_assign_token = not (
+            in_progress_submission.upload_session
+            or self.storage.extra_data.get("session_token", None)
+        )
 
         # The limit may be exceeded if a new session token had to be assigned
         # Tokens are only assigned if file uploading is enabled
@@ -418,7 +446,6 @@ class SubmissionFormWizard(SessionWizardView):
 
         try:
             self.save_form_data(request)
-            self.storage.reset()
 
             message = base_message
 
@@ -603,7 +630,6 @@ class SubmissionFormWizard(SessionWizardView):
 
         try:
             self.save_form_data(self.request)
-            self.storage.reset()
             messages.success(self.request, message)
         except Exception:
             messages.error(self.request, gettext("There was an error saving the submission."))
@@ -730,11 +756,16 @@ class SubmissionFormWizard(SessionWizardView):
         Fills in the user's name and email automatically where possible.
         """
         initial = (self.initial_dict or {}).get(step, {})
+        storage = cast(InProgressSubmissionStorage, self.storage)
 
-        if self.in_progress_submission and step == self.in_progress_submission.current_step:
-            initial = self.in_progress_submission.step_data.get("current", {})
+        if step == self.in_progress_submission.current_step and storage.legacy_current_data:
+            initial = storage.legacy_current_data
 
-        if not self.in_progress_submission and step == SubmissionStep.CONTACT_INFO.value:
+        if (
+            step == SubmissionStep.CONTACT_INFO.value
+            and not storage.get_step_data(step)
+            and not storage.legacy_current_data
+        ):
             user = cast(User, self.request.user)
             initial["contact_name"] = self.get_name_of_user(user)
             initial["email"] = str(user.email)
@@ -833,9 +864,8 @@ class SubmissionFormWizard(SessionWizardView):
         """Check if the user has started the form. This is true if there is an in-progress
         submission, or if the user has submitted any data for the form.
         """
-        return self.in_progress_submission is not None or bool(
-            self.storage.data.get("step_data", {})
-        )
+        storage = cast(InProgressSubmissionStorage, self.storage)
+        return bool(self.storage.data.get("step_data", {})) or bool(storage.legacy_current_data)
 
     def get_context_data(self, form: Union[BaseForm, BaseFormSet], **kwargs) -> dict[str, Any]:
         """Retrieve context data for the current form template, including context for the
@@ -1028,6 +1058,7 @@ class SubmissionFormWizard(SessionWizardView):
             submission.save()
 
             if self.in_progress_submission:
+                cast(InProgressSubmissionStorage, self.storage).mark_finalized()
                 self.in_progress_submission.delete()
 
             LOGGER.info("Finishing up submission in a worker process.")

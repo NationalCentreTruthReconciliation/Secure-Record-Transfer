@@ -13,6 +13,22 @@ LEGACY_WIZARD_DATA_VERSION = 1
 WIZARD_DATA_VERSION = 2
 
 
+def initial_wizard_data(
+    current_step: str,
+    extra_data: Optional[dict[str, Any]] = None,
+) -> dict[str, Any]:
+    """Return a canonical, initialized formtools storage envelope."""
+    return {
+        "version": WIZARD_DATA_VERSION,
+        "wizard": {
+            BaseStorage.step_key: current_step,
+            BaseStorage.step_data_key: {},
+            BaseStorage.step_files_key: {},
+            BaseStorage.extra_data_key: extra_data or {},
+        },
+    }
+
+
 class InProgressSubmissionStorage(BaseStorage):
     """Store formtools wizard data in an ``InProgressSubmission``.
 
@@ -25,6 +41,7 @@ class InProgressSubmissionStorage(BaseStorage):
         super().__init__(*args, **kwargs)
         self.in_progress_submission = self._get_in_progress_submission()
         self.legacy_current_data: dict | list[dict] | None = None
+        self._finalized = False
         self._data = self._load_data()
         self._original_data = copy.deepcopy(self._data)
 
@@ -119,7 +136,7 @@ class InProgressSubmissionStorage(BaseStorage):
 
     def _save(self) -> None:
         """Persist changed wizard data and synchronized model projections."""
-        if self.data == self._original_data:
+        if self._finalized or self.data == self._original_data:
             return
 
         current_step = self.data.get(self.step_key) or self.in_progress_submission.current_step
@@ -139,6 +156,10 @@ class InProgressSubmissionStorage(BaseStorage):
         self.in_progress_submission.save(update_fields=update_fields)
         self._original_data = copy.deepcopy(self.data)
         self.legacy_current_data = None
+
+    def mark_finalized(self) -> None:
+        """Prevent formtools' final reset from rewriting a deleted draft."""
+        self._finalized = True
 
     def update_response(self, response: HttpResponse) -> None:
         """Flush changed database state, then perform formtools file cleanup."""
