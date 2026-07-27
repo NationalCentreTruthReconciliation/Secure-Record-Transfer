@@ -14,7 +14,7 @@
             <a id="modal-save-link" class="link link-primary inline-block mt-3">{% trans "Save form and resume later" %}</a>
             <div class="modal-action">
                 <button id="unsaved-changes-leave-btn" class="btn">{% trans "Leave without saving" %}</button>
-                <button hx-on:click="unsaved_changes_modal.close()" class="btn btn-primary">{% trans "Cancel" %}</button>
+                <button class="btn btn-primary" data-modal-close>{% trans "Cancel" %}</button>
             </div>
         </div>
     </div>

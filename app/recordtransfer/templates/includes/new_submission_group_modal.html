@@ -10,7 +10,7 @@
         {% csrf_token %}
         {% include "includes/submission_group_form_fields.html" %}
         <div class="modal-action">
-            <button hx-on:click="base_modal.close()" type="button" class="btn">{% trans "Cancel" %}</button>
+            <button type="button" class="btn" data-modal-close>{% trans "Cancel" %}</button>
             <button type="submit" class="btn btn-primary" id="id_create_group_button">{% trans "Create" %}</button>
         </div>
     </form>
