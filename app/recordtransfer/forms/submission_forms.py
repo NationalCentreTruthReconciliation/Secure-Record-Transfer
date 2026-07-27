@@ -701,6 +701,10 @@ class OtherIdentifiersFormSet(BaseFormSet):
 
         submission_step = SubmissionStep.OTHER_IDENTIFIERS
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.forms[0].empty_permitted = True
+
 
 class GroupSubmissionForm(SubmissionForm):
     """Form for assigning a submission to a specific group."""
