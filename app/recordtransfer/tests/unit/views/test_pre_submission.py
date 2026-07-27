@@ -414,6 +414,7 @@ class SubmissionFormWizardTests(TestCase):
         form with the test data and submit it, making sure no errors are raised.
         """
         mock_session_create.return_value = self.session
+        mock_move_files.side_effect = RuntimeError("Redis unavailable")
 
         self._start_wizard()
         self.assertFalse(self.user.submission_set.exists())
@@ -423,7 +424,11 @@ class SubmissionFormWizardTests(TestCase):
         for step, step_data in self.test_data:
             submit_data = self._process_test_data(step, step_data)
 
-            response = self.client.post(self.url, submit_data, follow=True)
+            if step == SubmissionStep.REVIEW.value:
+                with self.captureOnCommitCallbacks(execute=True):
+                    response = self.client.post(self.url, submit_data, follow=True)
+            else:
+                response = self.client.post(self.url, submit_data, follow=True)
             self.assertEqual(200, response.status_code)
 
             if response.context and "form" in response.context:
@@ -441,6 +446,73 @@ class SubmissionFormWizardTests(TestCase):
             self.assertEqual(200, response.status_code)
 
         mock_move_files.assert_called_once()
+        submission = self.user.submission_set.get()
+        self.assertEqual(submission.upload_session, self.session)
+        self.assertTrue(UploadSession.objects.filter(pk=self.session.pk).exists())
+        self.assertFalse(self.user.inprogresssubmission_set.exists())
+
+    @override_settings(FILE_UPLOAD_ENABLED=True)
+    def test_existing_draft_session_prevents_duplicate_session_creation(self) -> None:
+        """A stale transition reuses the relation instead of creating another session."""
+        self._start_wizard()
+        draft = self.user.inprogresssubmission_set.get()
+        draft.current_step = SubmissionStep.GROUP_SUBMISSION.value
+        draft.upload_session = self.session
+        draft.step_data["wizard"]["step"] = SubmissionStep.GROUP_SUBMISSION.value
+        draft.save(update_fields=["current_step", "upload_session", "step_data"])
+        submit_data = {
+            "submission_form_wizard-current_step": SubmissionStep.GROUP_SUBMISSION.value,
+        }
+
+        with patch("recordtransfer.views.pre_submission.UploadSession.new_session") as new_session:
+            response = self.client.post(self.url, submit_data)
+
+        self.assertEqual(response.status_code, 200)
+        new_session.assert_not_called()
+        draft.refresh_from_db()
+        self.assertEqual(draft.upload_session, self.session)
+        self.assertEqual(draft.current_step, SubmissionStep.UPLOAD_FILES.value)
+        self.assertEqual(draft.step_data["wizard"]["extra_data"]["session_token"], self.session.token)
+
+    @override_settings(FILE_UPLOAD_ENABLED=True)
+    def test_finalization_failure_rolls_back_and_leaves_draft_resumable(self) -> None:
+        """A metadata failure preserves the draft and its upload session."""
+        self._start_wizard()
+
+        with patch(
+            "recordtransfer.views.pre_submission.UploadSession.new_session",
+            return_value=self.session,
+        ):
+            for step, step_data in self.test_data[:-1]:
+                response = self.client.post(self.url, self._process_test_data(step, step_data))
+                self.assertEqual(response.status_code, 200)
+
+        draft = self.user.inprogresssubmission_set.get()
+        self.assertEqual(draft.upload_session, self.session)
+
+        with (
+            patch.object(
+                InProgressSubmission,
+                "delete",
+                side_effect=RuntimeError("draft deletion failed"),
+            ),
+            patch("recordtransfer.views.pre_submission.move_uploads_and_send_emails.delay") as move,
+            patch("recordtransfer.views.pre_submission.send_submission_creation_failure.delay"),
+            patch(
+                "recordtransfer.views.pre_submission.send_your_submission_did_not_go_through.delay"
+            ),
+            self.assertRaisesMessage(Exception, "There was an error creating your submission"),
+        ):
+            self.client.post(
+                self.url,
+                self._process_test_data(*self.test_data[-1]),
+            )
+
+        draft.refresh_from_db()
+        self.assertEqual(draft.upload_session, self.session)
+        self.assertTrue(UploadSession.objects.filter(pk=self.session.pk).exists())
+        self.assertFalse(self.user.submission_set.exists())
+        move.assert_not_called()
 
     @override_settings(FILE_UPLOAD_ENABLED=True, UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES=60)
     def test_saving_expirable_in_progress_submission(self) -> None:

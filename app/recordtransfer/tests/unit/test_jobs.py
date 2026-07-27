@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from unittest.mock import MagicMock, call, patch
 from zoneinfo import ZoneInfo
@@ -6,12 +6,17 @@ from zoneinfo import ZoneInfo
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, override_settings
+from django.utils import timezone
 from freezegun import freeze_time
 
 from recordtransfer.jobs import (
     check_expiring_in_progress_submissions,
     cleanup_expired_sessions,
     create_downloadable_bag,
+    delete_upload_session_if_eligible,
+    expire_upload_session_if_eligible,
+    get_deletable_upload_sessions,
+    get_expirable_upload_sessions,
     move_uploads_and_send_emails,
 )
 from recordtransfer.models import InProgressSubmission, Job, Submission, UploadSession, User
@@ -531,8 +536,12 @@ class TestCleanupExpiredSessions(TestCase):
 
     @patch("recordtransfer.jobs.get_deletable_upload_sessions")
     @patch("recordtransfer.jobs.get_expirable_upload_sessions")
+    @patch("recordtransfer.jobs.expire_upload_session_if_eligible")
     def test_expirable_session(
-        self, mock_get_expirable: MagicMock, mock_get_deletable: MagicMock
+        self,
+        mock_expire_if_eligible: MagicMock,
+        mock_get_expirable: MagicMock,
+        mock_get_deletable: MagicMock,
     ) -> None:
         """Test when there's an expirable session."""
         # Setup mocks
@@ -542,16 +551,20 @@ class TestCleanupExpiredSessions(TestCase):
         mock_expirable_queryset.__iter__.return_value = [mock_session]
         mock_expirable_queryset.count.return_value = 1
         mock_get_expirable.return_value = mock_expirable_queryset
+        mock_expire_if_eligible.return_value = True
 
         cleanup_expired_sessions()
 
-        mock_session.expire.assert_called_once()
-        mock_session.delete.assert_not_called()
+        mock_expire_if_eligible.assert_called_once_with(mock_session.pk)
 
     @patch("recordtransfer.jobs.get_deletable_upload_sessions")
     @patch("recordtransfer.jobs.get_expirable_upload_sessions")
+    @patch("recordtransfer.jobs.delete_upload_session_if_eligible")
     def test_deletable_session(
-        self, mock_get_expirable: MagicMock, mock_get_deletable: MagicMock
+        self,
+        mock_delete_if_eligible: MagicMock,
+        mock_get_expirable: MagicMock,
+        mock_get_deletable: MagicMock,
     ) -> None:
         """Test when there is a deletable session."""
         # Setup mocks
@@ -561,18 +574,66 @@ class TestCleanupExpiredSessions(TestCase):
         mock_deletable_queryset.__iter__.return_value = [mock_session]
         mock_deletable_queryset.count.return_value = 1
         mock_get_deletable.return_value = mock_deletable_queryset
+        mock_delete_if_eligible.return_value = True
 
         cleanup_expired_sessions()
 
-        mock_session.delete.assert_called_once()
-        mock_session.expire.assert_not_called()
+        mock_delete_if_eligible.assert_called_once_with(mock_session.pk)
+
+    @override_settings(UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES=60)
+    def test_completed_submission_session_is_not_deletable(self) -> None:
+        """Cleanup cannot delete a stale session referenced by a completed submission."""
+        user = User.objects.create_user(username="completed-owner", password="password")
+        upload_session = UploadSession.new_session(user=user)
+        Submission.objects.create(user=user, upload_session=upload_session)
+        UploadSession.objects.filter(pk=upload_session.pk).update(
+            last_upload_interaction_time=timezone.now() - timedelta(hours=2)
+        )
+
+        self.assertNotIn(upload_session, get_deletable_upload_sessions())
+
+    @override_settings(UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES=60)
+    def test_recheck_skips_expiring_completed_submission_session(self) -> None:
+        """An expirable candidate is skipped if finalization has since claimed it."""
+        user = User.objects.create_user(username="finalized-owner", password="password")
+        upload_session = UploadSession.new_session(user=user)
+        in_progress = InProgressSubmission.objects.create(
+            user=user,
+            current_step="uploadfiles",
+            upload_session=upload_session,
+        )
+        UploadSession.objects.filter(pk=upload_session.pk).update(
+            last_upload_interaction_time=timezone.now() - timedelta(hours=2)
+        )
+        candidate_id = get_expirable_upload_sessions().get().pk
+        in_progress.upload_session = None
+        in_progress.save(update_fields=["upload_session"])
+        Submission.objects.create(user=user, upload_session=upload_session)
+
+        self.assertFalse(expire_upload_session_if_eligible(candidate_id))
+        upload_session.refresh_from_db()
+        self.assertNotEqual(upload_session.status, UploadSession.SessionStatus.EXPIRED)
+
+    @override_settings(UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES=60)
+    def test_recheck_skips_deleting_completed_submission_session(self) -> None:
+        """A deletable candidate is skipped if finalization has since claimed it."""
+        user = User.objects.create_user(username="claimed-owner", password="password")
+        upload_session = UploadSession.new_session(user=user)
+        UploadSession.objects.filter(pk=upload_session.pk).update(
+            last_upload_interaction_time=timezone.now() - timedelta(hours=2)
+        )
+        candidate_id = get_deletable_upload_sessions().get().pk
+        Submission.objects.create(user=user, upload_session=upload_session)
+
+        self.assertFalse(delete_upload_session_if_eligible(candidate_id))
+        self.assertTrue(UploadSession.objects.filter(pk=candidate_id).exists())
 
     @patch("recordtransfer.jobs.get_expirable_upload_sessions")
     def test_exception_handling(self, mock_get_expirable: MagicMock) -> None:
         """Test that exceptions are properly handled."""
         # Setup mock to raise an exception
-        mock_get_expirable.side_effect = Exception("Test error")
+        mock_get_expirable.side_effect = RuntimeError("Test error")
 
         # Verify the exception is re-raised
-        with self.assertRaises(Exception):
+        with self.assertRaises(RuntimeError):
             cleanup_expired_sessions()

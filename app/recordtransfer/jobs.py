@@ -6,6 +6,7 @@ from pathlib import Path
 import django_rq
 from django.conf import settings
 from django.core.files.base import File
+from django.db import transaction
 from django.db.models.query import QuerySet
 from django.utils import timezone
 from upload.models import UploadSession
@@ -106,8 +107,54 @@ def get_expirable_upload_sessions() -> QuerySet[UploadSession]:
 
 
 def get_deletable_upload_sessions() -> QuerySet[UploadSession]:
-    """Get upload sessions that can be deleted, and do not have an in-progress submission."""
-    return UploadSession.objects.get_deletable().filter(in_progress_submission__isnull=True).all()
+    """Get upload sessions that are not referenced by any submission and can be deleted."""
+    return (
+        UploadSession.objects.get_deletable()
+        .filter(in_progress_submission__isnull=True, submission__isnull=True)
+        .all()
+    )
+
+
+def expire_upload_session_if_eligible(session_id: int) -> bool:
+    """Expire a candidate after locking and rechecking its current relationships."""
+    with transaction.atomic():
+        session = UploadSession.objects.select_for_update().filter(pk=session_id).first()
+        if not session:
+            return False
+        still_expirable = (
+            UploadSession.objects.get_expirable()
+            .filter(
+                pk=session_id,
+                in_progress_submission__isnull=False,
+                submission__isnull=True,
+            )
+            .exists()
+        )
+        if not still_expirable:
+            return False
+        session.expire()
+        return True
+
+
+def delete_upload_session_if_eligible(session_id: int) -> bool:
+    """Delete a candidate after locking and rechecking that nothing references it."""
+    with transaction.atomic():
+        session = UploadSession.objects.select_for_update().filter(pk=session_id).first()
+        if not session:
+            return False
+        still_deletable = (
+            UploadSession.objects.get_deletable()
+            .filter(
+                pk=session_id,
+                in_progress_submission__isnull=True,
+                submission__isnull=True,
+            )
+            .exists()
+        )
+        if not still_deletable:
+            return False
+        session.delete()
+        return True
 
 
 @django_rq.job
@@ -188,16 +235,18 @@ def cleanup_expired_sessions() -> None:
             LOGGER.info("No expired upload sessions to clean up")
             return
 
-        for session in expirable_sessions:
-            session.expire()
-        for session in deletable_sessions:
-            session.delete()
+        expired_count = sum(
+            expire_upload_session_if_eligible(session.pk) for session in expirable_sessions
+        )
+        deleted_count = sum(
+            delete_upload_session_if_eligible(session.pk) for session in deletable_sessions
+        )
 
         LOGGER.info(
             "Cleaned up %d upload sessions; expired %d and deleted %d",
-            expirable_count + deletable_count,
-            expirable_count,
-            deletable_count,
+            expired_count + deleted_count,
+            expired_count,
+            deleted_count,
         )
 
     except Exception as e:

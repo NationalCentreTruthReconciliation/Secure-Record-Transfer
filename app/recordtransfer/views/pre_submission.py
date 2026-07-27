@@ -10,6 +10,7 @@ from caais.models import RightsType, SourceRole, SourceType
 from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.db.models import Case, Count, Value, When
 from django.forms import (
     BaseForm,
@@ -534,17 +535,40 @@ class SubmissionFormWizard(WizardView):
             self.storage.extra_data["save_contact_info_prompted"] = True
             return self.trigger_contact_info_save_prompt(form)
 
-        # Assign a new session token if one hasn't been created yet
-        if (
-            SubmissionStep(self.steps.next) == SubmissionStep.UPLOAD_FILES
-            and "session_token" not in self.storage.extra_data
-        ):
+        # Assign or recover the draft's upload session before entering the upload step.
+        if SubmissionStep(self.steps.next) == SubmissionStep.UPLOAD_FILES:
+            session = self.in_progress_submission.upload_session
             # Catch when another session would push the user over their limit.
-            try:
-                session = UploadSession.new_session(user, enforce_limit=True)
-            except UploadSession.SessionLimitExceeded:
-                return self._handle_session_limit_reached()
+            if not session:
+                try:
+                    with transaction.atomic():
+                        in_progress_submission = (
+                            InProgressSubmission.objects.select_for_update().get(
+                                pk=self.in_progress_submission.pk,
+                                user=user,
+                            )
+                        )
+                        session = in_progress_submission.upload_session
+                        if not session:
+                            session = UploadSession.objects.filter(
+                                token=self.storage.extra_data.get("session_token"),
+                                user=user,
+                            ).first()
+                        if not session:
+                            session = UploadSession.new_session(user, enforce_limit=True)
+                        if in_progress_submission.upload_session_id != session.pk:
+                            in_progress_submission.upload_session = session
+                            in_progress_submission.save(update_fields=["upload_session"])
+                except UploadSession.SessionLimitExceeded:
+                    return self._handle_session_limit_reached()
 
+                self.in_progress_submission = in_progress_submission
+                cast(InProgressSubmissionStorage, self.storage).in_progress_submission = (
+                    in_progress_submission
+                )
+
+            if session.user_id != user.pk:
+                raise ValueError("Cannot use an upload session owned by another user")
             self.storage.extra_data["session_token"] = session.token
 
         # get the form instance based on the data from the storage backend
@@ -693,13 +717,7 @@ class SubmissionFormWizard(WizardView):
 
         elif step == SubmissionStep.UPLOAD_FILES.value:
             kwargs["user"] = self.request.user
-            # The active upload session is resolved server-side from the
-            # wizard's stored token; the form itself sees only the resolved
-            # UploadSession instance, not a client-supplied identifier.
-            kwargs["upload_session"] = UploadSession.objects.filter(
-                token=self.storage.extra_data.get("session_token"),
-                user=self.request.user,
-            ).first()
+            kwargs["upload_session"] = self._get_upload_session()
 
         elif step == SubmissionStep.SOURCE_INFO.value:
             source_type, _ = SourceType.objects.get_or_create(name="Individual")
@@ -711,6 +729,19 @@ class SubmissionFormWizard(WizardView):
             }
 
         return kwargs
+
+    def _get_upload_session(self) -> Optional[UploadSession]:
+        """Resolve the draft's owned upload session, with legacy token fallback."""
+        if (
+            self.in_progress_submission.upload_session
+            and self.in_progress_submission.upload_session.user_id == self.request.user.pk
+        ):
+            return self.in_progress_submission.upload_session
+
+        return UploadSession.objects.filter(
+            token=self.storage.extra_data.get("session_token"),
+            user=self.request.user,
+        ).first()
 
     def get_forms_for_review(self) -> OrderedDict[str, Union[BaseForm, BaseFormSet]]:
         """Retrieve the relevant forms to be processed for the review step. This method does not
@@ -739,17 +770,7 @@ class SubmissionFormWizard(WizardView):
         The front-end should send the X-Upload-Handle header to this handle to be able to upload
         files.
         """
-        session_token = self.storage.extra_data.get("session_token", "")
-
-        # Create a fresh upload handle for this session to send to the user
-        if not session_token:
-            return None
-
-        upload_session = UploadSession.objects.filter(
-            token=session_token,
-            user=self.request.user,
-        ).first()
-
+        upload_session = self._get_upload_session()
         if not upload_session:
             return None
 
@@ -943,30 +964,65 @@ class SubmissionFormWizard(WizardView):
         form_data = self.get_all_cleaned_data()
 
         try:
-            submission = Submission.objects.create(user=self.request.user, raw_form=raw_form_data)
+            with transaction.atomic():
+                in_progress_submission = (
+                    InProgressSubmission.objects.select_for_update()
+                    .select_related("upload_session")
+                    .get(uuid=self.in_progress_uuid, user=self.request.user)
+                )
+                if in_progress_submission.upload_session_expired:
+                    raise ValueError("Cannot finalize an expired upload session")
 
-            LOGGER.info("Mapping form data to CAAIS metadata")
-            submission.metadata = map_form_to_metadata(form_data)
+                upload_session = None
+                if in_progress_submission.upload_session_id:
+                    upload_session = UploadSession.objects.select_for_update().get(
+                        pk=in_progress_submission.upload_session_id,
+                        user=self.request.user,
+                    )
+                if not upload_session and settings.FILE_UPLOAD_ENABLED:
+                    upload_session = (
+                        UploadSession.objects.select_for_update()
+                        .filter(
+                            token=self.storage.extra_data.get("session_token"),
+                            user=self.request.user,
+                        )
+                        .first()
+                    )
+                if upload_session and (
+                    upload_session.user_id != self.request.user.pk or upload_session.is_expired
+                ):
+                    raise ValueError("Cannot finalize an invalid upload session")
 
-            if settings.FILE_UPLOAD_ENABLED and (
-                upload_session := UploadSession.objects.filter(
-                    token=self.storage.extra_data.get("session_token"), user=self.request.user
-                ).first()
-            ):
-                submission.upload_session = upload_session
+                submission = Submission.objects.create(
+                    user=self.request.user,
+                    raw_form=raw_form_data,
+                )
 
-            if submission_group := form_data.get("submission_group"):
-                submission.part_of_group = submission_group
+                LOGGER.info("Mapping form data to CAAIS metadata")
+                submission.metadata = map_form_to_metadata(form_data)
 
-            LOGGER.info("Saving Submission with UUID %s", str(submission.uuid))
-            submission.save()
+                if settings.FILE_UPLOAD_ENABLED and upload_session:
+                    submission.upload_session = upload_session
 
-            if self.in_progress_submission:
+                if submission_group := form_data.get("submission_group"):
+                    submission.part_of_group = submission_group
+
+                LOGGER.info("Saving Submission with UUID %s", str(submission.uuid))
+                submission.save()
+
+                if upload_session:
+                    in_progress_submission.upload_session = None
+                    in_progress_submission.save(update_fields=["upload_session"])
+
+                in_progress_submission.delete()
                 cast(InProgressSubmissionStorage, self.storage).mark_finalized()
-                self.in_progress_submission.delete()
+                self.in_progress_submission = in_progress_submission
 
-            LOGGER.info("Finishing up submission in a worker process.")
-            move_uploads_and_send_emails.delay(submission, form_data)
+                LOGGER.info("Finishing up submission in a worker process after commit.")
+                transaction.on_commit(
+                    lambda: move_uploads_and_send_emails.delay(submission, form_data),
+                    robust=True,
+                )
 
             return HttpResponseClientRedirect(reverse("recordtransfer:submission_sent"))
 
