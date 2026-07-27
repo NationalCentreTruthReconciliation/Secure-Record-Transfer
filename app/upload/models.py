@@ -427,7 +427,7 @@ class UploadSession(models.Model):
         self.status = self.SessionStatus.REMOVING_IN_PROGRESS
         self.save()
 
-        self._remove_files_and_dir(self.get_temporary_uploads())
+        self._remove_files_and_dir(self.tempuploadedfile_set.all())
 
         if initial_status == self.SessionStatus.UPLOADING:
             self.status = self.SessionStatus.CREATED
@@ -445,7 +445,7 @@ class UploadSession(models.Model):
                 "session's state is not STORED"
             )
 
-        self._remove_files_and_dir(self.get_permanent_uploads())
+        self._remove_files_and_dir(self.permuploadedfile_set.all())
 
         if save:
             self.save()
