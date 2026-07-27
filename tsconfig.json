@@ -17,6 +17,7 @@
         "resolveJsonModule": true,
         "isolatedModules": true,
         "noEmit": false,
+        "rootDir": "./app/frontend/",
         "outDir": "./dist",
         "declaration": false,
         "sourceMap": true

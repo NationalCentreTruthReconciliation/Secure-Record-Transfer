@@ -39,7 +39,7 @@
                    type="hidden">
         </fieldset>
         <div class="modal-action">
-            <button hx-on:click="base_modal.close()" type="button" class="btn">{% trans "Cancel" %}</button>
+            <button type="button" class="btn" data-modal-close>{% trans "Cancel" %}</button>
             {% if current_group %}
                 <button id="unassign_group_btn"
                         name="{{ UNASSIGN_GROUP }}"

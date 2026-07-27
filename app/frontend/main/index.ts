@@ -17,6 +17,7 @@ import "htmx-ext-head-support";
 import htmx from "htmx.org";
 
 import { setupMessages } from "./js/base/messages.js";
+import { setupModalClose } from "./js/base/modal";
 import { setupNavbar } from "./js/base/navbar.js";
 import { setupHelpTooltips } from "./js/base/tooltip.js";
 import { initializeProfile } from "./js/profile/index.js";
@@ -42,6 +43,7 @@ window.htmx = htmx;
 document.addEventListener("DOMContentLoaded", () => {
     setupBaseHtmxEventListeners();
     initializeCustomModalEvents();
+    setupModalClose();
     setupNavbar();
     setupMessages();
     setupToastNotifications();
