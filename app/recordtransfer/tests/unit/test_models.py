@@ -9,6 +9,7 @@ from caais.models import Metadata
 from django.conf import settings
 from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.db import IntegrityError, transaction
 from django.forms import ValidationError
 from django.test import TestCase, override_settings
 from django.urls import reverse
@@ -398,6 +399,15 @@ class TestInProgressSubmission(TestCase):
         self.in_progress.current_step = "INVALID_STEP"
         with self.assertRaises(ValidationError):
             self.in_progress.clean()
+
+    def test_uuid_is_unique(self) -> None:
+        """Reject an in-progress submission with a duplicate public UUID."""
+        with self.assertRaises(IntegrityError), transaction.atomic():
+            InProgressSubmission.objects.create(
+                user=self.user,
+                uuid=self.in_progress.uuid,
+                current_step=SubmissionStep.ACCEPT_LEGAL.value,
+            )
 
     def test_upload_session_expires_at(self) -> None:
         """Test upload_session_expires_at method."""

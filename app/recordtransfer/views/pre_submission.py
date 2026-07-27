@@ -54,6 +54,7 @@ from recordtransfer.models import (
     User,
 )
 from recordtransfer.views.table import paginated_table_view
+from recordtransfer.wizard_storage import LEGACY_WIZARD_DATA_VERSION
 
 LOGGER = logging.getLogger(__name__)
 
@@ -455,6 +456,7 @@ class SubmissionFormWizard(SessionWizardView):
         current_data = SubmissionFormWizard.format_step_data(self.current_step, request.POST)
 
         form_data = {
+            "version": LEGACY_WIZARD_DATA_VERSION,
             "past": self.storage.data,
             "current": current_data,
             "extra": self.storage.extra_data or {},
