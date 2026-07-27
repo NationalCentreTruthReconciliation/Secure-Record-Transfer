@@ -103,6 +103,11 @@ LOGGING = {
             "level": "ERROR",
             "propagate": True,
         },
+        "upload": {
+            "handlers": ["console"],
+            "level": "ERROR",
+            "propagate": True,
+        },
         "rq.worker": {
             "handlers": ["console"],
             "level": "ERROR",

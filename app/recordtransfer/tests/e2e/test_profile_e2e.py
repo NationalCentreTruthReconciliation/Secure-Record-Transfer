@@ -407,10 +407,10 @@ class SubmissionTablesTest(SeleniumLiveServerTestCase):
         )
         new_submission_button.click()
 
-        current_url = driver.current_url
-        expected_url = f"{self.live_server_url}{reverse('recordtransfer:submit')}"
-
-        self.assertEqual(current_url, expected_url)
+        WebDriverWait(driver, 5).until(EC.url_contains("resume="))
+        parsed_url = urlparse(driver.current_url)
+        self.assertEqual(parsed_url.path, reverse("recordtransfer:submit"))
+        self.assertIn("resume=", parsed_url.query)
 
     def test_resume_in_progress_submission(self) -> None:
         """Test resuming an in-progress submission from the profile page."""

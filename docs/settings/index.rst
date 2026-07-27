@@ -758,6 +758,53 @@ UPLOAD_SESSION_EXPIRED_CLEANUP_SCHEDULE
 In-Progress Submission Controls
 -------------------------------
 
+IN_PROGRESS_SUBMISSION_PRISTINE_RETENTION_MINUTES
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    *Number of minutes to retain an untouched automatically-created draft*
+
+    .. table::
+
+        ============  =========
+        Default       Type
+        ============  =========
+        60            int
+        ============  =========
+
+    Drafts are created when a user opens the submission wizard. Drafts where the user has not
+    submitted any wizard step are hidden from the profile and deleted after this retention period.
+    Legacy saved submissions and drafts containing submitted form data are not affected.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        IN_PROGRESS_SUBMISSION_PRISTINE_RETENTION_MINUTES=60
+
+IN_PROGRESS_SUBMISSION_PRISTINE_CLEANUP_SCHEDULE
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    *Cron schedule expression for deleting expired untouched drafts*
+
+    .. table::
+
+        ===============  =========
+        Default          Type
+        ===============  =========
+        "0 \* \* \* \*"  string
+        ===============  =========
+
+    Defaults to running hourly. Set this value to an empty string ("") to disable pristine draft
+    cleanup.
+
+    **.env Example:**
+
+    ::
+
+        #file: .env
+        IN_PROGRESS_SUBMISSION_PRISTINE_CLEANUP_SCHEDULE="0 * * * *"
+
 IN_PROGRESS_SUBMISSION_EXPIRING_EMAIL_SCHEDULE
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -1043,4 +1090,3 @@ SELENIUM_TESTS_HEADLESS_MODE
 
         # file .env
         SELENIUM_TESTS_HEADLESS_MODE=True
-

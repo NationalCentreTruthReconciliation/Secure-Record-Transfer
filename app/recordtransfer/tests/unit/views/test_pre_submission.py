@@ -14,6 +14,7 @@ from upload.models import UploadSession
 from recordtransfer.constants import QueryParameters
 from recordtransfer.enums import SubmissionStep
 from recordtransfer.models import InProgressSubmission, SubmissionGroup, User
+from recordtransfer.wizard_storage import LEGACY_WIZARD_DATA_VERSION, WIZARD_DATA_VERSION
 
 
 def _set_handle(
@@ -368,6 +369,16 @@ class SubmissionFormWizardTests(TestCase):
         )
         self.assertEqual(200, response.status_code)
 
+    def _start_wizard(self) -> HttpResponse:
+        """Create a draft through the launcher and load its canonical URL."""
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("?resume=", response.url)
+        self.url = response.url
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        return response
+
     def _process_test_data(
         self, step: str, step_data: dict, response: HttpResponse | None = None
     ) -> dict:
@@ -403,8 +414,9 @@ class SubmissionFormWizardTests(TestCase):
         form with the test data and submit it, making sure no errors are raised.
         """
         mock_session_create.return_value = self.session
+        mock_move_files.side_effect = RuntimeError("Redis unavailable")
 
-        self.assertEqual(200, self.client.get(self.url).status_code)
+        self._start_wizard()
         self.assertFalse(self.user.submission_set.exists())
 
         response = None
@@ -412,7 +424,11 @@ class SubmissionFormWizardTests(TestCase):
         for step, step_data in self.test_data:
             submit_data = self._process_test_data(step, step_data)
 
-            response = self.client.post(self.url, submit_data, follow=True)
+            if step == SubmissionStep.REVIEW.value:
+                with self.captureOnCommitCallbacks(execute=True):
+                    response = self.client.post(self.url, submit_data, follow=True)
+            else:
+                response = self.client.post(self.url, submit_data, follow=True)
             self.assertEqual(200, response.status_code)
 
             if response.context and "form" in response.context:
@@ -430,15 +446,81 @@ class SubmissionFormWizardTests(TestCase):
             self.assertEqual(200, response.status_code)
 
         mock_move_files.assert_called_once()
+        submission = self.user.submission_set.get()
+        self.assertEqual(submission.upload_session, self.session)
+        self.assertTrue(UploadSession.objects.filter(pk=self.session.pk).exists())
+        self.assertFalse(self.user.inprogresssubmission_set.exists())
+
+    @override_settings(FILE_UPLOAD_ENABLED=True)
+    def test_existing_draft_session_prevents_duplicate_session_creation(self) -> None:
+        """A stale transition reuses the relation instead of creating another session."""
+        self._start_wizard()
+        draft = self.user.inprogresssubmission_set.get()
+        draft.current_step = SubmissionStep.GROUP_SUBMISSION.value
+        draft.upload_session = self.session
+        draft.step_data["wizard"]["step"] = SubmissionStep.GROUP_SUBMISSION.value
+        draft.save(update_fields=["current_step", "upload_session", "step_data"])
+        submit_data = {
+            "submission_form_wizard-current_step": SubmissionStep.GROUP_SUBMISSION.value,
+        }
+
+        with patch("recordtransfer.views.pre_submission.UploadSession.new_session") as new_session:
+            response = self.client.post(self.url, submit_data)
+
+        self.assertEqual(response.status_code, 200)
+        new_session.assert_not_called()
+        draft.refresh_from_db()
+        self.assertEqual(draft.upload_session, self.session)
+        self.assertEqual(draft.current_step, SubmissionStep.UPLOAD_FILES.value)
+        self.assertEqual(draft.step_data["wizard"]["extra_data"]["session_token"], self.session.token)
+
+    @override_settings(FILE_UPLOAD_ENABLED=True)
+    def test_finalization_failure_rolls_back_and_leaves_draft_resumable(self) -> None:
+        """A metadata failure preserves the draft and its upload session."""
+        self._start_wizard()
+
+        with patch(
+            "recordtransfer.views.pre_submission.UploadSession.new_session",
+            return_value=self.session,
+        ):
+            for step, step_data in self.test_data[:-1]:
+                response = self.client.post(self.url, self._process_test_data(step, step_data))
+                self.assertEqual(response.status_code, 200)
+
+        draft = self.user.inprogresssubmission_set.get()
+        self.assertEqual(draft.upload_session, self.session)
+
+        with (
+            patch.object(
+                InProgressSubmission,
+                "delete",
+                side_effect=RuntimeError("draft deletion failed"),
+            ),
+            patch("recordtransfer.views.pre_submission.move_uploads_and_send_emails.delay") as move,
+            patch("recordtransfer.views.pre_submission.send_submission_creation_failure.delay"),
+            patch(
+                "recordtransfer.views.pre_submission.send_your_submission_did_not_go_through.delay"
+            ),
+            self.assertRaisesMessage(Exception, "There was an error creating your submission"),
+        ):
+            self.client.post(
+                self.url,
+                self._process_test_data(*self.test_data[-1]),
+            )
+
+        draft.refresh_from_db()
+        self.assertEqual(draft.upload_session, self.session)
+        self.assertTrue(UploadSession.objects.filter(pk=self.session.pk).exists())
+        self.assertFalse(self.user.submission_set.exists())
+        move.assert_not_called()
 
     @override_settings(FILE_UPLOAD_ENABLED=True, UPLOAD_SESSION_EXPIRE_AFTER_INACTIVE_MINUTES=60)
     def test_saving_expirable_in_progress_submission(self) -> None:
         """Test that saving an expirable in-progress submission. Saves the form on the
         Upload Files step after uploading a file.
         """
-        self.assertEqual(200, self.client.get(self.url).status_code)
-        # Check that the in-progress submission does not exist yet
-        self.assertFalse(self.user.inprogresssubmission_set.exists())
+        self._start_wizard()
+        self.assertEqual(self.user.inprogresssubmission_set.count(), 1)
 
         for step, step_data in self.test_data:
             submit_data = self._process_test_data(step, step_data)
@@ -469,9 +551,8 @@ class SubmissionFormWizardTests(TestCase):
         """Test saving an unexpirable in-progress submission. Saves the form on the Rights step
         after filling out the form.
         """
-        self.assertEqual(200, self.client.get(self.url).status_code)
-        # Check that the in-progress submission does not exist yet
-        self.assertFalse(self.user.inprogresssubmission_set.exists())
+        self._start_wizard()
+        self.assertEqual(self.user.inprogresssubmission_set.count(), 1)
 
         for step, step_data in self.test_data:
             submit_data = self._process_test_data(step, step_data)
@@ -490,6 +571,10 @@ class SubmissionFormWizardTests(TestCase):
                 self.assertNotContains(response, "This submission will expire on")
                 self.assertTrue(self.user.inprogresssubmission_set.exists())
                 self.assertFalse(self.user.inprogresssubmission_set.first().upload_session_expired)
+                self.assertEqual(
+                    self.user.inprogresssubmission_set.first().step_data["version"],
+                    WIZARD_DATA_VERSION,
+                )
                 break
 
             else:
@@ -532,10 +617,9 @@ class SubmissionFormWizardTests(TestCase):
     )
     def test_session_limit_reached_mid_form(self) -> None:
         """Test that the session limit is reached during a POST request, i.e., mid-form."""
-        response = self.client.get(self.url)
-        self.assertEqual(200, response.status_code)
+        self._start_wizard()
 
-        self.assertEqual(0, self.user.inprogresssubmission_set.count())  # type: ignore
+        self.assertEqual(1, self.user.inprogresssubmission_set.count())  # type: ignore
 
         response = None
 
@@ -583,6 +667,7 @@ class SubmissionFormWizardTests(TestCase):
             user=self.user,
             current_step=SubmissionStep.RECORD_DESCRIPTION.value,
             step_data={
+                "version": LEGACY_WIZARD_DATA_VERSION,
                 "past": {},
                 "current": {},
                 "extra": {},
@@ -614,6 +699,7 @@ class SubmissionFormWizardTests(TestCase):
             current_step=SubmissionStep.RECORD_DESCRIPTION.value,
             upload_session=session,
             step_data={
+                "version": LEGACY_WIZARD_DATA_VERSION,
                 "past": {},
                 "current": {},
                 "extra": {
@@ -627,3 +713,117 @@ class SubmissionFormWizardTests(TestCase):
         self.assertEqual(200, response.status_code)
         # Assert that we're on the proper page
         self.assertContains(response, "Record Description")
+
+    def test_launcher_creates_canonical_versioned_draft(self) -> None:
+        """A bare GET creates one versioned draft and redirects to its UUID URL."""
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 302)
+        draft = InProgressSubmission.objects.get(user=self.user)
+        self.assertEqual(response.url, draft.get_resume_url())
+        self.assertEqual(draft.step_data["version"], WIZARD_DATA_VERSION)
+
+    def test_parallel_launches_create_distinct_drafts(self) -> None:
+        """Each bare GET receives an independent persisted wizard identity."""
+        first_response = self.client.get(self.url)
+        second_response = self.client.get(self.url)
+
+        self.assertNotEqual(first_response.url, second_response.url)
+        self.assertEqual(InProgressSubmission.objects.filter(user=self.user).count(), 2)
+
+    def test_canonical_get_does_not_reset_persisted_step(self) -> None:
+        """Refreshing a canonical wizard URL retains its data and current step."""
+        self._start_wizard()
+        submit_data = self._process_test_data(*self.test_data[0])
+        response = self.client.post(self.url, submit_data)
+        self.assertEqual(response.status_code, 200)
+
+        draft = InProgressSubmission.objects.get(user=self.user)
+        self.assertEqual(draft.current_step, SubmissionStep.CONTACT_INFO.value)
+        self.assertIn(SubmissionStep.ACCEPT_LEGAL.value, draft.step_data["wizard"]["step_data"])
+
+        response = self.client.get(self.url)
+        self.assertContains(response, "Contact Information")
+        draft.refresh_from_db()
+        self.assertEqual(draft.current_step, SubmissionStep.CONTACT_INFO.value)
+
+    def test_actions_in_one_draft_do_not_change_another(self) -> None:
+        """Separate canonical wizard URLs persist independent state."""
+        first_url = self.client.get(self.url).url
+        second_url = self.client.get(self.url).url
+        submit_data = self._process_test_data(*self.test_data[0])
+
+        response = self.client.post(first_url, submit_data)
+        self.assertEqual(response.status_code, 200)
+
+        first_uuid = first_url.rsplit("=", maxsplit=1)[-1]
+        second_uuid = second_url.rsplit("=", maxsplit=1)[-1]
+        first_draft = InProgressSubmission.objects.get(uuid=first_uuid)
+        second_draft = InProgressSubmission.objects.get(uuid=second_uuid)
+        self.assertEqual(first_draft.current_step, SubmissionStep.CONTACT_INFO.value)
+        self.assertEqual(second_draft.current_step, SubmissionStep.ACCEPT_LEGAL.value)
+        self.assertEqual(second_draft.step_data["wizard"]["step_data"], {})
+
+    def test_bare_post_returns_not_found(self) -> None:
+        """A POST without a draft identity cannot discard data through canonicalization."""
+        response = self.client.post(self.url, self._process_test_data(*self.test_data[0]))
+
+        self.assertEqual(response.status_code, 404)
+        self.assertFalse(InProgressSubmission.objects.filter(user=self.user).exists())
+
+    def test_explicit_save_preserves_invalid_current_step(self) -> None:
+        """Save stores unvalidated current fields canonically and restores them on resume."""
+        self._start_wizard()
+        response = self.client.post(self.url, self._process_test_data(*self.test_data[0]))
+        self.assertEqual(response.status_code, 200)
+        submit_data = {
+            "submission_form_wizard-current_step": SubmissionStep.CONTACT_INFO.value,
+            "contactinfo-contact_name": "Partial Donor",
+            "save_form_step": SubmissionStep.CONTACT_INFO.value,
+        }
+
+        response = self.client.post(self.url, submit_data)
+
+        self.assertEqual(response.headers["HX-Redirect"], reverse("recordtransfer:user_profile"))
+        draft = InProgressSubmission.objects.get(user=self.user)
+        self.assertEqual(draft.step_data["version"], WIZARD_DATA_VERSION)
+        saved_contact = draft.step_data["wizard"]["step_data"][SubmissionStep.CONTACT_INFO.value]
+        self.assertEqual(saved_contact["contactinfo-contact_name"], ["Partial Donor"])
+
+        response = self.client.get(self.url)
+        self.assertContains(response, 'value="Partial Donor"')
+
+    def test_explicit_save_preserves_formset_management_data(self) -> None:
+        """Save retains formset rows and management fields in formtools' raw representation."""
+        self._start_wizard()
+        draft = InProgressSubmission.objects.get(user=self.user)
+        draft.current_step = SubmissionStep.RIGHTS.value
+        draft.step_data["wizard"]["step"] = SubmissionStep.RIGHTS.value
+        draft.save(update_fields=["current_step", "step_data"])
+        rights_type = RightsType.objects.get(name="Copyright")
+        submit_data = {
+            "submission_form_wizard-current_step": SubmissionStep.RIGHTS.value,
+            "rights-TOTAL_FORMS": "1",
+            "rights-INITIAL_FORMS": "0",
+            "rights-0-rights_type": str(rights_type.pk),
+            "rights-0-rights_value": "Saved restriction",
+            "save_form_step": SubmissionStep.RIGHTS.value,
+        }
+
+        response = self.client.post(self.url, submit_data)
+
+        self.assertEqual(response.headers["HX-Redirect"], reverse("recordtransfer:user_profile"))
+        draft.refresh_from_db()
+        saved_rights = draft.step_data["wizard"]["step_data"][SubmissionStep.RIGHTS.value]
+        self.assertEqual(saved_rights["rights-TOTAL_FORMS"], ["1"])
+        self.assertEqual(saved_rights["rights-0-rights_value"], ["Saved restriction"])
+
+        response = self.client.get(self.url)
+        self.assertContains(response, "Saved restriction")
+
+    def test_unknown_draft_returns_not_found(self) -> None:
+        """An unknown canonical UUID does not silently create a replacement draft."""
+        response = self.client.get(self.url, {"resume": "00000000-0000-0000-0000-000000000000"})
+
+        self.assertEqual(response.status_code, 404)
+        self.assertFalse(InProgressSubmission.objects.filter(user=self.user).exists())

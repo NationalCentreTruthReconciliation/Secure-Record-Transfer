@@ -857,7 +857,7 @@ class InProgressSubmission(models.Model):
 
     STEP_CHOICES: ClassVar = [(step.value, step.name) for step in SubmissionStep]
 
-    uuid = models.UUIDField(default=uuid.uuid4)
+    uuid = models.UUIDField(default=uuid.uuid4, unique=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     last_updated = models.DateTimeField(auto_now_add=True)
     current_step = models.CharField(

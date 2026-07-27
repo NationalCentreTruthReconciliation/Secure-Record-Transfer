@@ -232,7 +232,7 @@ def in_progress_submission_table(request: HttpRequest) -> HttpResponse:
             "expires_at": "expires_at",
         }
 
-        queryset = InProgressSubmission.objects.filter(user=request.user).annotate(
+        queryset = InProgressSubmission.objects.get_interacted().filter(user=request.user).annotate(
             expires_at=ExpressionWrapper(
                 F("upload_session__last_upload_interaction_time")
                 + timezone.timedelta(minutes=expire_minutes),
@@ -250,7 +250,7 @@ def in_progress_submission_table(request: HttpRequest) -> HttpResponse:
             "submission_title": "title",
         }
 
-        queryset = InProgressSubmission.objects.filter(user=request.user)
+        queryset = InProgressSubmission.objects.get_interacted().filter(user=request.user)
 
     default_sort = "last_updated"
     default_direction = "desc"

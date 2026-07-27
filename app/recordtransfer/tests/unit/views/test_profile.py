@@ -24,6 +24,7 @@ from recordtransfer.models import (
     User,
 )
 from recordtransfer.views.profile import AccountInfoUpdateView, ContactInfoUpdateView
+from recordtransfer.wizard_storage import initial_wizard_data
 
 
 class TestUserProfileView(TestCase):
@@ -416,6 +417,29 @@ class TestInProgressSubmissionTableView(TestCase):
         for i in range(3):
             self.assertIn(f"Test In-Progress Submission {i}", response.content.decode())
 
+    def test_in_progress_submission_table_hides_pristine_automatic_draft(self) -> None:
+        """Opening the wizard without submitting a step does not add a profile table row."""
+        first_step = SubmissionStep.ACCEPT_LEGAL.value
+        InProgressSubmission.objects.create(
+            user=self.user,
+            current_step=first_step,
+            title="Untouched automatic draft",
+            step_data=initial_wizard_data(first_step),
+        )
+        interacted = initial_wizard_data(first_step)
+        interacted["wizard"]["step_data"] = {first_step: {"field": ["value"]}}
+        InProgressSubmission.objects.create(
+            user=self.user,
+            current_step=first_step,
+            title="Interacted automatic draft",
+            step_data=interacted,
+        )
+
+        response = self.client.get(self.in_progress_table_url, headers=self.htmx_headers)
+
+        self.assertNotContains(response, "Untouched automatic draft")
+        self.assertContains(response, "Interacted automatic draft")
+
     @patch("recordtransfer.views.table.SiteSetting.get_value_int", return_value=2)
     def test_in_progress_submission_table_pagination(self, mock_get_value_int: MagicMock) -> None:
         """Test pagination for the in-progress submission table."""
@@ -662,12 +686,12 @@ class TestSubmissionGroupTableView(TestCase):
     ) -> None:
         """Test that sorting by submissions count works correctly."""
         # Create groups with different submission counts
-        group1 = SubmissionGroup.objects.create(
+        SubmissionGroup.objects.create(
             created_by=self.user,
             name="Group 1",
             uuid=uuid.uuid4(),
         )
-        group2 = SubmissionGroup.objects.create(
+        SubmissionGroup.objects.create(
             created_by=self.user,
             name="Group 2",
             uuid=uuid.uuid4(),
