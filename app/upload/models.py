@@ -373,7 +373,7 @@ class UploadSession(models.Model):
                 f"{self.SessionStatus.STORED}"
             )
 
-    def _remove_files_and_dir(
+    def _remove_files_and_dirs(
         self, files: list[TempUploadedFile] | list[PermUploadedFile]
     ) -> None:
         """Remove all files in a list and remove the directory."""
@@ -392,7 +392,7 @@ class UploadSession(models.Model):
             if len(list(d.iterdir())) > 0:
                 name = "temp" if isinstance(files[0], TempUploadedFile) else "permanent"
                 LOGGER.warning(
-                    "Could not remove %s directory '%d' because there are untracked files in that directory.",
+                    "Could not remove %s directory '%d' because there are still files in that directory.",
                     name,
                     str(d),
                 )
@@ -427,7 +427,7 @@ class UploadSession(models.Model):
         self.status = self.SessionStatus.REMOVING_IN_PROGRESS
         self.save()
 
-        self._remove_files_and_dir(self.tempuploadedfile_set.all())
+        self._remove_files_and_dirs(self.tempuploadedfile_set.all())
 
         if initial_status == self.SessionStatus.UPLOADING:
             self.status = self.SessionStatus.CREATED
@@ -445,7 +445,7 @@ class UploadSession(models.Model):
                 "session's state is not STORED"
             )
 
-        self._remove_files_and_dir(self.permuploadedfile_set.all())
+        self._remove_files_and_dirs(self.permuploadedfile_set.all())
 
         if save:
             self.save()
