@@ -4,7 +4,6 @@ deleting in-progress submissions, as well as handling the final submission.
 
 import dataclasses
 import logging
-import re
 from typing import Any, ClassVar, Optional, OrderedDict, Union, cast
 
 from caais.models import RightsType, SourceRole, SourceType
@@ -15,16 +14,12 @@ from django.db.models import Case, Count, Value, When
 from django.forms import (
     BaseForm,
     BaseFormSet,
-    BaseInlineFormSet,
-    BaseModelFormSet,
-    ModelForm,
     formset_factory,
 )
 from django.http import (
     Http404,
     HttpRequest,
     HttpResponse,
-    QueryDict,
 )
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -57,7 +52,6 @@ from recordtransfer.models import (
 )
 from recordtransfer.views.table import paginated_table_view
 from recordtransfer.wizard_storage import (
-    LEGACY_WIZARD_DATA_VERSION,
     InProgressSubmissionStorage,
     initial_wizard_data,
 )
@@ -373,7 +367,12 @@ class SubmissionFormWizard(WizardView):
         )
 
         if not limit_reached:
-            return self.render(self.get_form())
+            form = self.get_form(
+                data=self.storage.get_step_data(self.steps.current),
+                files=self.storage.get_step_files(self.steps.current),
+            )
+            forms.clear_form_errors(form)
+            return self.render(form)
 
         messages.error(
             request,
@@ -445,7 +444,10 @@ class SubmissionFormWizard(WizardView):
             return super().post(request, *args, **kwargs)
 
         try:
-            self.save_form_data(request)
+            current_step_form = self.get_form(data=request.POST, files=request.FILES)
+            self.save_current_step(current_step_form)
+            self.storage.current_step = self.steps.current
+            cast(InProgressSubmissionStorage, self.storage).save()
 
             message = base_message
 
@@ -468,60 +470,13 @@ class SubmissionFormWizard(WizardView):
             messages.success(request, message)
 
         except Exception:
+            cast(InProgressSubmissionStorage, self.storage).discard_changes()
             messages.error(request, gettext("There was an error saving the submission."))
 
         return HttpResponseClientRedirect(redirect_to)
 
-    def save_form_data(self, request: HttpRequest) -> None:
-        """Save the current state of the form to the database.
-
-        Args:
-            request: The HTTP request object.
-        """
-        ### Gather information to save ###
-
-        current_data = SubmissionFormWizard.format_step_data(self.current_step, request.POST)
-
-        form_data = {
-            "version": LEGACY_WIZARD_DATA_VERSION,
-            "past": self.storage.data,
-            "current": current_data,
-            "extra": self.storage.extra_data or {},
-        }
-
-        title = None
-        # See if the title and session token are in the current data
-        if isinstance(current_data, dict):
-            title = current_data.get("accession_title")
-
-        # Look in past data if not found in current data
-        if not title:
-            title = self.get_form_value(SubmissionStep.RECORD_DESCRIPTION, "accession_title")
-
-        ### Save the information ###
-
-        if self.in_progress_submission:
-            self.in_progress_submission.last_updated = timezone.now()
-        else:
-            self.in_progress_submission = InProgressSubmission()
-
-        self.in_progress_submission.title = title
-
-        session = UploadSession.objects.filter(
-            token=self.storage.extra_data.get("session_token"), user=self.request.user
-        ).first()
-
-        if session:
-            self.in_progress_submission.upload_session = session
-
-        self.in_progress_submission.current_step = self.current_step.value
-        self.in_progress_submission.user = cast(User, self.request.user)
-        self.in_progress_submission.step_data = form_data
-
-        self.in_progress_submission.save()
-
     def save_current_step(
-        self, form: Union[BaseInlineFormSet, BaseModelFormSet, ModelForm]
+        self, form: Union[BaseForm, BaseFormSet]
     ) -> None:
         """Save the data from the current step."""
         self.storage.set_step_data(self.steps.current, self.process_step(form))
@@ -629,9 +584,13 @@ class SubmissionFormWizard(WizardView):
         )
 
         try:
-            self.save_form_data(self.request)
+            current_step_form = self.get_form(data=self.request.POST, files=self.request.FILES)
+            self.save_current_step(current_step_form)
+            self.storage.current_step = self.steps.current
+            cast(InProgressSubmissionStorage, self.storage).save()
             messages.success(self.request, message)
         except Exception:
+            cast(InProgressSubmissionStorage, self.storage).discard_changes()
             messages.error(self.request, gettext("There was an error saving the submission."))
 
         return HttpResponseClientRedirect(redirect_to)
@@ -659,61 +618,6 @@ class SubmissionFormWizard(WizardView):
                 },
             },
         )
-
-    @classmethod
-    def format_step_data(cls, step: SubmissionStep, data: QueryDict) -> Union[dict, list[dict]]:
-        """Format form data for the current step to be saved for later.
-
-        Args:
-            step: The current step of the form.
-            data: The data from the form.
-
-        Returns:
-            The formatted step data. If this step represents a formset, the return object will be a
-            list of dicts, otherwise, it will be a dict.
-        """
-        pattern = re.compile("^" + re.escape(step.value) + r"-(?:(?P<index>\d+)-)?(?P<field>.+)$")
-
-        formatted_data = []
-        is_formset = False
-
-        for key, value in data.items():
-            match_obj = pattern.match(key)
-
-            if not match_obj:
-                continue
-
-            field: str = match_obj.group("field")
-            index: str = match_obj.group("index")
-
-            if field in {
-                "MIN_NUM_FORMS",
-                "MAX_NUM_FORMS",
-                "TOTAL_FORMS",
-                "INITIAL_FORMS",
-            }:
-                continue
-
-            if index:
-                index_num = int(index)
-                is_formset = True
-            else:
-                index_num = 0
-
-            while len(formatted_data) <= index_num:
-                formatted_data.append({})
-
-            formatted_data[index_num][field] = value
-
-        if is_formset:
-            # Remove any empty dictionaries if there were any created without data
-            return [data for data in formatted_data if data]
-
-        # Case where the form has no fields
-        if len(formatted_data) == 0:
-            return {}
-
-        return formatted_data[0]
 
     def get_form_value(self, step: SubmissionStep, field: str) -> Optional[str]:
         """Get the value of a field in a form step.

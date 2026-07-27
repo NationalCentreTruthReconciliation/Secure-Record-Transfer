@@ -499,6 +499,10 @@ class SubmissionFormWizardTests(TestCase):
                 self.assertNotContains(response, "This submission will expire on")
                 self.assertTrue(self.user.inprogresssubmission_set.exists())
                 self.assertFalse(self.user.inprogresssubmission_set.first().upload_session_expired)
+                self.assertEqual(
+                    self.user.inprogresssubmission_set.first().step_data["version"],
+                    WIZARD_DATA_VERSION,
+                )
                 break
 
             else:
@@ -694,6 +698,56 @@ class SubmissionFormWizardTests(TestCase):
 
         self.assertEqual(response.status_code, 404)
         self.assertFalse(InProgressSubmission.objects.filter(user=self.user).exists())
+
+    def test_explicit_save_preserves_invalid_current_step(self) -> None:
+        """Save stores unvalidated current fields canonically and restores them on resume."""
+        self._start_wizard()
+        response = self.client.post(self.url, self._process_test_data(*self.test_data[0]))
+        self.assertEqual(response.status_code, 200)
+        submit_data = {
+            "submission_form_wizard-current_step": SubmissionStep.CONTACT_INFO.value,
+            "contactinfo-contact_name": "Partial Donor",
+            "save_form_step": SubmissionStep.CONTACT_INFO.value,
+        }
+
+        response = self.client.post(self.url, submit_data)
+
+        self.assertEqual(response.headers["HX-Redirect"], reverse("recordtransfer:user_profile"))
+        draft = InProgressSubmission.objects.get(user=self.user)
+        self.assertEqual(draft.step_data["version"], WIZARD_DATA_VERSION)
+        saved_contact = draft.step_data["wizard"]["step_data"][SubmissionStep.CONTACT_INFO.value]
+        self.assertEqual(saved_contact["contactinfo-contact_name"], ["Partial Donor"])
+
+        response = self.client.get(self.url)
+        self.assertContains(response, 'value="Partial Donor"')
+
+    def test_explicit_save_preserves_formset_management_data(self) -> None:
+        """Save retains formset rows and management fields in formtools' raw representation."""
+        self._start_wizard()
+        draft = InProgressSubmission.objects.get(user=self.user)
+        draft.current_step = SubmissionStep.RIGHTS.value
+        draft.step_data["wizard"]["step"] = SubmissionStep.RIGHTS.value
+        draft.save(update_fields=["current_step", "step_data"])
+        rights_type = RightsType.objects.get(name="Copyright")
+        submit_data = {
+            "submission_form_wizard-current_step": SubmissionStep.RIGHTS.value,
+            "rights-TOTAL_FORMS": "1",
+            "rights-INITIAL_FORMS": "0",
+            "rights-0-rights_type": str(rights_type.pk),
+            "rights-0-rights_value": "Saved restriction",
+            "save_form_step": SubmissionStep.RIGHTS.value,
+        }
+
+        response = self.client.post(self.url, submit_data)
+
+        self.assertEqual(response.headers["HX-Redirect"], reverse("recordtransfer:user_profile"))
+        draft.refresh_from_db()
+        saved_rights = draft.step_data["wizard"]["step_data"][SubmissionStep.RIGHTS.value]
+        self.assertEqual(saved_rights["rights-TOTAL_FORMS"], ["1"])
+        self.assertEqual(saved_rights["rights-0-rights_value"], ["Saved restriction"])
+
+        response = self.client.get(self.url)
+        self.assertContains(response, "Saved restriction")
 
     def test_unknown_draft_returns_not_found(self) -> None:
         """An unknown canonical UUID does not silently create a replacement draft."""

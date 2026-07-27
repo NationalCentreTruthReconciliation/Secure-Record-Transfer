@@ -7,7 +7,7 @@ from django.utils import timezone
 from formtools.wizard.storage.base import BaseStorage
 
 from recordtransfer.enums import SubmissionStep
-from recordtransfer.models import InProgressSubmission
+from recordtransfer.models import InProgressSubmission, UploadSession
 
 LEGACY_WIZARD_DATA_VERSION = 1
 WIZARD_DATA_VERSION = 2
@@ -134,7 +134,7 @@ class InProgressSubmissionStorage(BaseStorage):
 
         return False, None
 
-    def _save(self) -> None:
+    def save(self) -> None:
         """Persist changed wizard data and synchronized model projections."""
         if self._finalized or self.data == self._original_data:
             return
@@ -153,6 +153,15 @@ class InProgressSubmissionStorage(BaseStorage):
             self.in_progress_submission.title = title
             update_fields.append("title")
 
+        session_token = self.data[self.extra_data_key].get("session_token")
+        upload_session = UploadSession.objects.filter(
+            token=session_token,
+            user=self.request.user,
+        ).first()
+        if upload_session and self.in_progress_submission.upload_session_id != upload_session.pk:
+            self.in_progress_submission.upload_session = upload_session
+            update_fields.append("upload_session")
+
         self.in_progress_submission.save(update_fields=update_fields)
         self._original_data = copy.deepcopy(self.data)
         self.legacy_current_data = None
@@ -161,7 +170,11 @@ class InProgressSubmissionStorage(BaseStorage):
         """Prevent formtools' final reset from rewriting a deleted draft."""
         self._finalized = True
 
+    def discard_changes(self) -> None:
+        """Prevent a failed explicit flush from being retried while building the response."""
+        self._data = copy.deepcopy(self._original_data)
+
     def update_response(self, response: HttpResponse) -> None:
         """Flush changed database state, then perform formtools file cleanup."""
-        self._save()
+        self.save()
         super().update_response(response)

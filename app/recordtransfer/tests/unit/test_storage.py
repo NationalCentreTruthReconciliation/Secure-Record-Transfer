@@ -4,7 +4,7 @@ from django.http import Http404, HttpResponse, QueryDict
 from django.test import RequestFactory, TestCase
 
 from recordtransfer.enums import SubmissionStep
-from recordtransfer.models import InProgressSubmission, User
+from recordtransfer.models import InProgressSubmission, UploadSession, User
 from recordtransfer.wizard_storage import (
     LEGACY_WIZARD_DATA_VERSION,
     WIZARD_DATA_VERSION,
@@ -108,6 +108,37 @@ class InProgressSubmissionStorageTests(TestCase):
             submission.step_data["wizard"]["extra_data"],
             {"save_contact_info_prompted": True},
         )
+
+    def test_persisting_session_token_attaches_owned_upload_session(self) -> None:
+        """The draft relationship is synchronized from an owner-validated legacy token."""
+        submission = InProgressSubmission.objects.create(
+            user=self.user,
+            current_step=SubmissionStep.GROUP_SUBMISSION.value,
+        )
+        upload_session = UploadSession.new_session(user=self.user)
+        storage = self._storage(submission)
+
+        storage.extra_data["session_token"] = upload_session.token
+        storage.save()
+
+        submission.refresh_from_db()
+        self.assertEqual(submission.upload_session, upload_session)
+
+    def test_does_not_attach_another_users_upload_session(self) -> None:
+        """A persisted token cannot associate an upload session owned by another user."""
+        submission = InProgressSubmission.objects.create(
+            user=self.user,
+            current_step=SubmissionStep.GROUP_SUBMISSION.value,
+        )
+        other_user = User.objects.create_user(username="session-owner", password="password")
+        upload_session = UploadSession.new_session(user=other_user)
+        storage = self._storage(submission)
+
+        storage.extra_data["session_token"] = upload_session.token
+        storage.save()
+
+        submission.refresh_from_db()
+        self.assertIsNone(submission.upload_session)
 
     def test_rejects_submission_owned_by_another_user(self) -> None:
         """A user cannot load another user's wizard data by UUID."""
