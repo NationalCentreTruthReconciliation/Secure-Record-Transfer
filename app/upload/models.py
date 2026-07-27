@@ -401,13 +401,58 @@ class UploadSession(models.Model):
         self.status = self.SessionStatus.REMOVING_IN_PROGRESS
         self.save()
 
+        temp_dirs: set[Path] = set()
+
         for f in self.tempuploadedfile_set.all():  # type: ignore
+            parent = Path(f.file_upload.path).parent.resolve()
+            temp_dirs.add(parent)
             f.remove()
+
+        # Remove directory(ies) of temp files
+        for d in temp_dirs:
+            if len(list(d.iterdir())) > 0:
+                LOGGER.warning(
+                    "Could not remove temp directory '%d' because there are untracked files in that directory.",
+                    str(d),
+                )
+            else:
+                d.rmdir()
 
         if initial_status == self.SessionStatus.UPLOADING:
             self.status = self.SessionStatus.CREATED
             if save:
                 self.save()
+
+    def remove_perm_uploads(self, save: bool = True) -> None:
+        """Remove all permanent uploaded files associated with this session.
+
+        Note that this only happens if the upload session is deleted!
+        """
+        if self.status != self.SessionStatus.STORED:
+            raise ValueError(
+                f"Cannot remove permanent uploaded files from session {self.token} because the "
+                "session's state is not STORED"
+            )
+
+        perm_dirs: set[Path] = set()
+
+        for f in self.permuploadedfile_set.all():
+            parent = Path(f.file_upload.path).parent.resolve()
+            perm_dirs.add(parent)
+            f.remove()
+
+        # Remove directory(ies) of perm files
+        for d in perm_dirs:
+            if len(list(d.iterdir())) > 0:
+                LOGGER.warning(
+                    "Could not remove perm directory '%d' because there are untracked files in that directory.",
+                    str(d),
+                )
+            else:
+                d.rmdir()
+
+        if save:
+            self.save()
 
     def make_uploads_permanent(self) -> None:
         """Make all temporary uploaded files associated with this session permanent."""
@@ -555,6 +600,25 @@ class UploadSession(models.Model):
             "file_count": count,
             "total_size": size,
         }
+
+    def delete(self, *args, **kwargs) -> tuple[int, dict[str, int]]:
+        """Delete all files associated with the session before deleting the object."""
+        uploads = self.get_uploads()
+        if len(uploads) > 0:
+            try:
+                if isinstance(uploads[0], TempUploadedFile):
+                    self.remove_temp_uploads(save=False)
+                else:
+                    self.remove_perm_uploads(save=False)
+            except Exception as exc:
+                LOGGER.error(
+                    "An error occurred while cleaning up files associated with the session %s. "
+                    "Continuing to delete model regardless.",
+                    self.token,
+                    exc_info=exc,
+                )
+
+        return super().delete()
 
     def __str__(self):
         """Return a string representation of this object."""
