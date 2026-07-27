@@ -1,16 +1,20 @@
 from datetime import datetime, timedelta
 from typing import Union
 
-from caais.models import SourceRole, SourceType
+from caais.models import RightsType, SourceRole, SourceType
 from django import forms
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.forms import formset_factory
 from django.test import TestCase
 from upload.models import UploadSession
 
 from recordtransfer.forms import UserAccountInfoForm
 from recordtransfer.forms.submission_forms import (
     OtherIdentifiersForm,
+    OtherIdentifiersFormSet,
     RecordDescriptionForm,
+    RightsForm,
+    RightsFormSet,
     SourceInfoForm,
     UploadFilesForm,
 )
@@ -988,6 +992,122 @@ class OtherIdentifiersFormTest(TestCase):
                 self.assertFalse(form.is_valid())
                 self.assertIn(field_name, form.errors)
                 self.assertIn("HTML is not allowed in this field.", form.errors[field_name])
+
+
+class OtherIdentifiersFormSetTest(TestCase):
+    """Tests for the OtherIdentifiersFormSet."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        """Create the formset class used by all tests."""
+        super().setUpClass()
+        cls.FormSet = formset_factory(
+            OtherIdentifiersForm, formset=OtherIdentifiersFormSet, extra=1
+        )
+
+    def _formset_data(self, forms_data: list[dict]) -> dict[str, str]:
+        """Build a POST-style data dict for the formset from a list of per-form dicts."""
+        data: dict[str, str] = {
+            "form-TOTAL_FORMS": str(len(forms_data)),
+            "form-INITIAL_FORMS": "0",
+        }
+        for i, form_data in enumerate(forms_data):
+            for field, value in form_data.items():
+                data[f"form-{i}-{field}"] = value
+        return data
+
+    def test_first_form_empty_permitted(self) -> None:
+        """The first form in the formset should have empty_permitted=True."""
+        formset = self.FormSet()
+        self.assertTrue(formset.forms[0].empty_permitted)
+
+    def test_empty_formset_valid_and_cleaned_data_is_empty_dicts(self) -> None:
+        """A skipped (all-empty) formset should be valid and yield [{}], not dicts with empty
+        string values.
+        """
+        data = self._formset_data(
+            [{"other_identifier_type": "", "other_identifier_value": "", "other_identifier_note": ""}]
+        )
+        formset = self.FormSet(data=data)
+        self.assertTrue(formset.is_valid())
+        self.assertEqual(formset.cleaned_data, [{}])
+
+    def test_filled_formset_valid(self) -> None:
+        """A formset with real data should validate and return the filled cleaned_data."""
+        data = self._formset_data(
+            [
+                {
+                    "other_identifier_type": "Receipt number",
+                    "other_identifier_value": "12345",
+                    "other_identifier_note": "A note",
+                }
+            ]
+        )
+        formset = self.FormSet(data=data)
+        self.assertTrue(formset.is_valid())
+        self.assertEqual(len(formset.cleaned_data), 1)
+        self.assertEqual(formset.cleaned_data[0]["other_identifier_type"], "Receipt number")
+        self.assertEqual(formset.cleaned_data[0]["other_identifier_value"], "12345")
+        self.assertEqual(formset.cleaned_data[0]["other_identifier_note"], "A note")
+
+    def test_partial_form_invalid(self) -> None:
+        """A form with a type but no value should be invalid, even with empty_permitted on the
+        first form.
+        """
+        data = self._formset_data(
+            [{"other_identifier_type": "Receipt number", "other_identifier_value": "", "other_identifier_note": ""}]
+        )
+        formset = self.FormSet(data=data)
+        self.assertFalse(formset.is_valid())
+
+
+class RightsFormSetTest(TestCase):
+    """Tests for the RightsFormSet."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        """Create the formset class used by all tests."""
+        super().setUpClass()
+        cls.FormSet = formset_factory(RightsForm, formset=RightsFormSet, extra=1)
+
+    def _formset_data(self, forms_data: list[dict]) -> dict[str, str]:
+        """Build a POST-style data dict for the formset from a list of per-form dicts."""
+        data: dict[str, str] = {
+            "form-TOTAL_FORMS": str(len(forms_data)),
+            "form-INITIAL_FORMS": "0",
+        }
+        for i, form_data in enumerate(forms_data):
+            for field, value in form_data.items():
+                data[f"form-{i}-{field}"] = value
+        return data
+
+    def test_first_form_empty_permitted(self) -> None:
+        """The first form in the formset should have empty_permitted=True."""
+        formset = self.FormSet()
+        self.assertTrue(formset.forms[0].empty_permitted)
+
+    def test_empty_formset_valid_and_cleaned_data_is_empty_dicts(self) -> None:
+        """A skipped (all-empty) formset should be valid and yield [{}]."""
+        data = self._formset_data(
+            [{"rights_type": "", "other_rights_type": "", "rights_value": ""}]
+        )
+        formset = self.FormSet(data=data)
+        self.assertTrue(formset.is_valid())
+        self.assertEqual(formset.cleaned_data, [{}])
+
+    def test_filled_formset_valid(self) -> None:
+        """A formset with a rights type selected should validate and return the filled
+        cleaned_data.
+        """
+        rights_type = RightsType.objects.get(name="Copyright")
+        data = self._formset_data(
+            [{"rights_type": str(rights_type.pk), "other_rights_type": "", "rights_value": "Copyright until 2050"}]
+        )
+        formset = self.FormSet(data=data)
+        self.assertTrue(formset.is_valid())
+        self.assertEqual(len(formset.cleaned_data), 1)
+        self.assertEqual(formset.cleaned_data[0]["rights_type"], rights_type)
+        self.assertEqual(formset.cleaned_data[0]["rights_value"], "Copyright until 2050")
 
 
 class UploadFilesFormTest(TestCase):
